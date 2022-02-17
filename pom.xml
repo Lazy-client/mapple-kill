@@ -19,8 +19,8 @@
     <modules>
         <module>mapple-common</module>
         <module>mapple-admin</module>
-        <module>mapper-gateway</module>
-        <module>mapper-seckill</module>
+        <module>mapple-gateway</module>
+        <module>mapple-seckill</module>
     </modules>
 
     <properties>
