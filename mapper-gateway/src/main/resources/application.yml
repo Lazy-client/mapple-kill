@@ -1,0 +1,65 @@
+#ok: ack
+#server:
+#  port: 88
+#spring:
+#  cloud:
+#    gateway:
+#      discovery:
+#        locator:
+#          enabled: true  #动态路由，根据微服务名称实现动态转发
+#      routes:
+#        - id: mapple-coupon     #路由的ID，没有固定规则但要求唯一，建议配合服务名
+#          uri: lb://mapple-coupon #匹配后提供服务的路由地址
+#          predicates:
+#            - Path=/coupon/**         # 断言，路径相匹配的进行路由
+#
+#        - id: mapple-seckill     #路由的ID，没有固定规则但要求唯一，建议配合服务名
+#          uri: lb://mapple-seckill #匹配后提供服务的路由地址
+#          predicates:
+#            - Path=/api/seckill/**         # 断言，路径相匹配的进行路由
+#          filters:
+#            - RewritePath=/api/(?<segment>/?.*),/$\{segment}
+#
+#        - id: mapple-product     #路由的ID，没有固定规则但要求唯一，建议配合服务名
+#          uri: lb://mapple-product #匹配后提供服务的路由地址
+#          predicates:
+#            - Path=/api/product/**
+#          filters:
+#            - RewritePath=/api/(?<segment>/?.*),/$\{segment}
+#
+#
+#        - id: member_route
+#          uri: lb://mapple-member
+#          predicates:
+#            - Path=/api/member/**
+#          filters:
+#            - RewritePath=/api/(?<segment>/?.*),/$\{segment}
+#
+#        - id: ware_route
+#          uri: lb://mapple-ware
+#          predicates:
+#            - Path=/api/ware/**
+#          filters:
+#            - RewritePath=/api/(?<segment>/?.*),/$\{segment}
+#
+#        - id: route_coupon
+#          uri: lb://mapple-coupon
+#          predicates:
+#            - Path=/api/coupon/**
+#          filters:
+#            - RewritePath=/api/(?<segment>/?.*),/$\{segment}
+#
+#        - id: route_order
+#          uri: lb://mapple-order
+#          predicates:
+#            - Path=/api/order/**
+#          filters:
+#            - RewritePath=/api/(?<segment>/?.*),/$\{segment}
+#
+#
+#        - id: renren-fast
+#          uri: lb://renren-fast
+#          predicates:
+#            - Path=/api/**
+#          filters:
+#            - RewritePath=/api/(?<segment>/?.*), /renren-fast/$\{segment}

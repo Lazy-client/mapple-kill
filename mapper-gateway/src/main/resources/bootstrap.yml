@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: mapple-gateway
+  cloud:
+    nacos:
+      discovery:
+        server-addr:  localhost:8848
+      config:
+        server-addr:  localhost:8848
+        file-extension: yaml #指定yaml格式的配置
+        namespace: 1049cc93-29a0-4d55-ac71-050150b38358
+
