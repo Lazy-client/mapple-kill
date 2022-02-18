@@ -80,6 +80,8 @@ public class RedisUtils {
         redisTemplate.delete(key);
     }
 
+
+
     /**
      * Object转成JSON数据
      */

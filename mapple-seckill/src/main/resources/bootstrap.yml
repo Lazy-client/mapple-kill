@@ -9,3 +9,8 @@ spring:
         server-addr: localhost:8848
         file-extension: yaml #指定yaml格式的配置
         namespace: 6bdd88c0-bdd1-47e9-8cca-1f1f967cb450
+        extension-configs:
+          - dataId: redis.yaml
+            group: DEFAULT_GROUP
+            namespace: 1c79016b-ced8-4c2b-b3cd-73b6d42f9439
+            refresh: true
