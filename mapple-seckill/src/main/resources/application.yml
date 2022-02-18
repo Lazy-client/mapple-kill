@@ -25,3 +25,6 @@
 #    throw-exception-if-no-handler-found: true
 #server:
 #  port: 12000
+server:
+  servlet:
+    context-path: /seckill
