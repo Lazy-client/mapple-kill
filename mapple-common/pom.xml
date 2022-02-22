@@ -18,6 +18,12 @@
 
 
     <dependencies>
+<!--        引入加密工具类，使用 https://github.com/antherd/sm-crypto 项目中一些加解密方式-->
+        <dependency>
+            <groupId>com.antherd</groupId>
+            <artifactId>sm-crypto</artifactId>
+            <version>0.3.2</version>
+        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
