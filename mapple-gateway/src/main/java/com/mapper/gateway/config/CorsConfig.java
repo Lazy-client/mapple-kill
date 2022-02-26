@@ -6,6 +6,10 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsWebFilter;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 
+/**
+ * @author 15776
+ * 关于跨域
+ */
 @Configuration
 public class CorsConfig {
     @Bean
@@ -18,7 +22,8 @@ public class CorsConfig {
         corsConfiguration.addAllowedHeader("*");
         corsConfiguration.addAllowedMethod("*");
         corsConfiguration.addAllowedOrigin("*");
-        corsConfiguration.setAllowCredentials(true);//允许跨域携带cookie
+        //允许跨域携带cookie
+        corsConfiguration.setAllowCredentials(true);
 
         source.registerCorsConfiguration("/**",corsConfiguration);
         return new CorsWebFilter(source);

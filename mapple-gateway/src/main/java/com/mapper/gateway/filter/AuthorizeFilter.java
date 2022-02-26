@@ -1,5 +1,7 @@
 package com.mapper.gateway.filter;
 
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
@@ -18,19 +20,23 @@ import reactor.core.publisher.Mono;
  * @date 2022/2/18 21:29
  */
 @Component
+@Slf4j
 public class AuthorizeFilter implements GlobalFilter, Ordered {
 
     private static final String AUTHORIZE_TOKEN = "AUTHORIZATION";
+    @Value("${admin.path}")
+    private String adminPath;
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
 
+        log.info(adminPath);
         //1. 获取请求
         ServerHttpRequest request = exchange.getRequest();
         //2. 则获取响应
         ServerHttpResponse response = exchange.getResponse();
         //3. 如果是登录请求则放行
-        if (request.getURI().getPath().contains("/renren-fast")) {
+        if (request.getURI().getPath().startsWith(adminPath)) {
             return chain.filter(exchange);
         }
         //4. 获取请求头
@@ -46,16 +52,6 @@ public class AuthorizeFilter implements GlobalFilter, Ordered {
             return response.setComplete();
         }
 
-        //9. 如果请求头中有令牌则解析令牌
-        //        try {
-        //            JwtUtil.parseJWT(token);
-        //        } catch (Exception e) {
-        //            e.printStackTrace();
-        //            //10. 解析jwt令牌出错, 说明令牌过期或者伪造等不合法情况出现
-        //            response.setStatusCode(HttpStatus.UNAUTHORIZED);
-        //            //11. 返回
-        //            return response.setComplete();
-        //        }
         //12. 放行
         return chain.filter(exchange);
     }
