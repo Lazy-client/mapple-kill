@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
 public class CryptogramUtil {
 
 //    private static final Log log = Log.get();
-   private static Logger logger = LoggerFactory.getLogger(getClass());
+   private static Logger logger = LoggerFactory.getLogger(CryptogramUtil.class);
 
     /**
      * 加密方法（Sm2 的专门针对前后端分离，非对称秘钥对的方式，暴露出去的公钥，对传输过程中的密码加个密）
