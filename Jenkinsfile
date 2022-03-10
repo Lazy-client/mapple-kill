@@ -79,7 +79,7 @@ pipeline {
                   构建地址:${BUILD_URL}
                   构建日志:${BUILD_URL}
                        ''',
-                to: "sicheng_zhou@qq.com,2941176308@qq.com,2686028645@qq.com",
+                to: "sicheng_zhou@qq.com,2941176308@qq.com,2686028645@qq.com,860834338@qq.com",
             )
         }
     }
