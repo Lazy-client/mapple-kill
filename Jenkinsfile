@@ -31,31 +31,15 @@ pipeline {
                     //每一行指令都是基于当前环境信息。和上下指令无关
                     sh 'cd ${WS} && mvn clean package -s "/var/jenkins_home/appconfig/maven/settings.xml"  -Dmaven.test.skip=true '
                 }
-    }
+        }
 
         stage('制作Docker镜像') {
 
-         parallel {
-                stage('Stage2.1') {
-                    agent { label "mapple-admin" }
                     steps {
-                       sh 'cd ${WS}/mapple-admin && docker build -t registry-vpc.cn-beijing.aliyuncs.com/sicheng/mapple-admin .'
-                    }
-                }
-                stage('Stage2.2') {
-                    agent { label "mapple-gateway" }
-                    steps {
+                        sh 'cd ${WS}/mapple-admin && docker build -t registry-vpc.cn-beijing.aliyuncs.com/sicheng/mapple-admin .'
                         sh 'cd ${WS}/mapple-gateway && docker build -t registry-vpc.cn-beijing.aliyuncs.com/sicheng/mapple-gateway .'
-                    }
-                }
-                stage('Stage2.3') {
-                    agent { label "mapple-seckill" }
-                    steps {
                         sh 'cd ${WS}/mapple-seckill && docker build -t registry-vpc.cn-beijing.aliyuncs.com/sicheng/mapple-seckill .'
                     }
-                }
-
-                }
         }
 
         stage('部署应用') {
@@ -65,38 +49,16 @@ pipeline {
             }
         }
         stage('推送制品到阿里云制品库') {
-
-         parallel {
-            stage('Stage 4.1') {
-                agent { label "mapple-admin" }
                 steps {
                      echo "push..."
                      sh 'docker login --username=userlazy -p wise5201314 registry-vpc.cn-beijing.aliyuncs.com'
                      sh 'docker push registry-vpc.cn-beijing.aliyuncs.com/sicheng/mapple-admin'
                      sh 'docker rmi registry-vpc.cn-beijing.aliyuncs.com/sicheng/mapple-admin'
-                }
-            }
-            stage('Stage 4.2') {
-                agent { label "mapple-gateway" }
-                steps {
-                     echo "push..."
-                     sh 'docker login --username=userlazy -p wise5201314 registry-vpc.cn-beijing.aliyuncs.com'
                      sh 'docker push registry-vpc.cn-beijing.aliyuncs.com/sicheng/mapple-gateway'
                      sh 'docker rmi registry-vpc.cn-beijing.aliyuncs.com/sicheng/mapple-gateway'
-                }
-            }
-            stage('Stage 4.3') {
-                agent { label "mapple-seckill" }
-                steps {
-                     echo "push..."
-                     sh 'docker login --username=userlazy -p wise5201314 registry-vpc.cn-beijing.aliyuncs.com'
                      sh 'docker push registry-vpc.cn-beijing.aliyuncs.com/sicheng/mapple-seckill'
                      sh 'docker rmi registry-vpc.cn-beijing.aliyuncs.com/sicheng/mapple-seckill'
                 }
-            }
-
-         }
-
 
         }
     }
