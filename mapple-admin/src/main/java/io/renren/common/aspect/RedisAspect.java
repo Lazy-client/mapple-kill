@@ -18,7 +18,9 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RedisAspect {
     private final Logger logger = LoggerFactory.getLogger(getClass());
-    //是否开启redis缓存  true开启   false关闭
+    /**
+     *  是否开启redis缓存  true开启   false关闭
+     */
     @Value("${spring.redis.open: false}")
     private boolean open;
 

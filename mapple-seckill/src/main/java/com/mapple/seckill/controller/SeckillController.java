@@ -28,8 +28,9 @@ public class SeckillController {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        if (s == null)
+        if (s == null) {
             return CommonResult.error("秒杀失败");
+        }
         return CommonResult.ok().put("ok", s);
     }
 

@@ -8,6 +8,7 @@ import io.renren.modules.sys.entity.SysLogEntity;
 import io.renren.modules.sys.entity.SysUserEntity;
 import io.renren.modules.sys.form.SysLoginForm;
 import io.renren.modules.sys.service.SysLogService;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.SecurityUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -29,13 +30,15 @@ import java.util.Date;
  */
 @Aspect
 @Component
+@Slf4j
 public class SysLogAspect {
     @Resource
     private SysLogService sysLogService;
 
     @Pointcut("@annotation(io.renren.common.annotation.SysLog)")
     public void logPointCut() {
-
+        // TODO document why this method is empty
+        log.info("切面");
     }
 
     @Around("logPointCut()")
@@ -84,9 +87,10 @@ public class SysLogAspect {
 
         //用户名
         String username;
-        if (!methodName.equals("login"))
+        String loginMethodName = "login";
+        if (!loginMethodName.equals(methodName)) {
             username = ((SysUserEntity) SecurityUtils.getSubject().getPrincipal()).getUsername();
-        else {
+        } else {
             SysLoginForm form = (SysLoginForm) args[0];
             username = form.getUsername();
         }

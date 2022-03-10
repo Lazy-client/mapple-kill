@@ -1,5 +1,7 @@
 package com.mapple.common.utils;
 
+import org.apache.http.HttpStatus;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,7 +28,7 @@ public class CommonResult extends HashMap<String, Object> {
     }
 
     public static CommonResult error(String msg) {
-        return CommonResult.error(ResultCode.ERROR, msg);
+        return CommonResult.error(HttpStatus.SC_INTERNAL_SERVER_ERROR, msg);
     }
 
     public static CommonResult error(int code, String msg) {
@@ -38,6 +40,12 @@ public class CommonResult extends HashMap<String, Object> {
 
     public static CommonResult ok() {
         return new CommonResult();
+    }
+
+    public static  CommonResult ok(String msg) {
+        CommonResult r = new CommonResult();
+        r.put("msg", msg);
+        return r;
     }
 
     public CommonResult put(String key, Object value) {
