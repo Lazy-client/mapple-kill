@@ -23,7 +23,7 @@ public class RRExceptionHandler {
      */
     @ExceptionHandler(RRException.class)
     public CommonResult handleRRException(RRException e) {
-        return CommonResult.error();
+        return CommonResult.error(e.getCode(), e.getMsg());
     }
 
     @ExceptionHandler(NoHandlerFoundException.class)

@@ -42,7 +42,7 @@ public class AuthorizeFilter implements GlobalFilter, Ordered {
         //4. 获取请求头
         HttpHeaders headers = request.getHeaders();
         //5. 请求头中获取令牌
-        String token = headers.getFirst(AUTHORIZE_TOKEN);
+        String token = headers.getFirst(HttpHeaders.AUTHORIZATION);
 
         //6. 判断请求头中是否有令牌
         if (StringUtils.isEmpty(token)) {

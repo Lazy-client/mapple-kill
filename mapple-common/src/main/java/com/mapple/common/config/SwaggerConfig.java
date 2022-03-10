@@ -30,8 +30,8 @@ public class SwaggerConfig {
     private ApiInfo webApiInfo(){
 
         return new ApiInfoBuilder()
-                .title("gulimall API文档")
-                .description("本文档描述了所有书城项目接口")
+                .title("mapple-kill API文档")
+                .description("本文档描述了所有三湘秒杀项目接口")
                 .version("1.0")
                 .contact(new Contact("sicheng", "", "sicheng_zhou@qq.com"))
                 .build();
