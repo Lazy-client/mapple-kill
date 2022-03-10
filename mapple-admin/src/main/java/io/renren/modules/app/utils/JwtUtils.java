@@ -33,7 +33,26 @@ public class JwtUtils {
     private String header;
 
     /**
-     * 生成jwt token
+     * 原来的生成jwt token
+     */
+//    public String generateToken(long userId) {
+//        Date nowDate = new Date();
+//        //过期时间
+//        Date expireDate = new Date(nowDate.getTime() + expire * 1000);
+//
+//        return Jwts.builder()
+//                .setHeaderParam("typ", "JWT")
+//                .setSubject(userId+"")
+//                .setIssuedAt(nowDate)
+//                .setExpiration(expireDate)
+//                .signWith(SignatureAlgorithm.HS512, secret)
+//                .compact();
+//    }
+
+    /**
+     * 用国密生成jwt token
+     * @param userId
+     * @return
      */
     public String generateToken(long userId) {
         Date nowDate = new Date();
