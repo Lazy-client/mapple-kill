@@ -32,11 +32,11 @@ public class UserServiceImpl extends ServiceImpl<UserDao, UserEntity> implements
 	@Override
 	public long login(LoginForm form) {
 		UserEntity user = queryByMobile(form.getMobile());
-		Assert.isNull(user, "手机号或密码错误");
+		Assert.isNull(user, "手机号错误");
 
 		//密码错误
 		if(!user.getPassword().equals(DigestUtils.sha256Hex(form.getPassword()))){
-			throw new RRException("手机号或密码错误");
+			throw new RRException("密码错误");
 		}
 
 		return user.getUserId();
