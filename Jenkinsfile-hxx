@@ -1,0 +1,40 @@
+pipeline {
+    agent any
+    environment {
+            WS = "${WORKSPACE}"
+            IMAGE_VERSION = "v1.0"
+            }
+
+    stages {
+        stage('应用部署') {
+             steps {
+              echo "start ..."
+			  sh 'docker rm -f mapple-admin mapple-gateway-01 mapple-gateway-02 mapple-gateway-03 mapple-seckill-01 mapple-seckill-02 mapple-seckill-03 '
+              sh 'docker run -di -p 10000:3333 -e server_port="3333" --name mapple-admin registry.cn-beijing.aliyuncs.com/sicheng/mapple-admin'
+              sh 'docker run -di -p 88:3333 -e server_port="3333"   --name mapple-gateway-01 registry.cn-beijing.aliyuncs.com/sicheng/mapple-gateway'
+              sh 'docker run -di -p 89:3333 -e server_port="3333"   --name mapple-gateway-02 registry.cn-beijing.aliyuncs.com/sicheng/mapple-gateway'
+              sh 'docker run -di -p 90:3333 -e server_port="3333"   --name mapple-gateway-03 registry.cn-beijing.aliyuncs.com/sicheng/mapple-gateway'
+              sh 'docker run -di -p 20000:3333 -e server_port="3333" --name mapple-seckill-01 registry.cn-beijing.aliyuncs.com/sicheng/mapple-seckill'
+              sh 'docker run -di -p 20001:3333 -e server_port="3333" --name mapple-seckill-02 registry.cn-beijing.aliyuncs.com/sicheng/mapple-seckill'
+              sh 'docker run -di -p 20002:3333 -e server_port="3333" --name mapple-seckill-03 registry.cn-beijing.aliyuncs.com/sicheng/mapple-seckill'
+            }
+        }
+    }
+
+	post {             //发送邮箱
+        success {
+            emailext (
+                subject: "SUCCESSFUL: Job '${env.JOB_NAME}-${env.BUILD_NUMBER}'",
+                from: 'sicheng_zhou@qq.com',
+                body: '''
+                  构建名称:${PROJECT_NAME}
+                  构建结果:Successful
+                  构建次数:${BUILD_NUMBER}
+                  触发用户:${CAUSE}
+                  变更概要:${CHANGES}
+                       ''',
+                to: "1123671761@qq.com",
+            )
+        }
+    }
+}

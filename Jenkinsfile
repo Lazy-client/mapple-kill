@@ -78,11 +78,8 @@ pipeline {
                   变更概要:${CHANGES}
                   构建地址:${BUILD_URL}
                   构建日志:${BUILD_URL}
-                  请运维人员及时更新:
-
-                  docker run -di -p 8001:3333 -e server_port="3333" --name mapple-admin registry.cn-beijing.aliyuncs.com/sicheng/mapple-admin
                        ''',
-                to: "sicheng_zhou@qq.com",
+                to: "sicheng_zhou@qq.com,2941176308@qq.com,2686028645@qq.com,860834338@qq.com",
             )
         }
     }
