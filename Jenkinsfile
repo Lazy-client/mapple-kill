@@ -23,16 +23,14 @@ pipeline {
                        args '-v /var/jenkins_home/appconfig/maven/mvnrepo:/root/mvnrepo'
                     }
                  }
-            steps {
-                 sh 'pwd && ls -alh'
-                 sh 'mvn -v'
-                 //打包，jar.。默认是从maven中央仓库下载。
-                 //jenkins目录+容器目录；-s指定容器内位置
-                 sh "echo 默认的工作目录：${WS}"
-                 //每一行指令都是基于当前环境信息。和上下指令无关
-                 sh 'cd ${WS} && mvn clean package -s "/var/jenkins_home/appconfig/maven/settings.xml"  -Dmaven.test.skip=true '
-                 sh 'cd ${WS} && ls -alh'
-            }
+
+                steps {
+                    //打包，jar.。默认是从maven中央仓库下载。
+                    //jenkins目录+容器目录；-s指定容器内位置
+                    sh "echo 默认的工作目录：${WS}"
+                    //每一行指令都是基于当前环境信息。和上下指令无关
+                    sh 'cd ${WS} && mvn clean package -s "/var/jenkins_home/appconfig/maven/settings.xml"  -Dmaven.test.skip=true '
+                }
     }
 
         stage('制作Docker镜像') {
