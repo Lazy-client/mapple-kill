@@ -1,6 +1,7 @@
 package com.mapple.seckill.config;
 
 import com.mapple.seckill.cons.RedisConstants;
+import lombok.extern.slf4j.Slf4j;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
@@ -16,13 +17,21 @@ import javax.annotation.Resource;
  */
 
 @Configuration
+@Slf4j
 public class KillConfig {
     @Resource
     private RedisConstants redisConstants;
+
     @Bean
     public RedissonClient redissonClient() {
         Config config = new Config();
+
+        log.info(redisConstants.getPassword());
+        log.info(redisConstants.getNok());
+        log.info(redisConstants.getHost());
+        log.info(redisConstants.getPassword());
         config.useSingleServer()
+
                 .setDatabase(redisConstants.getDatabase())
                 .setPassword(redisConstants.getPassword())
                 .setAddress("redis://" + redisConstants.getHost() + ":" + redisConstants.getPort());
