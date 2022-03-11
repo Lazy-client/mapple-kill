@@ -1,4 +1,4 @@
-package com.mapper.gateway.filter;
+package com.mapple.gateway.filter;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

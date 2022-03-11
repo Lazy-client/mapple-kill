@@ -1,7 +1,7 @@
 package com.mapple.seckill.controller;
 
 import com.mapple.common.utils.CommonResult;
-import com.mapple.common.utils.RedisKeyUtils;
+import com.mapple.seckill.cons.RedisConstants;
 import com.mapple.seckill.service.SecKillService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,9 +33,13 @@ public class SeckillController {
         }
         return CommonResult.ok().put("ok", s);
     }
+    @Resource
+    private RedisConstants redisConstants;
 
     @GetMapping("/redisKey")
-    public CommonResult redisKey(){
-        return CommonResult.ok().put("redisKey", RedisKeyUtils.STOCK_PREFIX);
+    public CommonResult redisKey() {
+        return CommonResult
+                .ok()
+                .put("redisKey", redisConstants.getPort());
     }
 }

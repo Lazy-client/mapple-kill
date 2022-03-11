@@ -6,22 +6,61 @@ pipeline {
             }
 
     stages {
+        stage('环境检查'){
+            steps {
+                sh 'printenv'
+                echo "正在检测基本信息"
+                sh 'java -version'
+                sh 'git --version'
+                sh 'docker version'
+                sh 'pwd && ls -alh'
+            }
+        }
+        stage('Maven编译打包') {
+            agent {
+                 docker {
+                       image 'maven:3-alpine'
+                       args '-v /var/jenkins_home/appconfig/maven/mvnrepo:/root/mvnrepo'
+                    }
+                 }
+            steps {
+                 sh 'pwd && ls -alh'
+                 sh 'mvn -v'
+                 //打包，jar.。默认是从maven中央仓库下载。
+                 //jenkins目录+容器目录；-s指定容器内位置
+                 sh "echo 默认的工作目录：${WS}"
+                 //每一行指令都是基于当前环境信息。和上下指令无关
+                 sh 'cd ${WS} && mvn clean package -s "/var/jenkins_home/appconfig/maven/settings.xml"  -Dmaven.test.skip=true '
+            }
+    }
+
+        stage('制作Docker镜像') {
+            steps {
+                sh 'cd ${WS}/mapple-admin && docker build -t mapple-admin .'
+                sh 'cd ${WS}/mapple-gateway && docker build -t mapple-gateway .'
+                sh 'cd ${WS}/mapple-seckill && docker build -t mapple-seckill .'
+                        }
+        }
+
+
         stage('应用部署') {
              steps {
               echo "start ..."
-			  sh 'docker rm -f mapple-admin mapple-gateway-01 mapple-gateway-02 mapple-gateway-03 mapple-seckill-01 mapple-seckill-02 mapple-seckill-03 '
-              sh 'docker run -di -p 10000:3333 -e server_port="3333" --name mapple-admin registry.cn-beijing.aliyuncs.com/sicheng/mapple-admin'
-              sh 'docker run -di -p 88:3333 -e server_port="3333"   --name mapple-gateway-01 registry.cn-beijing.aliyuncs.com/sicheng/mapple-gateway'
-              sh 'docker run -di -p 89:3333 -e server_port="3333"   --name mapple-gateway-02 registry.cn-beijing.aliyuncs.com/sicheng/mapple-gateway'
-              sh 'docker run -di -p 90:3333 -e server_port="3333"   --name mapple-gateway-03 registry.cn-beijing.aliyuncs.com/sicheng/mapple-gateway'
-              sh 'docker run -di -p 20000:3333 -e server_port="3333" --name mapple-seckill-01 registry.cn-beijing.aliyuncs.com/sicheng/mapple-seckill'
-              sh 'docker run -di -p 20001:3333 -e server_port="3333" --name mapple-seckill-02 registry.cn-beijing.aliyuncs.com/sicheng/mapple-seckill'
-              sh 'docker run -di -p 20002:3333 -e server_port="3333" --name mapple-seckill-03 registry.cn-beijing.aliyuncs.com/sicheng/mapple-seckill'
+              sh 'docker rm -f mapple-admin mapple-gateway-01 mapple-gateway-02 mapple-gateway-03 mapple-seckill-01 mapple-seckill-02 mapple-seckill-03 '
+              sh 'docker run -di -p 10000:3333 -e server_port="3333" --name mapple-admin        mapple-admin'
+              sh 'docker run -di -p 88:3333 -e server_port="3333"   --name mapple-gateway-01    mapple-gateway'
+              //sh 'docker run -di -p 89:3333 -e server_port="3333"   --name mapple-gateway-02  mapple-gateway'
+              //sh 'docker run -di -p 90:3333 -e server_port="3333"   --name mapple-gateway-03  mapple-gateway'
+              sh 'docker run -di -p 20000:3333 -e server_port="3333" --name mapple-seckill-01   mapple-seckill'
+              //sh 'docker run -di -p 20001:3333 -e server_port="3333" --name mapple-seckill-02 mapple-seckill'
+              //sh 'docker run -di -p 20002:3333 -e server_port="3333" --name mapple-seckill-03 mapple-seckill'
             }
         }
+
     }
 
-	post {             //发送邮箱
+
+    post {             //新增
         success {
             emailext (
                 subject: "SUCCESSFUL: Job '${env.JOB_NAME}-${env.BUILD_NUMBER}'",
@@ -32,8 +71,10 @@ pipeline {
                   构建次数:${BUILD_NUMBER}
                   触发用户:${CAUSE}
                   变更概要:${CHANGES}
+                  构建地址:${BUILD_URL}
+                  构建日志:${BUILD_URL}
                        ''',
-                to: "1123671761@qq.com",
+                to: "sicheng_zhou@qq.com,2941176308@qq.com,2686028645@qq.com,860834338@qq.com",
             )
         }
     }
