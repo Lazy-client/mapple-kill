@@ -1,4 +1,4 @@
-package com.mapper.gateway.config;
+package com.mapple.gateway.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

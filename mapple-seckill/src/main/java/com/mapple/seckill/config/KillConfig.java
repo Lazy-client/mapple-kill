@@ -1,10 +1,13 @@
 package com.mapple.seckill.config;
 
+import com.mapple.seckill.cons.RedisConstants;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import javax.annotation.Resource;
 
 /**
  * @author zsc
@@ -14,10 +17,15 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class KillConfig {
+    @Resource
+    private RedisConstants redisConstants;
     @Bean
-    public RedissonClient redissonClient(){
+    public RedissonClient redissonClient() {
         Config config = new Config();
-        config.useSingleServer().setAddress("redis://127.0.0.1:6379");
+        config.useSingleServer()
+                .setDatabase(redisConstants.getDatabase())
+                .setPassword(redisConstants.getPassword())
+                .setAddress("redis://" + redisConstants.getHost() + ":" + redisConstants.getPort());
         return Redisson.create(config);
     }
 

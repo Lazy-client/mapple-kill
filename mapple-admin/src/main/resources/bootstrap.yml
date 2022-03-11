@@ -1,8 +1,9 @@
 spring:
   profiles:
       active: release
+    ######激活#####
   application:
-    name: mapple-seckill
+    name: mapple-admin
   cloud:
     nacos:
       discovery:
@@ -10,8 +11,8 @@ spring:
       config:
         server-addr: hxx.sicheng.store:8848
         file-extension: yaml #指定yaml格式的配置
-        namespace: 6bdd88c0-bdd1-47e9-8cca-1f1f967cb450
+        namespace: e363bea5-27e2-45dd-8d0e-e4333ef9a417
         extension-configs:
           - dataId: redis.yaml
             refresh: true
-env: release
+env: dev
