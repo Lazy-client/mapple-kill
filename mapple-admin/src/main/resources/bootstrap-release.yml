@@ -1,6 +1,4 @@
 spring:
-  profiles:
-    active:    ######激活#####
   application:
     name: mapple-admin
   cloud:
