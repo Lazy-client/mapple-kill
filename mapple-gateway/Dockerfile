@@ -13,4 +13,4 @@ touch /app.jar;
 ENV server_port ${server_port}
 EXPOSE ${server_port}
 
-ENTRYPOINT [ "sh", "-c", "java -Dfile.encoding=utf8 -Djava.security.egd=file:/dev/./urandom  -jar /app.jar --server.port=${server_port}" ]
+ENTRYPOINT [ "sh", "-c", "java -Dfile.encoding=utf8 -Djava.security.egd=file:/dev/./urandom  -jar /app.jar --spring.profiles.active=release --server.port=${server_port}" ]

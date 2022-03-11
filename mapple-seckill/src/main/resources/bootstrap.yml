@@ -1,6 +1,6 @@
 spring:
   profiles:
-      active: release
+      active:
   application:
     name: mapple-seckill
   cloud:

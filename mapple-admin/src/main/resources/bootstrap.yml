@@ -1,6 +1,6 @@
 spring:
   profiles:
-      active: release
+      active:
     ######激活#####
   application:
     name: mapple-admin
