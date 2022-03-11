@@ -8,6 +8,7 @@
 
 package io.renren.modules.app.utils;
 
+import com.mapple.common.utils.CryptogramUtil;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -58,14 +59,16 @@ public class JwtUtils {
         Date nowDate = new Date();
         //过期时间
         Date expireDate = new Date(nowDate.getTime() + expire * 1000);
-
-        return Jwts.builder()
+        String jwtToken=Jwts.builder()
                 .setHeaderParam("typ", "JWT")
+                //用户唯一id标识
                 .setSubject(userId+"")
                 .setIssuedAt(nowDate)
                 .setExpiration(expireDate)
                 .signWith(SignatureAlgorithm.HS512, secret)
                 .compact();
+        //***用国密sm4（cbc模式）加密***
+        return CryptogramUtil.doEncrypt(jwtToken);
     }
 
     public Claims getClaimByToken(String token) {
