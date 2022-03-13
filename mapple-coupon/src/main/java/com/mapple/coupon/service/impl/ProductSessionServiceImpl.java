@@ -1,5 +1,6 @@
 package com.mapple.coupon.service.impl;
 
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import org.springframework.stereotype.Service;
 import java.util.Map;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -18,6 +19,13 @@ public class ProductSessionServiceImpl extends ServiceImpl<ProductSessionDao, Pr
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
+        QueryWrapper<ProductSessionEntity> productSessionEntityQueryWrapper = new QueryWrapper<>();
+        //获取场地id
+        String sessionId = (String) params.get("sessionId");
+        //判空
+        if (!StringUtils.isBlank(sessionId)){
+
+        }
         IPage<ProductSessionEntity> page = this.page(
                 new Query<ProductSessionEntity>().getPage(params),
                 new QueryWrapper<ProductSessionEntity>()
