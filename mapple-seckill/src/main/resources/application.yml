@@ -1,4 +1,4 @@
 server:
   servlet:
     context-path: /seckill
-  port: 10000
+  port: 100
