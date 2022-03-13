@@ -3,6 +3,10 @@ package com.mapple.coupon.controller;
 import java.util.Arrays;
 import java.util.Map;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.*;
 
 import com.mapple.coupon.entity.ProductSessionEntity;
@@ -21,6 +25,7 @@ import javax.annotation.Resource;
  * @email sicheng_zhou@qq.com
  * @date 2022-03-13 15:23:08
  */
+@Api(tags = {"场次和产品关联"})
 @RestController
 @RequestMapping("coupon/productsession")
 public class ProductSessionController {
@@ -28,8 +33,15 @@ public class ProductSessionController {
     private ProductSessionService productSessionService;
 
     /**
-     * 列表
+     * 根据分页数据和场次id查询场次对应的商品
+     * @param params
+     * @return
      */
+    @ApiOperation(value = "根据场次id查询场次对应的商品")
+    @ApiImplicitParams(value =
+            @ApiImplicitParam(name = "params",
+                    value = "分页数据xxx与场次sessionId=xxx，封装在map中",
+                    required = true,dataTypeClass =Map.class ))
     @GetMapping("/list")
     //@RequiresPermissions("coupon:productsession:list")
     public CommonResult list(@RequestParam Map<String, Object> params){
@@ -54,6 +66,11 @@ public class ProductSessionController {
      * 保存
      */
     @PostMapping("/save")
+    @ApiOperation(value = "选择场次后，在这个场次id下添加产品信息")
+    @ApiImplicitParams(value =
+    @ApiImplicitParam(name = "productSession",
+            value = "参数包括场次id以及商品多个属性",
+            required = true,dataTypeClass =ProductSessionEntity.class ))
     //@RequiresPermissions("coupon:productsession:save")
     public CommonResult save(@RequestBody ProductSessionEntity productSession){
 		productSessionService.save(productSession);

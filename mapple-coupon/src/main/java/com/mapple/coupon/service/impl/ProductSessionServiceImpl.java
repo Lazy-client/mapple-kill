@@ -24,11 +24,11 @@ public class ProductSessionServiceImpl extends ServiceImpl<ProductSessionDao, Pr
         String sessionId = (String) params.get("sessionId");
         //判空
         if (!StringUtils.isBlank(sessionId)){
-
+            productSessionEntityQueryWrapper.eq("session_id",sessionId);
         }
         IPage<ProductSessionEntity> page = this.page(
                 new Query<ProductSessionEntity>().getPage(params),
-                new QueryWrapper<ProductSessionEntity>()
+                productSessionEntityQueryWrapper
         );
 
         return new PageUtils(page);
