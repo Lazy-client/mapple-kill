@@ -21,6 +21,7 @@
         <module>mapple-admin</module>
         <module>mapple-gateway</module>
         <module>mapple-seckill</module>
+        <module>mapple-coupon</module>
     </modules>
 
     <properties>
