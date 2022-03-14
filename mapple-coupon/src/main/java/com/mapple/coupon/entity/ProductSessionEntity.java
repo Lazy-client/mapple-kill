@@ -46,10 +46,6 @@ public class ProductSessionEntity implements Serializable {
 	 */
 	private Integer totalCount;
 	/**
-	 * 排序
-	 */
-	private Integer sort;
-	/**
 	 * 逻辑删除 1（true）已删除， 0（false）未删除
 	 */
 	private Integer isDeleted;

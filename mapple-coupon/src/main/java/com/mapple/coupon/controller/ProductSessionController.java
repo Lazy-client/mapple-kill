@@ -3,6 +3,7 @@ package com.mapple.coupon.controller;
 import java.util.Arrays;
 import java.util.Map;
 
+import com.mapple.coupon.entity.vo.productSessionVo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -41,7 +42,7 @@ public class ProductSessionController {
     @ApiImplicitParams(value =
             @ApiImplicitParam(name = "params",
                     value = "分页数据xxx与场次sessionId=xxx，封装在map中",
-                    required = true,dataTypeClass =Map.class ))
+                    required = true))
     @GetMapping("/list")
     //@RequiresPermissions("coupon:productsession:list")
     public CommonResult list(@RequestParam Map<String, Object> params){
@@ -68,13 +69,19 @@ public class ProductSessionController {
     @PostMapping("/save")
     @ApiOperation(value = "选择场次后，在这个场次id下添加产品信息")
     @ApiImplicitParams(value =
-    @ApiImplicitParam(name = "productSession",
-            value = "参数包括场次id以及商品多个属性",
-            required = true,dataTypeClass =ProductSessionEntity.class ))
+    @ApiImplicitParam(name = "productSessionVo",
+            value = "请传入：场次sessionId、商品对象product、产品库存量totalCount",
+            required = true,
+            dataTypeClass=productSessionVo.class ))
     //@RequiresPermissions("coupon:productsession:save")
-    public CommonResult save(@RequestBody ProductSessionEntity productSession){
-		productSessionService.save(productSession);
-        return CommonResult.ok();
+    public CommonResult save(@RequestBody productSessionVo productSessionVo){
+        if (productSessionService.saveProductSession(productSessionVo).equals("ok")){
+            return CommonResult.ok();
+        }else {
+            return CommonResult.error("数据插入出错");
+        }
+
+
     }
 
     /**

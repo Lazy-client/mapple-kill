@@ -3,6 +3,7 @@ package com.mapple.coupon.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.mapple.common.utils.PageUtils;
 import com.mapple.coupon.entity.ProductSessionEntity;
+import com.mapple.coupon.entity.vo.productSessionVo;
 
 import java.util.Map;
 
@@ -16,5 +17,7 @@ import java.util.Map;
 public interface ProductSessionService extends IService<ProductSessionEntity> {
 
     PageUtils queryPage(Map<String, Object> params);
+
+    String saveProductSession(productSessionVo productSession);
 }
 

@@ -23,7 +23,6 @@ import lombok.Data;
 @TableName("mk_product")
 public class ProductEntity implements Serializable {
 	private static final long serialVersionUID = 1L;
-
 	/**
 	 * 主键id
 	 */
@@ -32,7 +31,7 @@ public class ProductEntity implements Serializable {
 	/**
 	 * 产品名称
 	 */
-	private String name;
+	private String productName;
 	/**
 	 * 产品介绍描述
 	 */
@@ -45,14 +44,6 @@ public class ProductEntity implements Serializable {
 	 * 标题
 	 */
 	private String title;
-	/**
-	 * 价格
-	 */
-	private BigDecimal price;
-	/**
-	 * 产品销量
-	 */
-	private Integer saleCount;
 	/**
 	 * 逻辑删除 1（true）已删除， 0（false）未删除
 	 */
