@@ -26,7 +26,7 @@ public class SeckillController {
     @Resource
     private SecKillService secKillService;
 
-    @ApiOperation(value = "点击秒杀",notes = "随机码一定要传")
+    @ApiOperation(value = "点击秒杀", notes = "随机码一定要传")
     @ApiImplicitParams(value = {
             @ApiImplicitParam(name = "key", value = "秒杀产品的随机码", required = true, dataTypeClass = String.class),
             //@ApiImplicitParam(name = "lostID", value = "ID", required = true, dataTypeClass = Long.class),
@@ -48,12 +48,12 @@ public class SeckillController {
     @Resource
     private RedisConstants redisConstants;
 
-    @ApiOperation(value = "获取redis的key",notes = "这只是个测试接口，不是业务")
+    @ApiOperation(value = "获取redis的key", notes = "这只是个测试接口，不是业务")
     @GetMapping("/redisKey")
     public CommonResult redisKey() {
         return Objects.requireNonNull(CommonResult
                 .ok()
                 .put("redisKey", redisConstants.getPort()))
-                .put("redisHost",redisConstants.getHost());
+                .put("redisHost", redisConstants.getHost());
     }
 }
