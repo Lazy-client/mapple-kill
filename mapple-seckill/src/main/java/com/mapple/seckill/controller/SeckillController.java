@@ -7,6 +7,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.data.redis.core.HashOperations;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,6 +26,9 @@ import java.util.Objects;
 public class SeckillController {
     @Resource
     private SecKillService secKillService;
+
+    @Resource
+    private HashOperations<String, String, Object> hashOperations;;
 
     @ApiOperation(value = "点击秒杀", notes = "随机码一定要传")
     @ApiImplicitParams(value = {
@@ -55,6 +59,6 @@ public class SeckillController {
         return Objects.requireNonNull(CommonResult
                 .ok()
                 .put("redisKey", redisConstants.getPort()))
-                .put("redisHost", redisConstants.getHost());
+                .put("redisHost", hashOperations.hasKey("seckill:upload:skus:","场次Id_c"));
     }
 }
