@@ -45,6 +45,7 @@ public class SeckillController {
         }
         return CommonResult.ok().put("ok", s);
     }
+
     @Resource
     private RedisConstants redisConstants;
 
