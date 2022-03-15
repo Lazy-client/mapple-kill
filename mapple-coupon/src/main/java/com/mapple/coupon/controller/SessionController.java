@@ -3,6 +3,7 @@ package com.mapple.coupon.controller;
 import java.util.Arrays;
 import java.util.Map;
 
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import com.mapple.coupon.entity.SessionEntity;
@@ -56,8 +57,13 @@ public class SessionController {
     @PostMapping("/save")
     //@RequiresPermissions("coupon:session:save")
     public CommonResult save(@RequestBody SessionEntity session){
-		sessionService.save(session);
-        return CommonResult.ok();
+        String result = sessionService.saveSession(session);
+        if (!StringUtils.isBlank(result)){
+            return CommonResult.ok().put("sessionId",result);
+        }else {
+            return CommonResult.error("数据格式或插入错误");
+        }
+
     }
 
     /**

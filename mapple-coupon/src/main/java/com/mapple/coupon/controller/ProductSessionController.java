@@ -3,6 +3,11 @@ package com.mapple.coupon.controller;
 import java.util.Arrays;
 import java.util.Map;
 
+import com.mapple.coupon.entity.vo.productSessionVo;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.*;
 
 import com.mapple.coupon.entity.ProductSessionEntity;
@@ -21,6 +26,7 @@ import javax.annotation.Resource;
  * @email sicheng_zhou@qq.com
  * @date 2022-03-13 15:23:08
  */
+@Api(tags = {"场次和产品关联"})
 @RestController
 @RequestMapping("coupon/productsession")
 public class ProductSessionController {
@@ -28,8 +34,15 @@ public class ProductSessionController {
     private ProductSessionService productSessionService;
 
     /**
-     * 列表
+     * 根据分页数据和场次id查询场次对应的商品
+     * @param params
+     * @return
      */
+    @ApiOperation(value = "根据场次id查询场次对应的商品")
+    @ApiImplicitParams(value =
+            @ApiImplicitParam(name = "params",
+                    value = "分页数据xxx与场次sessionId=xxx，封装在map中",
+                    required = true))
     @GetMapping("/list")
     //@RequiresPermissions("coupon:productsession:list")
     public CommonResult list(@RequestParam Map<String, Object> params){
@@ -54,10 +67,21 @@ public class ProductSessionController {
      * 保存
      */
     @PostMapping("/save")
+    @ApiOperation(value = "选择场次后，在这个场次id下添加产品信息")
+    @ApiImplicitParams(value =
+    @ApiImplicitParam(name = "productSessionVo",
+            value = "请传入：场次sessionId、商品对象product、产品库存量totalCount",
+            required = true,
+            dataTypeClass=productSessionVo.class ))
     //@RequiresPermissions("coupon:productsession:save")
-    public CommonResult save(@RequestBody ProductSessionEntity productSession){
-		productSessionService.save(productSession);
-        return CommonResult.ok();
+    public CommonResult save(@RequestBody productSessionVo productSessionVo){
+        if (productSessionService.saveProductSession(productSessionVo).equals("ok")){
+            return CommonResult.ok();
+        }else {
+            return CommonResult.error("数据插入出错");
+        }
+
+
     }
 
     /**

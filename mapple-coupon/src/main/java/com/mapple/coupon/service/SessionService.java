@@ -16,5 +16,7 @@ import java.util.Map;
 public interface SessionService extends IService<SessionEntity> {
 
     PageUtils queryPage(Map<String, Object> params);
+
+    String saveSession(SessionEntity session);
 }
 
