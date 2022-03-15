@@ -7,7 +7,6 @@ spring:
   cloud:
     nacos:
       discovery:
-<<<<<<<<< Temporary merge branch 1
         server-addr:  hxx.sicheng.store:8848 #Nacos服务注册中心地址
         namespace: e363bea5-27e2-45dd-8d0e-e4333ef9a417
       config:
