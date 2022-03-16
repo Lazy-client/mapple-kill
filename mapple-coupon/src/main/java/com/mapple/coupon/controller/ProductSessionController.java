@@ -4,10 +4,7 @@ import java.util.Arrays;
 import java.util.Map;
 
 import com.mapple.coupon.entity.vo.productSessionVo;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.*;
 import org.springframework.web.bind.annotation.*;
 
 import com.mapple.coupon.entity.ProductSessionEntity;
@@ -16,7 +13,7 @@ import com.mapple.common.utils.PageUtils;
 import com.mapple.common.utils.CommonResult;
 
 import javax.annotation.Resource;
-
+import javax.validation.Valid;
 
 
 /**
@@ -39,13 +36,16 @@ public class ProductSessionController {
      * @return
      */
     @ApiOperation(value = "根据场次id查询场次对应的商品")
-    @ApiImplicitParams(value =
-            @ApiImplicitParam(name = "params",
-                    value = "分页数据xxx与场次sessionId=xxx，封装在map中",
-                    required = true))
+//    @ApiImplicitParams(value =
+//            @ApiImplicitParam(name = "params",
+//                    value = "分页数据xxx与场次sessionId=xxx，封装在map中",
+//                    required = true,
+//            dataType = "Map<String, Object>"))
     @GetMapping("/list")
     //@RequiresPermissions("coupon:productsession:list")
-    public CommonResult list(@RequestParam Map<String, Object> params){
+    public CommonResult list(@ApiParam(name = "productSessionVo",
+            value = "请传入：场次sessionId、商品对象productEntity、产品库存量totalCount",
+            required = true)@RequestParam Map<String, Object> params){
         PageUtils page = productSessionService.queryPage(params);
 
         return CommonResult.ok().put("page", page);
@@ -55,6 +55,7 @@ public class ProductSessionController {
     /**
      * 信息
      */
+    @ApiOperation(value = "根据")
     @GetMapping("/info/{id}")
     //@RequiresPermissions("coupon:productsession:info")
     public CommonResult info(@PathVariable("id") String id){
@@ -68,14 +69,17 @@ public class ProductSessionController {
      */
     @PostMapping("/save")
     @ApiOperation(value = "选择场次后，在这个场次id下添加产品信息")
-    @ApiImplicitParams(value =
-    @ApiImplicitParam(name = "productSessionVo",
-            value = "请传入：场次sessionId、商品对象product、产品库存量totalCount",
-            required = true,
-            dataTypeClass=productSessionVo.class ))
+//    @ApiImplicitParams(value =
+//    @ApiImplicitParam(name = "productSessionVo",
+//            value = "请传入：场次sessionId、商品对象product、产品库存量totalCount",
+//            required = true,
+//            paramType = "body"))
     //@RequiresPermissions("coupon:productsession:save")
-    public CommonResult save(@RequestBody productSessionVo productSessionVo){
-        if (productSessionService.saveProductSession(productSessionVo).equals("ok")){
+    public CommonResult save(@Valid @ApiParam(name = "productSessionVo",
+            value = "请传入：场次sessionId、商品对象productEntity、产品库存量totalCount",
+            required = true) @RequestBody productSessionVo productSessionVo){
+        String result = productSessionService.saveProductSession(productSessionVo);
+        if (result.equals("ok")){
             return CommonResult.ok();
         }else {
             return CommonResult.error("数据插入出错");

@@ -1,8 +1,17 @@
 package com.mapple.coupon.service.impl;
 
+import cn.hutool.core.date.DateUtil;
 import com.mapple.common.exception.RRException;
+import com.mapple.common.utils.RedisKeyUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.BoundHashOperations;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -13,6 +22,7 @@ import com.mapple.common.utils.Query;
 import com.mapple.coupon.dao.SessionDao;
 import com.mapple.coupon.entity.SessionEntity;
 import com.mapple.coupon.service.SessionService;
+import org.springframework.transaction.annotation.Transactional;
 
 
 @Service("sessionService")
@@ -20,6 +30,9 @@ public class SessionServiceImpl extends ServiceImpl<SessionDao, SessionEntity> i
 
     @Autowired
     public SessionDao sessionDao;
+
+    @Autowired
+    public RedisTemplate<String, Object> redisTemplate;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -37,20 +50,44 @@ public class SessionServiceImpl extends ServiceImpl<SessionDao, SessionEntity> i
      * @return
      */
     @Override
+    @Transactional
     public String saveSession(SessionEntity session) {
-        long startTime = session.getStartTime().getTime();
-        long endTime = session.getEndTime().getTime();
-        long now = System.currentTimeMillis();
+        Date startTime = session.getStartTime();
+        long startTime_long = startTime.getTime();
+        String startTime_str = DateUtil.format(startTime, "yyyy-MM-dd HH:mm:ss");
+        Date endTime = session.getEndTime();
+        long endTime_long = endTime.getTime();
+        String endTime_str = DateUtil.format(endTime, "yyyy-MM-dd HH:mm:ss");
+        Date nowTime = new Date();
+
         //当前时间在开始时间之前，且开始时间在结束时间之前，时间设置没问题
-        if (now<startTime&&startTime<endTime){
+        if (nowTime.compareTo(startTime)<0&&startTime.compareTo(endTime)<0){
             //插入mysql成功
-            if (sessionDao.insert(session)==1){
-                return session.getId();
+            Integer count = sessionDao.selectCount(new QueryWrapper<SessionEntity>().eq("start_time", startTime_str).eq("end_time", endTime_str));
+            if (count==0){
+                int insertSession = sessionDao.insert(session);
+                if (insertSession==1){
+                    //获取sessionId
+                    String sessionId = session.getId();
+                    //不存在该session时
+                    BoundHashOperations<String, Object, Object> operations = redisTemplate.boundHashOps(RedisKeyUtils.SESSIONS_PREFIX);
+                    if (!operations.hasKey(sessionId)){
+                        //把场次放入redis中
+                        try {
+                            operations.put(sessionId,startTime_long+"-"+endTime_long);
+                            return sessionId;
+                        }catch (Exception e){
+                            throw new RRException("数据插入错误");
+                        }
+                    }
+
+                }
             }
-        }else {
-            return null;
+            else {
+                throw new RRException("场次重复");
+            }
         }
-        return null;
+        throw new RRException("时间设置有误");
     }
 
 }
