@@ -58,12 +58,7 @@ public class SessionController {
     //@RequiresPermissions("coupon:session:save")
     public CommonResult save(@RequestBody SessionEntity session){
         String result = sessionService.saveSession(session);
-        if (!StringUtils.isBlank(result)){
-            return CommonResult.ok().put("sessionId",result);
-        }else {
-            return CommonResult.error("数据格式或插入错误");
-        }
-
+        return CommonResult.ok().put("sessionId",result);
     }
 
     /**
