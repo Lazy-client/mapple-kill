@@ -54,12 +54,9 @@ public class SeckillServiceImpl implements SecKillService {
                         //todo 替换成userId
                         hashOperations.put(RedisKeyUtils.SECKILL_USER_PREFIX, IdWorker.getId() + "-" + key, "1");
                         //todo 生成订单发消息
-
                         return "ok";
                     }
                 }
-
-
             }
 
         }
@@ -105,7 +102,7 @@ public class SeckillServiceImpl implements SecKillService {
                     session.setSessionId(sessionId);
                     //设置 session-name
                     session.setStartTime(sToEnd[0]);
-                    session.setEndTime(sToEnd[0]);
+                    session.setEndTime(sToEnd[1]);
                     //当前秒杀的场次
                     if (currentTime >= Long.parseLong(sToEnd[0]) && currentTime < Long.parseLong(sToEnd[1])) {
                         String skus = hashOperations.get(RedisKeyUtils.SKUS_PREFIX, sessionId);
