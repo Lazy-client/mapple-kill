@@ -4,6 +4,7 @@ import com.mapple.common.vo.Session;
 import com.mapple.common.vo.Sku;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author zsc
@@ -11,9 +12,9 @@ import java.util.List;
  * @date 2022/2/17 17:59
  */
 public interface SecKillService {
-    String kill(String key) throws InterruptedException;
+    String kill(String key,String id,String token) throws InterruptedException;
 
     List<Sku> search(String sessionId);
 
-    List<Session> searchSessions();
+    Map<String, List<Session>> searchSessions();
 }

@@ -18,6 +18,8 @@ import java.util.Date;
 @Data
 @NoArgsConstructor
 public class Sku implements Serializable {
+    @ApiModelProperty("场次Id")
+    private String sessionId;
     /**
      * 场次名称
      */

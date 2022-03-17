@@ -6,14 +6,14 @@ import com.mapple.common.vo.Sku;
 import com.mapple.seckill.cons.RedisConstants;
 import com.mapple.seckill.service.SecKillService;
 import io.swagger.annotations.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.HashOperations;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -25,24 +25,29 @@ import java.util.Objects;
 @Api(tags = {"秒杀"})
 @RestController
 public class SeckillController {
+    protected Logger logger = LoggerFactory.getLogger(getClass());
     @Resource
     private SecKillService secKillService;
 
     @Resource
     private HashOperations<String, String, Object> hashOperations;
-    ;
 
     @ApiOperation(value = "点击秒杀", notes = "随机码一定要传")
     @ApiImplicitParams(value = {
             @ApiImplicitParam(name = "key", value = "秒杀产品的随机码", required = true, dataTypeClass = String.class),
-            //@ApiImplicitParam(name = "lostID", value = "ID", required = true, dataTypeClass = Long.class),
-            //@ApiImplicitParam(name = "img", value = "照片", required = true, dataTypeClass = MultipartFile.class),
+            @ApiImplicitParam(name = "token", value = "用户唯一标识", required = true, dataTypeClass = String.class),
+            @ApiImplicitParam(name = "sessionId", value = "场次Id", required = true, dataTypeClass = String.class),
+            @ApiImplicitParam(name = "productId", value = "产品Id", required = true, dataTypeClass = String.class),
     })
-    @GetMapping("kill/{key}")
-    public CommonResult kill(@PathVariable String key) {
+    @GetMapping("kill/{token}/{key}")
+    public CommonResult kill(@PathVariable String key,
+                             String sessionId,
+                             String productId,
+                             @PathVariable String token) {
         String s = null;
         try {
-            s = secKillService.kill(key);
+            logger.info(token);
+            s = secKillService.kill(key, sessionId.concat("-").concat(productId),token);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -64,8 +69,8 @@ public class SeckillController {
     @ApiOperation(value = "搜索所有场次信息", notes = "进行中，以及未开始")
     @GetMapping("searchSessions")
     public CommonResult searchSessions() {
-        List<Session> sessions = secKillService.searchSessions();
-        return CommonResult.ok().put("data", sessions);
+        Map<String, List<Session>> data = secKillService.searchSessions();
+        return CommonResult.ok().put("data", data);
     }
 
     @Resource
