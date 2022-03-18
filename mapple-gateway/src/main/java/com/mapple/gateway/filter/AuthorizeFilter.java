@@ -22,7 +22,7 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public class AuthorizeFilter implements GlobalFilter, Ordered {
 
-    private static final String AUTHORIZE_TOKEN = "AUTHORIZATION";
+    private static final String AUTHORIZE_TOKEN = "token";
     @Value("${admin.path}")
     private String adminPath;
 
@@ -41,7 +41,7 @@ public class AuthorizeFilter implements GlobalFilter, Ordered {
         //4. 获取请求头
         HttpHeaders headers = request.getHeaders();
         //5. 请求头中获取令牌
-        String token = headers.getFirst(HttpHeaders.AUTHORIZATION);
+        String token = headers.getFirst(AUTHORIZE_TOKEN);
 
         //6. 判断请求头中是否有令牌
         if (StringUtils.isEmpty(token)) {
