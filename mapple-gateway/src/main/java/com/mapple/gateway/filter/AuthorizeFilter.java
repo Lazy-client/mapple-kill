@@ -46,7 +46,6 @@ public class AuthorizeFilter implements GlobalFilter, Ordered {
         //6. 判断请求头中是否有令牌
         if (StringUtils.isEmpty(token)) {
 
-
             //7. 响应中放入返回的状态吗, 没有权限访问
             //response.setStatusCode(HttpStatus.UNAUTHORIZED);
             //8. 返回
