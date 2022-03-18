@@ -58,6 +58,8 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
         if(StringUtils.isBlank(token)){
             throw new RRException(jwtUtils.getHeader() + "不能为空", HttpStatus.UNAUTHORIZED.value());
         }
+        //  todo 对国密解密拿到jwt
+        //  todo 后续操作不变，相当于对jwt二次封装
 
         Claims claims = jwtUtils.getClaimByToken(token);
         if(claims == null || jwtUtils.isTokenExpired(claims.getExpiration())){
