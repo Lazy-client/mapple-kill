@@ -19,6 +19,11 @@ import java.util.Date;
 @Data
 @NoArgsConstructor
 public class productSessionVo_Skus implements Serializable {
+
+    private String id;
+
+    @ApiModelProperty("场次id")
+    private String sessionId;
     /**
      * 场次名称
      */

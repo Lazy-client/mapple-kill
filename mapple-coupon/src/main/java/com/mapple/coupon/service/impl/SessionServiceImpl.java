@@ -74,13 +74,12 @@ public class SessionServiceImpl extends ServiceImpl<SessionDao, SessionEntity> i
                     if (!operations.hasKey(sessionId)){
                         //把场次放入redis中
                         try {
-                            operations.put(sessionId,startTime_long+"-"+endTime_long);
+                            operations.put(sessionId,startTime_long+"-"+endTime_long+"-"+session.getSessionName());
                             return sessionId;
                         }catch (Exception e){
                             throw new RRException("数据插入错误");
                         }
                     }
-
                 }
             }
             else {
