@@ -22,11 +22,11 @@ public class Session implements Serializable {
     @ApiModelProperty("场次id")
     private String sessionId;
     @ApiModelProperty("产品名称")
-    private String productName;
+    private String sessionName;
     @ApiModelProperty("当前商品秒杀的开始时间")
-    private String startTime;
+    private long startTime;
     @ApiModelProperty("当前商品秒杀的结束时间")
-    private String endTime;
+    private long endTime;
     @ApiModelProperty("场次关联产品的json串")
     private String skus;
 

@@ -38,9 +38,9 @@ public class SeckillServiceImpl implements SecKillService {
     public String kill(String key, String id, String token) throws InterruptedException {
         //id ====> sessionId-productId
         long currentTime = new Date().getTime();
-        if (hashOperations.hasKey(RedisKeyUtils.SESSIONS_PREFIX, id)) {//校验场次的sku是否存在
-            String skuJason = hashOperations.get(RedisKeyUtils.SESSIONS_PREFIX, id);
-            assert skuJason != null;
+        //校验场次的sku是否存在
+        String skuJason = hashOperations.get(RedisKeyUtils.SESSIONS_PREFIX, id);
+        if (!StringUtils.isEmpty(skuJason)){
             Sku sku = JSON.parseObject(skuJason, Sku.class);
             if (currentTime >= sku.getStartTime().getTime() && currentTime < sku.getEndTime().getTime()) {//校验时间
                 //todo 解析token拿到userId
@@ -58,8 +58,8 @@ public class SeckillServiceImpl implements SecKillService {
                     }
                 }
             }
-
         }
+
 
 
         return null;
@@ -101,8 +101,9 @@ public class SeckillServiceImpl implements SecKillService {
                     Session session = new Session();
                     session.setSessionId(sessionId);
                     //设置 session-name
-                    session.setStartTime(sToEnd[0]);
-                    session.setEndTime(sToEnd[1]);
+                    session.setStartTime(Long.parseLong(sToEnd[0]));
+                    session.setEndTime(Long.parseLong(sToEnd[1]));
+                    session.setSessionName(sToEnd[2]);
                     //当前秒杀的场次
                     if (currentTime >= Long.parseLong(sToEnd[0]) && currentTime < Long.parseLong(sToEnd[1])) {
                         String skus = hashOperations.get(RedisKeyUtils.SKUS_PREFIX, sessionId);
