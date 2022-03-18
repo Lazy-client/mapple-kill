@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
  * @author Mark sunlightcs@gmail.com
  */
 @Component
-//@SuppressWarnings("unused")
+@SuppressWarnings("unused")
 public class RedisUtils {
     @Resource
     private RedisTemplate<String, Object> redisTemplate;

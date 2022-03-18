@@ -6,7 +6,6 @@ import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
@@ -46,10 +45,11 @@ public class AuthorizeFilter implements GlobalFilter, Ordered {
 
         //6. 判断请求头中是否有令牌
         if (StringUtils.isEmpty(token)) {
+
             //7. 响应中放入返回的状态吗, 没有权限访问
-            response.setStatusCode(HttpStatus.UNAUTHORIZED);
+            //response.setStatusCode(HttpStatus.UNAUTHORIZED);
             //8. 返回
-            return response.setComplete();
+            //return response.setComplete();
         }
 
         //12. 放行
