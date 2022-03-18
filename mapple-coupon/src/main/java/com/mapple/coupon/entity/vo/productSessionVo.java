@@ -43,7 +43,6 @@ public class productSessionVo implements Serializable {
     /**
      * 产品对象
      */
-    @NotNull
     @ApiModelProperty("产品对象")
     private ProductEntity productEntity;
     /**

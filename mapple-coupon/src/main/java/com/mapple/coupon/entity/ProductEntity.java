@@ -1,9 +1,6 @@
 package com.mapple.coupon.entity;
 
-import com.baomidou.mybatisplus.annotation.FieldFill;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
 
 import java.math.BigDecimal;
 import java.io.Serializable;
@@ -12,6 +9,10 @@ import java.util.Date;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+
+import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 /**
  * 产品信息表
@@ -30,30 +31,35 @@ public class ProductEntity implements Serializable {
 	 */
 	@TableId
 	@ApiModelProperty(value = "产品id",required = false)
-	private String id;
+	private String productId;
 	/**
 	 * 产品名称
 	 */
+	@NotNull
 	@ApiModelProperty("产品名称")
 	private String productName;
 	/**
 	 * 产品介绍描述
 	 */
+	@NotNull
 	@ApiModelProperty("产品介绍描述")
 	private String description;
 	/**
 	 * 产品默认图片地址
 	 */
+	@NotNull
 	@ApiModelProperty("产品默认图片地址")
 	private String defaultImg;
 	/**
 	 * 标题
 	 */
+	@NotNull
 	@ApiModelProperty("标题")
 	private String title;
 	/**
 	 * 逻辑删除 1（true）已删除， 0（false）未删除
 	 */
+	@TableLogic(value = "0", delval = "1")
 	@ApiModelProperty(value = "逻辑删除 1（true）已删除， 0（false）未删除",required = false)
 	private Integer isDeleted;
 

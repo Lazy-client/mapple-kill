@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.mapple.coupon.entity.vo.productSessionVo;
 import io.swagger.annotations.*;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import com.mapple.coupon.entity.ProductSessionEntity;
@@ -79,8 +80,8 @@ public class ProductSessionController {
             value = "请传入：场次sessionId、商品对象productEntity、产品库存量totalCount",
             required = true) @RequestBody productSessionVo productSessionVo){
         String result = productSessionService.saveProductSession(productSessionVo);
-        if (result.equals("ok")){
-            return CommonResult.ok();
+        if (!StringUtils.isEmpty(result)){
+            return CommonResult.ok().put("productSessionId",result);
         }else {
             return CommonResult.error("数据插入出错");
         }
