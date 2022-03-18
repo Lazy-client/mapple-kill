@@ -3,3 +3,11 @@ renren:
         open: false
     shiro:
         redis: false
+management:
+    endpoints:
+        web:
+            exposure:
+                include: '*'
+feign:
+    sentinel:
+        enabled: true

@@ -3,5 +3,12 @@ server:
     context-path: /coupon
   port: 7001
 
-
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+feign:
+  sentinel:
+    enabled: true
 

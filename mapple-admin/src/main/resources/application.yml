@@ -5,3 +5,11 @@ renren:
     redis: false
 server:
   port: 8081
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+feign:
+  sentinel:
+    enabled: true
