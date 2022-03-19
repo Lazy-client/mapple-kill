@@ -9,6 +9,11 @@
 package io.renren.modules.app.controller;
 
 
+import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.IdcardUtil;
+import cn.hutool.crypto.SmUtil;
+import com.mapple.common.exception.RRException;
+import com.mapple.common.utils.CryptogramUtil;
 import io.renren.common.utils.R;
 import io.renren.common.validator.ValidatorUtils;
 import io.renren.modules.app.entity.UserEntity;
@@ -23,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -43,11 +49,34 @@ public class AppRegisterController {
         //表单校验
         ValidatorUtils.validateEntity(form);
 
+        //校验身份证号
+        if (!IdcardUtil.isValidCard(form.getIdCard())) {
+            throw new RRException("身份证号格式错误");
+        }
         UserEntity user = new UserEntity();
-        user.setMobile(form.getMobile());
-        user.setUsername(form.getMobile());
-        user.setPassword(DigestUtils.sha256Hex(form.getPassword()));
-        user.setCreateTime(new Date());
+        //设置余额
+        user.setBalance(new BigDecimal(10000));
+        user.setRealName(form.getRealName());
+        //有工作
+        user.setNotHasJob(false);
+        //未逾期
+        user.setIsOverdue(false);
+        //没有失信
+        user.setIsDishonest(false);
+        //生成16位用户名随机码
+        String simpleUUID = IdUtil.simpleUUID();
+        //设置用户名
+        user.setUsername("user"+simpleUUID);
+        //身份证号
+        user.setIdCard(form.getIdCard());
+        //电话号码
+        user.setTelephoneNum(form.getTelephoneNum());
+        //密码
+        //生成随机salt
+        String salt = IdUtil.simpleUUID();
+
+        //密码加密
+        user.setPassword(SmUtil.sm3(form.getPassword()));
         userService.save(user);
 
         return R.ok();

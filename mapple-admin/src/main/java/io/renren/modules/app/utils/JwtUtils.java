@@ -38,17 +38,17 @@ public class JwtUtils {
      * @param userId
      * @return
      */
-    public String generateToken(long userId) {
+    public String generateToken(String userId) {
         Date nowDate = new Date();
         //过期时间
         Date expireDate = new Date(nowDate.getTime() + expire * 1000);
         String jwtToken = Jwts.builder()
                 .setHeaderParam("typ", "JWT")
                 //用户唯一id标识
-                .setSubject(userId + "")
+                .setSubject(userId)
                 .setIssuedAt(nowDate)
                 .setExpiration(expireDate)
-                .signWith(SignatureAlgorithm.HS512, secret)
+                .signWith(SignatureAlgorithm.HS512, "f4e2e52034348f86b67cde581c0f9eb5[www.renren.io]")
                 .compact();
         //***用国密sm4（cbc模式）加密***
         return CryptogramUtil.doEncrypt(jwtToken);

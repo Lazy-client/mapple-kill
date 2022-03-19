@@ -9,6 +9,7 @@
 package io.renren.modules.app.controller;
 
 
+import cn.hutool.core.util.IdUtil;
 import io.renren.common.utils.R;
 import io.renren.common.validator.ValidatorUtils;
 import io.renren.modules.app.form.LoginForm;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * APP登录授权
@@ -49,7 +51,7 @@ public class AppLoginController {
         ValidatorUtils.validateEntity(form);
 
         //用户登录
-        long userId = userService.login(form);
+        String userId = userService.login(form);
 
         //生成token
         String token = jwtUtils.generateToken(userId);
