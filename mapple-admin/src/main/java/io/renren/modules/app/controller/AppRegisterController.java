@@ -12,9 +12,11 @@ package io.renren.modules.app.controller;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.IdcardUtil;
 import cn.hutool.crypto.SmUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.renren.common.exception.RRException;
 import io.renren.common.utils.R;
 import io.renren.common.validator.ValidatorUtils;
+import io.renren.modules.app.dao.UserDao;
 import io.renren.modules.app.entity.UserEntity;
 import io.renren.modules.app.form.RegisterForm;
 import io.renren.modules.app.service.UserService;
@@ -27,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
+import java.util.Random;
 
 /**
  * 注册
@@ -51,6 +54,14 @@ public class AppRegisterController {
             throw new RRException("身份证号格式错误");
         }
         UserEntity user = new UserEntity();
+//        //生成16位用户名随机码
+//        String simpleUUID = IdUtil.simpleUUID();
+        //设置用户名
+        //username用户名查重
+        UserEntity userEntity = userService.queryByUsername(form.getUsername());
+        if (null==userEntity){
+            user.setUsername(form.getUsername());
+        }
         //设置余额
         user.setBalance(new BigDecimal(10000));
         user.setRealName(form.getRealName());
@@ -60,18 +71,12 @@ public class AppRegisterController {
         user.setIsOverdue(false);
         //没有失信
         user.setIsDishonest(false);
-        //生成16位用户名随机码
-        String simpleUUID = IdUtil.simpleUUID();
-        //设置用户名
-        user.setUsername("user"+simpleUUID);
         //身份证号
         user.setIdCard(form.getIdCard());
         //电话号码
         user.setTelephoneNum(form.getTelephoneNum());
-        //密码
-        //生成随机salt
-        String salt = IdUtil.simpleUUID();
-
+        //随机生成年龄：[15,115]岁
+        user.setAge(new Random().nextInt(101)+ 15);
         //密码加密
         user.setPassword(SmUtil.sm3(form.getPassword()));
         userService.save(user);

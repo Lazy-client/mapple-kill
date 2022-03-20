@@ -42,9 +42,9 @@ public class UserEntity implements Serializable {
 	private String username;
 
 	/**
-	 * 用户名
+	 * 真实姓名
 	 */
-	@ApiModelProperty(value = "用户名",required = true)
+	@ApiModelProperty(value = "真实姓名",required = true)
 	private String realName;
 
 	/**
@@ -85,8 +85,14 @@ public class UserEntity implements Serializable {
 	/**
 	 * 余额
 	 */
-	@ApiModelProperty(value = "余额",required = false)
+	@ApiModelProperty(value = "余额",required = true)
 	private BigDecimal balance;
+
+	/**
+	 * 余额
+	 */
+	@ApiModelProperty(value = "年龄",required = true)
+	private Integer age;
 
 	/**
 	 * 逻辑删除 1（true）已删除， 0（false）未删除
