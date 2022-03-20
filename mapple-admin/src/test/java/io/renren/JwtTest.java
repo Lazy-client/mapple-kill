@@ -16,7 +16,7 @@ public class JwtTest {
 
     @Test
     public void test() {
-        String token = jwtUtils.generateToken(1);
+        String token = jwtUtils.generateToken("1");
 
         System.out.println(token);
 

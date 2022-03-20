@@ -40,6 +40,7 @@ pipeline {
                 sh 'cd ${WS}/mapple-gateway && docker build -t mapple-gateway .'
                 sh 'cd ${WS}/mapple-seckill && docker build -t mapple-seckill .'
                 sh 'cd ${WS}/mapple-coupon && docker build -t mapple-coupon .'
+                sh 'cd ${WS}/mapple-consume && docker build -t mapple-consume .'
                         }
         }
 
@@ -47,7 +48,9 @@ pipeline {
         stage('应用部署') {
              steps {
               echo "start ..."
-              sh 'docker rm -f mapple-coupon mapple-admin mapple-gateway-01 mapple-gateway-02 mapple-gateway-03 mapple-seckill-01 mapple-seckill-02 mapple-seckill-03 '
+              sh 'docker rm -f mapple-consume mapple-coupon mapple-admin mapple-gateway-01 mapple-gateway-02 mapple-gateway-03 mapple-seckill-01 mapple-seckill-02 mapple-seckill-03 '
+
+              sh 'docker run -di -p 8000:3333 -e server_port="3333" --name mapple-consume       mapple-consume'
               sh 'docker run -di -p 10000:3333 -e server_port="3333" --name mapple-admin        mapple-admin'
               sh 'docker run -di -p 7000:3333 -e server_port="3333" --name mapple-coupon        mapple-coupon'
               sh 'docker run -di -p 88:3333 -e server_port="3333"   --name mapple-gateway-01    mapple-gateway'

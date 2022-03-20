@@ -8,10 +8,10 @@
 
 package io.renren.modules.app.utils;
 
-import com.mapple.common.utils.CryptogramUtil;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.renren.common.utils.CryptogramUtil;
 import lombok.Data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
