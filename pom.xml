@@ -22,6 +22,7 @@
         <module>mapple-gateway</module>
         <module>mapple-seckill</module>
         <module>mapple-coupon</module>
+        <module>mapple-consume</module>
     </modules>
 
     <properties>
