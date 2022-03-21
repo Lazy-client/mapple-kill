@@ -9,9 +9,7 @@
 package io.renren.modules.app.controller;
 
 
-import cn.hutool.core.util.IdUtil;
 import io.renren.common.utils.R;
-import io.renren.common.validator.ValidatorUtils;
 import io.renren.modules.app.form.LoginForm;
 import io.renren.modules.app.service.UserService;
 import io.renren.modules.app.utils.JwtUtils;
@@ -25,7 +23,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 /**
  * APP登录授权
@@ -48,7 +45,7 @@ public class AppLoginController {
     @ApiOperation("登录")
     public R login(@RequestBody LoginForm form){
         //表单校验
-        ValidatorUtils.validateEntity(form);
+//        ValidatorUtils.validateEntity(form);
 
         //用户登录
         String userId = userService.login(form);

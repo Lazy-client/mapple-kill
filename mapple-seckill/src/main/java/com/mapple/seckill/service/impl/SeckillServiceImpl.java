@@ -36,6 +36,7 @@ public class SeckillServiceImpl implements SecKillService {
 
     @Override
     public String kill(String key, String id, String token) throws InterruptedException {
+
         //id ====> sessionId-productId
         long currentTime = new Date().getTime();
         //校验场次的sku是否存在

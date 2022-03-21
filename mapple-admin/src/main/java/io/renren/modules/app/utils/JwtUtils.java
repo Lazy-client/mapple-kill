@@ -48,7 +48,7 @@ public class JwtUtils {
                 .setSubject(userId)
                 .setIssuedAt(nowDate)
                 .setExpiration(expireDate)
-                .signWith(SignatureAlgorithm.HS512, "f4e2e52034348f86b67cde581c0f9eb5[www.renren.io]")
+                .signWith(SignatureAlgorithm.HS512, JwtConstants.secret)
                 .compact();
         //***用国密sm4（cbc模式）加密***
         return CryptogramUtil.doEncrypt(jwtToken);

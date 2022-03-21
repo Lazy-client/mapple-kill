@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 public class MQNamesrvConfig {
 
 
-    @Value("${rocketmq.nameServer}")
+    @Value("${rocketmq.name-server}")
     String nameServer;
 
     /**
