@@ -9,6 +9,7 @@
 package io.renren.modules.app.service.impl;
 
 
+import cn.hutool.crypto.SmUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import io.renren.common.exception.RRException;
@@ -25,20 +26,21 @@ import org.springframework.stereotype.Service;
 public class UserServiceImpl extends ServiceImpl<UserDao, UserEntity> implements UserService {
 
 	@Override
-	public UserEntity queryByMobile(String mobile) {
-		return baseMapper.selectOne(new QueryWrapper<UserEntity>().eq("mobile", mobile));
+	public UserEntity queryByUsername(String username) {
+		return baseMapper.selectOne(new QueryWrapper<UserEntity>().eq("username", username));
 	}
 
 	@Override
-	public long login(LoginForm form) {
-		UserEntity user = queryByMobile(form.getMobile());
-		Assert.isNull(user, "手机号错误");
+	public String login(LoginForm form) {
+		UserEntity user = queryByUsername(form.getUsername());
+		Assert.isNull(user, "用户名错误");
 
 		//密码错误
-		if(!user.getPassword().equals(DigestUtils.sha256Hex(form.getPassword()))){
+		if(!user.getPassword().equals(SmUtil.sm3(form.getPassword()))){
 			throw new RRException("密码错误");
 		}
 
+		//如果没错，则返回用户唯一id
 		return user.getUserId();
 	}
 }

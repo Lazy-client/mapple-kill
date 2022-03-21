@@ -5,6 +5,11 @@ spring:
   application:
     name: mapple-admin
   cloud:
+#    sentinel:
+#      transport:
+#        dashboard: hxx.sicheng.store:8888 #配置Sentinel dashboard地址
+#        #默认是 8719, 假如被占用会依次 +1 向后扫描直到找到未被占用端口
+#        port: 8719
     nacos:
       discovery:
         server-addr:  hxx.sicheng.store:8848 #Nacos服务注册中心地址

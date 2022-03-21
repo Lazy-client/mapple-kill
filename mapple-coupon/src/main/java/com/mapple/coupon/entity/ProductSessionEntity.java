@@ -1,9 +1,6 @@
 package com.mapple.coupon.entity;
 
-import com.baomidou.mybatisplus.annotation.FieldFill;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
 
 import java.math.BigDecimal;
 import java.io.Serializable;
@@ -48,6 +45,7 @@ public class ProductSessionEntity implements Serializable {
 	/**
 	 * 逻辑删除 1（true）已删除， 0（false）未删除
 	 */
+	@TableLogic(value = "0", delval = "1")
 	private Integer isDeleted;
 	@ApiModelProperty(value = "创建时间")
 	@TableField(fill = FieldFill.INSERT)

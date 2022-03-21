@@ -25,6 +25,6 @@ public class TestTask implements ITask {
 
 	@Override
 	public void run(String params){
-		logger.debug("TestTask定时任务正在执行，参数为：{}", params);
+		logger.info("TestTask定时任务正在执行，参数为：{}", params);
 	}
 }

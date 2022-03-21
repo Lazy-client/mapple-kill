@@ -2,3 +2,12 @@ server:
   servlet:
     context-path: /seckill
   port: 100
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+feign:
+  sentinel:
+    enabled: true

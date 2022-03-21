@@ -18,6 +18,25 @@
 
 
     <dependencies>
+        <!--SpringCloud ailibaba sentinel-datasource-nacos 后续做持久化用到-->
+<!--        <dependency>-->
+<!--            <groupId>com.alibaba.csp</groupId>-->
+<!--            <artifactId>sentinel-datasource-nacos</artifactId>-->
+<!--        </dependency>-->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-sentinel</artifactId>
+        </dependency>
+        <!--openfeign-->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-openfeign</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt</artifactId>
+        </dependency>
 <!--        引入加密工具类，使用 https://github.com/antherd/sm-crypto 项目中一些加解密方式-->
         <dependency>
             <groupId>com.antherd</groupId>
@@ -79,6 +98,9 @@
             <artifactId>hutool-all</artifactId>
             <version>5.7.22</version>
         </dependency>
+<!--        hutool加入对国密的支持-->
+        <!-- https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk15to18 -->
+
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>

@@ -18,11 +18,12 @@
 
     <modules>
         <module>mapple-common</module>
-        <module>mapple-admin</module>
+<!--        <module>mapple-admin</module>-->
         <module>mapple-gateway</module>
         <module>mapple-seckill</module>
         <module>mapple-coupon</module>
         <module>mapple-consume</module>
+        <module>mapple-admin</module>
     </modules>
 
     <properties>
@@ -148,7 +149,7 @@
             <dependency>
                 <groupId>cn.hutool</groupId>
                 <artifactId>hutool-all</artifactId>
-                <version>5.1.0</version>
+                <version>5.7.22</version>
             </dependency>
 
             <dependency>

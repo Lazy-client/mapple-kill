@@ -32,7 +32,7 @@ import java.util.Map;
 public class SysLogController {
 	@Autowired
 	private SysLogService sysLogService;
-	
+
 	/**
 	 * 列表
 	 */
@@ -41,8 +41,7 @@ public class SysLogController {
 	@RequiresPermissions("sys:log:list")
 	public R list(@RequestParam Map<String, Object> params){
 		PageUtils page = sysLogService.queryPage(params);
-
 		return R.ok().put("page", page);
 	}
-	
+
 }
