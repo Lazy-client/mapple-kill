@@ -1,7 +1,8 @@
 package com.mapple.seckill.service.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.baomidou.mybatisplus.core.toolkit.IdWorker;
+import com.mapple.common.utils.CryptogramUtil;
+import com.mapple.common.utils.JwtUtils;
 import com.mapple.common.utils.RedisKeyUtils;
 import com.mapple.common.vo.Session;
 import com.mapple.common.vo.Sku;
@@ -30,39 +31,39 @@ public class SeckillServiceImpl implements SecKillService {
     protected Logger logger = LoggerFactory.getLogger(getClass());
     @Resource
     RedissonClient redissonClient;
-
     @Resource
     private HashOperations<String, String, String> hashOperations;
 
     @Override
     public String kill(String key, String id, String token) throws InterruptedException {
+        String jwt = CryptogramUtil.doDecrypt(token);
+        String userId = JwtUtils.getUserId(jwt);
+        if (!StringUtils.isEmpty(userId)){
+            logger.info(userId);
+            //id ====> sessionId-productId
+            long currentTime = new Date().getTime();
+            //校验场次的sku是否存在
+            String skuJason = hashOperations.get(RedisKeyUtils.SESSIONS_PREFIX, id);
+            if (!StringUtils.isEmpty(skuJason)){
+                Sku sku = JSON.parseObject(skuJason, Sku.class);
+                if (currentTime >= sku.getStartTime().getTime() && currentTime < sku.getEndTime().getTime()) {//校验时间
+                    //校验用户是有参与过秒杀
+                    if (!hashOperations.hasKey(RedisKeyUtils.SECKILL_USER_PREFIX, userId)) {
+                        //分布式锁减库存
+                        RSemaphore semaphore = redissonClient.getSemaphore(RedisKeyUtils.STOCK_PREFIX + key);
 
-        //id ====> sessionId-productId
-        long currentTime = new Date().getTime();
-        //校验场次的sku是否存在
-        String skuJason = hashOperations.get(RedisKeyUtils.SESSIONS_PREFIX, id);
-        if (!StringUtils.isEmpty(skuJason)){
-            Sku sku = JSON.parseObject(skuJason, Sku.class);
-            if (currentTime >= sku.getStartTime().getTime() && currentTime < sku.getEndTime().getTime()) {//校验时间
-                //todo 解析token拿到userId
-                //校验用户是有参与过秒杀
-                if (!hashOperations.hasKey(RedisKeyUtils.SECKILL_USER_PREFIX, "userId")) {
-                    //分布式锁减库存
-                    RSemaphore semaphore = redissonClient.getSemaphore(RedisKeyUtils.STOCK_PREFIX + key);
+                        boolean acquire = semaphore.tryAcquire(1, 100, TimeUnit.MILLISECONDS);
+                        if (acquire) {//库存与扣成功
+                            hashOperations.put(RedisKeyUtils.SECKILL_USER_PREFIX, userId + "-" + key, "1");
+                            //todo 生成订单发消息
 
-                    boolean acquire = semaphore.tryAcquire(1, 200, TimeUnit.MILLISECONDS);
-                    if (acquire) {//库存与扣成功
-                        //todo 替换成userId
-                        hashOperations.put(RedisKeyUtils.SECKILL_USER_PREFIX, IdWorker.getId() + "-" + key, "1");
-                        //todo 生成订单发消息
-                        return "ok";
+
+                            return "ok";
+                        }
                     }
                 }
             }
         }
-
-
-
         return null;
     }
 

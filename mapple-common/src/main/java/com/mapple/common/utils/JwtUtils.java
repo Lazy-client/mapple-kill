@@ -11,10 +11,8 @@ package com.mapple.common.utils;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import lombok.Data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import java.util.Date;
 
@@ -24,20 +22,20 @@ import java.util.Date;
  * @author Mark sunlightcs@gmail.com
  */
 //@ConfigurationProperties(prefix = "renren.jwt")
-@Component
-@Data
+//@Component
 public class JwtUtils {
-    private Logger logger = LoggerFactory.getLogger(getClass());
-    private String secret = JwtConstants.secret;
-    private long expire = JwtConstants.expire;
-    private String header = JwtConstants.header;
+    private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
+    private static final String secret = JwtConstants.secret;
+    private static final long expire = JwtConstants.expire;
+    private static final String header = JwtConstants.header;
 
     /**
      * 用国密生成jwt token
+     *
      * @param userId
      * @return
      */
-    public String generateToken(long userId) {
+    public static String  generateToken(long userId) {
         Date nowDate = new Date();
         //过期时间
         Date expireDate = new Date(nowDate.getTime() + expire * 1000);
@@ -53,7 +51,7 @@ public class JwtUtils {
         return CryptogramUtil.doEncrypt(jwtToken);
     }
 
-    public Claims getClaimByToken(String token) {
+    public static Claims getClaimByToken(String token) {
         try {
             return Jwts.parser()
                     .setSigningKey(secret)
@@ -65,11 +63,19 @@ public class JwtUtils {
         }
     }
 
+    public static String getUserId(String jwt) {
+        final Claims claim = getClaimByToken(jwt);
+        if (claim == null)
+            return null;
+        return claim.getSubject();
+    }
+
     /**
      * token是否过期
+     *
      * @return true：过期
      */
-    public boolean isTokenExpired(Date expiration) {
+    public static boolean isTokenExpired(Date expiration) {
         return expiration.before(new Date());
     }
 }
