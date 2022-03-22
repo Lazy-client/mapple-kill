@@ -49,13 +49,13 @@ pipeline {
              steps {
               echo "start ..."
               sh 'docker rm -f mapple-consume mapple-coupon mapple-admin mapple-gateway-01 mapple-gateway-02 mapple-gateway-03 mapple-seckill-01 mapple-seckill-02 mapple-seckill-03 '
-              sh 'docker run -di -p 8000:3333 -e server_port="3333" --name mapple-consume       mapple-consume'
+              sh 'docker run -di -m 3g -p 8000:3333 -e server_port="3333" --name mapple-consume       mapple-consume'
               sh 'docker run -di -m 500m -p 10000:3333 -e server_port="3333" --name mapple-admin        mapple-admin'
               sh 'docker run -di -m 500m -p 7000:3333 -e server_port="3333" --name mapple-coupon        mapple-coupon'
-              sh 'docker run -di -p 88:3333 -e server_port="3333"   --name mapple-gateway-01    mapple-gateway'
+              sh 'docker run -di -m 3g -p 88:3333 -e server_port="3333"   --name mapple-gateway-01    mapple-gateway'
               //sh 'docker run -di -p 89:3333 -e server_port="3333"   --name mapple-gateway-02  mapple-gateway'
               //sh 'docker run -di -p 90:3333 -e server_port="3333"   --name mapple-gateway-03  mapple-gateway'
-              sh 'docker run -di -p 20000:3333 -e server_port="3333" --name mapple-seckill-01   mapple-seckill'
+              sh 'docker run -m 3g -di -p 20000:3333 -e server_port="3333" --name mapple-seckill-01   mapple-seckill'
               //sh 'docker run -di -p 20001:3333 -e server_port="3333" --name mapple-seckill-02 mapple-seckill'
               //sh 'docker run -di -p 20002:3333 -e server_port="3333" --name mapple-seckill-03 mapple-seckill'
             }
