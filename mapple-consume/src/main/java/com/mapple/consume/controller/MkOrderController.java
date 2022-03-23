@@ -23,10 +23,9 @@ import javax.annotation.Resource;
  * @since 2022-03-19
  */
 @RestController
-@RequestMapping("/consume/mk-order")
+@RequestMapping("/mk-order")
 public class MkOrderController {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MkOrderController.class);
 
     @Resource
     private MkOrderService orderService;
@@ -40,5 +39,6 @@ public class MkOrderController {
         // 参数校验结束
         return orderService.orderEnqueue(order);
     }
+
 }
 

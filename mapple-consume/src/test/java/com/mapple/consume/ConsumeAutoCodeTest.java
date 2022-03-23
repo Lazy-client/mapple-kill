@@ -17,7 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.util.ArrayList;
 
 @SpringBootTest
-public class ScoreAutoCodeTest {
+public class ConsumeAutoCodeTest {
 
     @Test
     public void contextLoads() {
