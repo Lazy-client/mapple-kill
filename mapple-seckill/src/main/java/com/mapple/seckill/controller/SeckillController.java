@@ -3,18 +3,24 @@ package com.mapple.seckill.controller;
 import com.mapple.common.utils.CommonResult;
 import com.mapple.common.vo.Session;
 import com.mapple.common.vo.Sku;
-import com.mapple.seckill.cons.RedisConstants;
+import com.mapple.common.utils.redis.cons.RedisConstants;
 import com.mapple.seckill.service.SecKillService;
 import io.swagger.annotations.*;
+import org.redisson.api.RMapCache;
+import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.HashOperations;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author zsc
@@ -47,7 +53,7 @@ public class SeckillController {
         String s = null;
         try {
             logger.info(token);
-            s = secKillService.kill(key, sessionId.concat("-").concat(productId),token);
+            s = secKillService.kill(key, sessionId.concat("-").concat(productId), token);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -76,9 +82,20 @@ public class SeckillController {
     @Resource
     private RedisConstants redisConstants;
 
+    @Resource
+    private RedissonClient redissonClient;
+
     @ApiOperation(value = "获取redis的key", notes = "这只是个测试接口，不是业务")
     @GetMapping("/redisKey")
     public CommonResult redisKey() {
+        RMapCache<String, String> map = redissonClient.getMapCache("JWT_WHITE_LIST");
+        map.put("hello","hello",30, TimeUnit.SECONDS);
+        map.put("ok","你好");
+        String hello = map.get("hello");
+        String ok = map.get("ok");
+        logger.info(hello);
+        logger.info(ok);
+
         return Objects.requireNonNull(CommonResult
                 .ok()
                 .put("redisKey", redisConstants.getPort()))

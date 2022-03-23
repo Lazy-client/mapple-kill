@@ -38,13 +38,13 @@ public class SeckillServiceImpl implements SecKillService {
     public String kill(String key, String id, String token) throws InterruptedException {
         String jwt = CryptogramUtil.doDecrypt(token);
         String userId = JwtUtils.getUserId(jwt);
-        if (!StringUtils.isEmpty(userId)){
+        if (!StringUtils.isEmpty(userId)) {
             logger.info(userId);
             //id ====> sessionId-productId
             long currentTime = new Date().getTime();
             //校验场次的sku是否存在
             String skuJason = hashOperations.get(RedisKeyUtils.SESSIONS_PREFIX, id);
-            if (!StringUtils.isEmpty(skuJason)){
+            if (!StringUtils.isEmpty(skuJason)) {
                 Sku sku = JSON.parseObject(skuJason, Sku.class);
                 if (currentTime >= sku.getStartTime().getTime() && currentTime < sku.getEndTime().getTime()) {//校验时间
                     //校验用户是有参与过秒杀

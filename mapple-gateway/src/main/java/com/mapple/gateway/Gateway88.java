@@ -4,7 +4,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
-@SpringBootApplication(scanBasePackages = "com.mapple")
+@SpringBootApplication
 @EnableDiscoveryClient
 public class Gateway88 {
     public static void main(String[] args) {
