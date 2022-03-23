@@ -12,6 +12,7 @@ package io.renren.modules.app.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import io.renren.modules.app.entity.UserEntity;
 import io.renren.modules.app.form.LoginForm;
+import io.renren.modules.app.form.RegisterForm;
 
 /**
  * 用户
@@ -28,4 +29,6 @@ public interface UserService extends IService<UserEntity> {
 	 * @return        返回用户ID
 	 */
 	String login(LoginForm form);
+
+	String register(RegisterForm form);
 }

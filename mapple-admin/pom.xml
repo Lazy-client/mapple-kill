@@ -109,6 +109,7 @@
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
         </dependency>
+
         <!--oracle驱动-->
         <!--		<dependency>-->
         <!--			<groupId>com.oracle</groupId>-->
@@ -235,6 +236,19 @@
             <groupId>com.antherd</groupId>
             <artifactId>sm-crypto</artifactId>
             <version>0.3.2</version>
+        </dependency>
+
+        <!--        生成身份证号，手机号等-->
+        <dependency>
+            <groupId>com.github.binarywang</groupId>
+            <artifactId>java-generator</artifactId>
+            <version>1.1.0</version>
+<!--            <exclusions>-->
+<!--                <exclusion>-->
+<!--                    <groupId>com.google.guava</groupId>-->
+<!--                    <artifactId>guava</artifactId>-->
+<!--                </exclusion>-->
+<!--            </exclusions>-->
         </dependency>
     </dependencies>
 

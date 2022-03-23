@@ -9,6 +9,9 @@
 package io.renren.modules.app.controller;
 
 
+import cn.binarywang.tools.generator.ChineseIDCardNumberGenerator;
+import cn.binarywang.tools.generator.ChineseMobileNumberGenerator;
+import cn.binarywang.tools.generator.ChineseNameGenerator;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.IdcardUtil;
 import cn.hutool.crypto.SmUtil;
@@ -30,6 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 注册
@@ -46,41 +50,30 @@ public class AppRegisterController {
     @PostMapping("register")
     @ApiOperation("注册")
     public R register(@RequestBody RegisterForm form){
-        //表单校验
-        ValidatorUtils.validateEntity(form);
+        String userId=userService.register(form);
+        return R.ok().put("userId",userId);
+    }
 
-        //校验身份证号
-        if (!IdcardUtil.isValidCard(form.getIdCard())) {
-            throw new RRException("身份证号格式错误");
-        }
-        UserEntity user = new UserEntity();
-//        //生成16位用户名随机码
-//        String simpleUUID = IdUtil.simpleUUID();
-        //设置用户名
-        //username用户名查重
-        UserEntity userEntity = userService.queryByUsername(form.getUsername());
-        if (null==userEntity){
-            user.setUsername(form.getUsername());
-        }
-        //设置余额
-        user.setBalance(new BigDecimal(10000));
-        user.setRealName(form.getRealName());
-        //有工作
-        user.setNotHasJob(false);
-        //未逾期
-        user.setIsOverdue(false);
-        //没有失信
-        user.setIsDishonest(false);
-        //身份证号
-        user.setIdCard(form.getIdCard());
-        //电话号码
-        user.setTelephoneNum(form.getTelephoneNum());
-        //随机生成年龄：[15,115]岁
-        user.setAge(new Random().nextInt(101)+ 15);
-        //密码加密
-        user.setPassword(SmUtil.sm3(form.getPassword()));
-        userService.save(user);
+//    @PostMapping("/user/list")
 
-        return R.ok();
+    @PostMapping("test")
+    public void test(){
+        for (int i = 0; i <= 2000; i++) {
+            String idCard = ChineseIDCardNumberGenerator.getInstance().generate();
+            String generatedMobileNum = ChineseMobileNumberGenerator.getInstance()
+                    .generate();
+            String generatedName = ChineseNameGenerator.getInstance().generate();
+            RegisterForm registerForm = new RegisterForm();
+            registerForm.setRealName(generatedName);
+            registerForm.setTelephoneNum(generatedMobileNum);
+            registerForm.setIdCard(idCard);
+            registerForm.setPassword("123456");
+            registerForm.setUsername("user"+i);
+            userService.register(registerForm);
+            if (i%100==0){
+                try {
+                    TimeUnit.MILLISECONDS.sleep(1000);}catch (InterruptedException e){ e.printStackTrace();}
+            }
+        }
     }
 }

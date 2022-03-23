@@ -9,6 +9,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import javax.validation.constraints.NotNull;
+
 /**
  * 场次表
  * 
@@ -29,6 +31,7 @@ public class SessionEntity implements Serializable {
 	/**
 	 * 场次名称
 	 */
+	@NotNull
 	private String sessionName;
 	/**
 	 * 每日开始时间

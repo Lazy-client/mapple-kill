@@ -12,7 +12,7 @@ import com.mapple.common.utils.PageUtils;
 import com.mapple.common.utils.CommonResult;
 
 import javax.annotation.Resource;
-
+import javax.validation.Valid;
 
 
 /**
@@ -56,7 +56,7 @@ public class SessionController {
      */
     @PostMapping("/save")
     //@RequiresPermissions("coupon:session:save")
-    public CommonResult save(@RequestBody SessionEntity session){
+    public CommonResult save(@Valid @RequestBody SessionEntity session){
         String result = sessionService.saveSession(session);
         return CommonResult.ok().put("sessionId",result);
     }

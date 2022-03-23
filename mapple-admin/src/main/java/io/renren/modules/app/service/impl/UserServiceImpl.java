@@ -9,17 +9,23 @@
 package io.renren.modules.app.service.impl;
 
 
+import cn.hutool.core.util.IdcardUtil;
 import cn.hutool.crypto.SmUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import io.renren.common.exception.RRException;
 import io.renren.common.validator.Assert;
+import io.renren.common.validator.ValidatorUtils;
 import io.renren.modules.app.dao.UserDao;
 import io.renren.modules.app.entity.UserEntity;
 import io.renren.modules.app.form.LoginForm;
+import io.renren.modules.app.form.RegisterForm;
 import io.renren.modules.app.service.UserService;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.util.Random;
 
 
 @Service("userService")
@@ -42,5 +48,47 @@ public class UserServiceImpl extends ServiceImpl<UserDao, UserEntity> implements
 
 		//如果没错，则返回用户唯一id
 		return user.getUserId();
+	}
+
+	@Override
+	public String register(RegisterForm form) {
+		//表单校验
+		ValidatorUtils.validateEntity(form);
+
+		//校验身份证号
+		if (!IdcardUtil.isValidCard(form.getIdCard())) {
+			throw new RRException("身份证号格式错误");
+		}
+		UserEntity user = new UserEntity();
+//        //生成16位用户名随机码
+//        String simpleUUID = IdUtil.simpleUUID();
+		//设置用户名
+		//username用户名查重
+		UserEntity userEntity = queryByUsername(form.getUsername());
+		if (null==userEntity){
+			user.setUsername(form.getUsername());
+		}
+		//设置余额
+		user.setBalance(new BigDecimal(10000));
+		user.setRealName(form.getRealName());
+		//有工作
+		user.setNotHasJob(false);
+		//未逾期
+		user.setIsOverdue(false);
+		//没有失信
+		user.setIsDishonest(false);
+		//身份证号
+		user.setIdCard(form.getIdCard());
+		//电话号码
+		user.setTelephoneNum(form.getTelephoneNum());
+		//随机生成年龄：[15,115]岁
+		user.setAge(new Random().nextInt(101)+ 15);
+		//密码加密
+		user.setPassword(SmUtil.sm3(form.getPassword()));
+		if (save(user)) {
+			return user.getUserId();
+		}else {
+			throw new RRException("插入错误");
+		}
 	}
 }
