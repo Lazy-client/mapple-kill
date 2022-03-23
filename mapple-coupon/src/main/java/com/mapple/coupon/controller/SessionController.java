@@ -3,13 +3,12 @@ package com.mapple.coupon.controller;
 import java.util.Arrays;
 import java.util.Map;
 
-import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import com.mapple.coupon.entity.SessionEntity;
 import com.mapple.coupon.service.SessionService;
 import com.mapple.common.utils.PageUtils;
-import com.mapple.common.utils.CommonResult;
+import com.mapple.common.utils.result.CommonResult;
 
 import javax.annotation.Resource;
 

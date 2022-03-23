@@ -1,4 +1,4 @@
-package com.mapple.common.utils;
+package com.mapple.common.utils.jwt;
 
 /**
  * @author zsc

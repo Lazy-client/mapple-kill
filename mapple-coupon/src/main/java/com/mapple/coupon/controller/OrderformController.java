@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import com.mapple.coupon.entity.OrderformEntity;
 import com.mapple.coupon.service.OrderformService;
 import com.mapple.common.utils.PageUtils;
-import com.mapple.common.utils.CommonResult;
+import com.mapple.common.utils.result.CommonResult;
 
 import javax.annotation.Resource;
 

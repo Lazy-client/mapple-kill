@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import com.mapple.coupon.entity.ProductSessionEntity;
 import com.mapple.coupon.service.ProductSessionService;
 import com.mapple.common.utils.PageUtils;
-import com.mapple.common.utils.CommonResult;
+import com.mapple.common.utils.result.CommonResult;
 
 import javax.annotation.Resource;
 import javax.validation.Valid;

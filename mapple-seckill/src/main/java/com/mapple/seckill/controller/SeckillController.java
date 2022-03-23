@@ -1,6 +1,7 @@
 package com.mapple.seckill.controller;
 
-import com.mapple.common.utils.CommonResult;
+import com.mapple.common.utils.redis.cons.Key;
+import com.mapple.common.utils.result.CommonResult;
 import com.mapple.common.vo.Session;
 import com.mapple.common.vo.Sku;
 import com.mapple.common.utils.redis.cons.RedisConstants;
@@ -88,7 +89,7 @@ public class SeckillController {
     @ApiOperation(value = "获取redis的key", notes = "这只是个测试接口，不是业务")
     @GetMapping("/redisKey")
     public CommonResult redisKey() {
-        RMapCache<String, String> map = redissonClient.getMapCache("JWT_WHITE_LIST");
+        RMapCache<String, String> map = redissonClient.getMapCache(Key.JWT_WHITE_LIST.name());
         map.put("hello","hello",30, TimeUnit.SECONDS);
         map.put("ok","你好");
         String hello = map.get("hello");

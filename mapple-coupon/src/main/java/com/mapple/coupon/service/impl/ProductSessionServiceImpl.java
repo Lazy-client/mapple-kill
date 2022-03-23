@@ -1,14 +1,11 @@
 package com.mapple.coupon.service.impl;
-import java.util.Date;
 
-import java.math.BigDecimal;
 import java.util.*;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.mapple.common.exception.RRException;
-import com.mapple.common.utils.RedisKeyUtils;
-import com.mapple.common.utils.RedisUtils;
+import com.mapple.common.utils.redis.cons.RedisKeyUtils;
 import com.mapple.coupon.dao.ProductDao;
 import com.mapple.coupon.dao.SessionDao;
 import com.mapple.coupon.entity.ProductEntity;

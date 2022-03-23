@@ -2,15 +2,12 @@ package com.mapple.coupon.service.impl;
 
 import cn.hutool.core.date.DateUtil;
 import com.mapple.common.exception.RRException;
-import com.mapple.common.utils.RedisKeyUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.time.DateUtils;
+import com.mapple.common.utils.redis.cons.RedisKeyUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;

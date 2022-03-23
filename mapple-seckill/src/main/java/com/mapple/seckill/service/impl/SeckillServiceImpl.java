@@ -2,8 +2,8 @@ package com.mapple.seckill.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.mapple.common.utils.CryptogramUtil;
-import com.mapple.common.utils.JwtUtils;
-import com.mapple.common.utils.RedisKeyUtils;
+import com.mapple.common.utils.jwt.JwtUtils;
+import com.mapple.common.utils.redis.cons.RedisKeyUtils;
 import com.mapple.common.vo.Session;
 import com.mapple.common.vo.Sku;
 import com.mapple.seckill.service.SecKillService;
