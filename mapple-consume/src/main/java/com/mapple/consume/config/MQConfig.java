@@ -45,6 +45,10 @@ public class MQConfig {
     @Resource
     private MkOrderService orderService;
 
+    /**
+     * 实现批量处理，消费对应主题和Tag的消息，然后调用批量处理方法
+     * @return  返回DefaultMQPushConsumer，交给Spring去管理
+     */
     @Bean(name = "CustomPushConsumer")
     public DefaultMQPushConsumer customPushConsumer() throws MQClientException {
         log.info(consumerGroup + "*******" + nameServer + "*******" + messageTopic);
