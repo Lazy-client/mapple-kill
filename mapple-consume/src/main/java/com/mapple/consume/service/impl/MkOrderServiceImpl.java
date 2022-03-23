@@ -1,13 +1,10 @@
 package com.mapple.consume.service.impl;
 
-import com.alibaba.fastjson.JSON;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.mapple.common.utils.CommonResult;
 import com.mapple.consume.entity.MkOrder;
-import com.mapple.consume.entity.dto.MkOrderResponse;
 import com.mapple.consume.mapper.MkOrderMapper;
-import com.mapple.consume.message.*;
 import com.mapple.consume.service.MkOrderService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.client.exception.MQBrokerException;
 import org.apache.rocketmq.client.exception.MQClientException;
@@ -31,10 +28,11 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> implements MkOrderService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MkOrderServiceImpl.class);
+    @Autowired
+    private RocketMQTemplate rocketMQTemplate;
 
-    @Resource
-    MkOrderProducer orderProducer;
+    @Value("${mq.order.topic}")
+    private String topic;
 
     @Value("${mq.order.tag}")
     private String tag;
@@ -87,7 +85,7 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
         // "1s 5s 10s 30s 1m 2m 3m 4m 5m 6m 7m 8m 9m 10m 20m 30m 1h 2h"
         // 设置消息延迟等级,延迟5秒发送
         message.setDelayTimeLevel(2);
-         rocketMQTemplate.getProducer().send(message);
+        rocketMQTemplate.getProducer().send(message);
     }
 
 
