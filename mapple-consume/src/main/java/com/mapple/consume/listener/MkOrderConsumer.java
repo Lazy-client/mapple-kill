@@ -1,16 +1,13 @@
 package com.mapple.consume.listener;
 
-import com.alibaba.fastjson.JSON;
-import com.mapple.consume.entity.MkOrder;
-import com.mapple.consume.exception.ConsumeException;
 import com.mapple.consume.service.MkOrderService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.common.message.MessageExt;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.springframework.stereotype.Component;
+
 import javax.annotation.Resource;
-import java.nio.charset.StandardCharsets;
 
 @RocketMQMessageListener(
         topic = "MkOrder-Topic",
