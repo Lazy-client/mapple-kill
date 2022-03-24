@@ -16,5 +16,7 @@ import java.util.Map;
 public interface ProductService extends IService<ProductEntity> {
 
     PageUtils queryPage(Map<String, Object> params);
+
+    void saveProduct(ProductEntity product);
 }
 

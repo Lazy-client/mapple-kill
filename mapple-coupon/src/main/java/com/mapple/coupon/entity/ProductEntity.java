@@ -44,18 +44,39 @@ public class ProductEntity implements Serializable {
 	@NotNull
 	@ApiModelProperty("产品介绍描述")
 	private String description;
-	/**
-	 * 产品默认图片地址
-	 */
-	@NotNull
-	@ApiModelProperty("产品默认图片地址")
-	private String defaultImg;
-	/**
-	 * 标题
-	 */
+//	/**
+//	 * 产品默认图片地址
+//	 */
+//	@NotNull
+//	@ApiModelProperty("产品默认图片地址")
+//	private String defaultImg;
+
 	@NotNull
 	@ApiModelProperty("标题")
 	private String title;
+	/**
+	 * 年利率
+	 */
+	@NotNull
+	@ApiModelProperty("年利率")
+	private BigDecimal interestRate;
+
+	@NotNull
+	@ApiModelProperty("存款时间 比如存5年2个月 格式为：5-2")
+	private String depositTime;
+
+	@NotNull
+	@ApiModelProperty("风险等级 低：1 中：2 高： 3")
+	private Integer riskLevel;
+
+	@NotNull
+	@ApiModelProperty("是否能提前取钱 1表示能提前 0表示不能")
+	private Boolean cashAdvance;
+
+	@NotNull
+	@ApiModelProperty("是否能自动赎回 1表示自动赎回 0表示不自动")
+	private Boolean autoRedemption;
+
 	/**
 	 * 逻辑删除 1（true）已删除， 0（false）未删除
 	 */

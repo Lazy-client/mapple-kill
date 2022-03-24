@@ -3,6 +3,7 @@ package com.mapple.coupon.controller;
 import java.util.Arrays;
 import java.util.Map;
 
+import com.mapple.common.exception.RRException;
 import org.springframework.web.bind.annotation.*;
 
 import com.mapple.coupon.entity.ProductEntity;
@@ -11,7 +12,7 @@ import com.mapple.common.utils.PageUtils;
 import com.mapple.common.utils.result.CommonResult;
 
 import javax.annotation.Resource;
-
+import javax.validation.Valid;
 
 
 /**
@@ -55,8 +56,8 @@ public class ProductController {
      */
     @PostMapping("/save")
     //@RequiresPermissions("coupon:product:save")
-    public CommonResult save(@RequestBody ProductEntity product){
-		productService.save(product);
+    public CommonResult save(@Valid @RequestBody ProductEntity product){
+        productService.saveProduct(product);
         return CommonResult.ok();
     }
 

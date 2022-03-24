@@ -231,9 +231,6 @@ public class ProductSessionServiceImpl extends ServiceImpl<ProductSessionDao, Pr
             if (StringUtils.isEmpty(productEntity.getTitle())) {
                 throw new RRException("产品标题为空");
             }
-            if (StringUtils.isEmpty(productEntity.getDefaultImg())) {
-                throw new RRException("产品图片为空");
-            }
             BeanUtils.copyProperties(productEntity, product);
             String productId;
             ProductEntity productEntity_fromdb = productDao.selectOne(new QueryWrapper<ProductEntity>().eq("product_name", product.getProductName()));
