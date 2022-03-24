@@ -1,12 +1,13 @@
 package com.mapple.seckill.controller;
 
-import com.mapple.common.utils.redis.cons.Key;
+import com.mapple.common.utils.redis.cons.RedisConstants;
+import com.mapple.common.utils.redis.cons.RedisKeyUtils;
 import com.mapple.common.utils.result.CommonResult;
 import com.mapple.common.vo.Session;
 import com.mapple.common.vo.Sku;
-import com.mapple.common.utils.redis.cons.RedisConstants;
 import com.mapple.seckill.service.SecKillService;
 import io.swagger.annotations.*;
+import org.redisson.api.RMap;
 import org.redisson.api.RMapCache;
 import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
@@ -21,7 +22,6 @@ import javax.annotation.Resource;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author zsc
@@ -37,7 +37,7 @@ public class SeckillController {
     private SecKillService secKillService;
 
     @Resource
-    private HashOperations<String, String, Object> hashOperations;
+    private HashOperations<String, String, String> hashOperations;
 
     @ApiOperation(value = "点击秒杀", notes = "随机码一定要传")
     @ApiImplicitParams(value = {
@@ -89,17 +89,14 @@ public class SeckillController {
     @ApiOperation(value = "获取redis的key", notes = "这只是个测试接口，不是业务")
     @GetMapping("/redisKey")
     public CommonResult redisKey() {
-        RMapCache<String, String> map = redissonClient.getMapCache(Key.JWT_WHITE_LIST.name());
-        map.put("hello","hello",30, TimeUnit.SECONDS);
-        map.put("ok","你好");
-        String hello = map.get("hello");
-        String ok = map.get("ok");
-        logger.info(hello);
-        logger.info(ok);
-
+        RMapCache<String, String> mapCache = redissonClient.getMapCache(RedisKeyUtils.SECKILL_USER_PREFIX);
+        RMap<String, String> rMap = redissonClient.getMap(RedisKeyUtils.SECKILL_USER_PREFIX);
+        String s = rMap.get("1503572720200978433-a920b9cd31bc40bf98ba12c7d8d0bb66");
+        logger.info(s);
+        rMap.fastPut("55555", "666666");
+        System.out.println(hashOperations.get(RedisKeyUtils.SECKILL_USER_PREFIX, "55555"));
         return Objects.requireNonNull(CommonResult
                 .ok()
-                .put("redisKey", redisConstants.getPort()))
-                .put("redisHost", hashOperations.hasKey("seckill:upload:skus:", "场次Id_c"));
+        );
     }
 }

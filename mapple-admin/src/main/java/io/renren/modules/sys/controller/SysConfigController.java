@@ -36,7 +36,7 @@ public class SysConfigController extends AbstractController {
 	 * 所有配置列表
 	 */
 	@GetMapping("/list")
-	@RequiresPermissions("sys:com.mapper.gateway.config:list")
+//	@RequiresPermissions("sys:com.mapper.gateway.config:list")
 	public R list(@RequestParam Map<String, Object> params){
 		PageUtils page = sysConfigService.queryPage(params);
 
