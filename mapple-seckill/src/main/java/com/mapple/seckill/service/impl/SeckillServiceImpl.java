@@ -2,8 +2,8 @@ package com.mapple.seckill.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.mapple.common.utils.CryptogramUtil;
-import com.mapple.common.utils.JwtUtils;
-import com.mapple.common.utils.RedisKeyUtils;
+import com.mapple.common.utils.jwt.JwtUtils;
+import com.mapple.common.utils.redis.cons.RedisKeyUtils;
 import com.mapple.common.vo.Session;
 import com.mapple.common.vo.Sku;
 import com.mapple.seckill.service.SecKillService;
@@ -38,13 +38,13 @@ public class SeckillServiceImpl implements SecKillService {
     public String kill(String key, String id, String token) throws InterruptedException {
         String jwt = CryptogramUtil.doDecrypt(token);
         String userId = JwtUtils.getUserId(jwt);
-        if (!StringUtils.isEmpty(userId)){
+        if (!StringUtils.isEmpty(userId)) {
             logger.info(userId);
             //id ====> sessionId-productId
             long currentTime = new Date().getTime();
             //校验场次的sku是否存在
             String skuJason = hashOperations.get(RedisKeyUtils.SESSIONS_PREFIX, id);
-            if (!StringUtils.isEmpty(skuJason)){
+            if (!StringUtils.isEmpty(skuJason)) {
                 Sku sku = JSON.parseObject(skuJason, Sku.class);
                 if (currentTime >= sku.getStartTime().getTime() && currentTime < sku.getEndTime().getTime()) {//校验时间
                     //校验用户是有参与过秒杀

@@ -1,7 +1,7 @@
 package com.mapple.common.exception;
 
 
-import com.mapple.common.utils.CommonResult;
+import com.mapple.common.utils.result.CommonResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DuplicateKeyException;

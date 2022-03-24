@@ -1,4 +1,4 @@
-package com.mapple.common.utils;
+package com.mapple.gateway.utils;
 
 /**
  * @author zsc

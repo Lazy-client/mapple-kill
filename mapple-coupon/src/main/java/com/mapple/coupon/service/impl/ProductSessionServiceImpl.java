@@ -1,24 +1,25 @@
 package com.mapple.coupon.service.impl;
 
-import java.lang.reflect.Array;
-import java.util.Date;
-
-import java.math.BigDecimal;
-import java.util.*;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.mapple.common.exception.RRException;
-import com.mapple.common.utils.RedisKeyUtils;
-import com.mapple.common.utils.RedisUtils;
+import com.mapple.common.utils.PageUtils;
+import com.mapple.common.utils.Query;
+import com.mapple.common.utils.redis.cons.RedisKeyUtils;
 import com.mapple.coupon.dao.ProductDao;
+import com.mapple.coupon.dao.ProductSessionDao;
 import com.mapple.coupon.dao.SessionDao;
 import com.mapple.coupon.entity.ProductEntity;
+import com.mapple.coupon.entity.ProductSessionEntity;
 import com.mapple.coupon.entity.SessionEntity;
 import com.mapple.coupon.entity.vo.productSessionVo;
 import com.mapple.coupon.entity.vo.productSessionVo_Skus;
 import com.mapple.coupon.entity.vo.productSessionVo_new;
 import com.mapple.coupon.entity.vo.productVo_new;
+import com.mapple.coupon.service.ProductSessionService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.BoundHashOperations;
@@ -26,20 +27,14 @@ import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
-
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.mapple.common.utils.PageUtils;
-import com.mapple.common.utils.Query;
-
-import com.mapple.coupon.dao.ProductSessionDao;
-import com.mapple.coupon.entity.ProductSessionEntity;
-import com.mapple.coupon.service.ProductSessionService;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 
 @Service("productSessionService")
