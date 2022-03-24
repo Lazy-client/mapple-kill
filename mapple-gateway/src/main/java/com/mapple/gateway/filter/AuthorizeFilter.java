@@ -1,5 +1,7 @@
 package com.mapple.gateway.filter;
 
+import com.mapple.gateway.utils.CryptogramUtil;
+import com.mapple.gateway.utils.JwtUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
@@ -44,15 +46,16 @@ public class AuthorizeFilter implements GlobalFilter, Ordered {
         String token = headers.getFirst(AUTHORIZE_TOKEN);
 
         //6. 判断请求头中是否有令牌
-        if (StringUtils.isEmpty(token)) {
-
-            //7. 响应中放入返回的状态吗, 没有权限访问
-            //response.setStatusCode(HttpStatus.UNAUTHORIZED);
-            //8. 返回
-            //return response.setComplete();
+        if (!StringUtils.isEmpty(token)) {
+            String jwt = CryptogramUtil.doDecrypt(token);
+            String userId = JwtUtils.getUserId(jwt);
+            if (!StringUtils.isEmpty(userId))
+                return chain.filter(exchange);
         }
-
-        //12. 放行
+        //7. 响应中放入返回的状态吗, 没有权限访问
+        //response.setStatusCode(HttpStatus.UNAUTHORIZED);
+        //8. 返回
+        //return response.setComplete();
         return chain.filter(exchange);
     }
 

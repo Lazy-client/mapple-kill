@@ -6,8 +6,9 @@
  * 版权所有，侵权必究！
  */
 
-package com.mapple.common.utils;
+package com.mapple.common.utils.jwt;
 
+import com.mapple.common.utils.CryptogramUtil;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;

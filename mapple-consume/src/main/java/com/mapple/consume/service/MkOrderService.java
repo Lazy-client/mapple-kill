@@ -1,6 +1,6 @@
 package com.mapple.consume.service;
 
-import com.mapple.common.utils.CommonResult;
+import com.mapple.common.utils.result.CommonResult;
 import com.mapple.consume.entity.MkOrder;
 import com.baomidou.mybatisplus.extension.service.IService;
 

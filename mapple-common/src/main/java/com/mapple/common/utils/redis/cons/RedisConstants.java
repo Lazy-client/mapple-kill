@@ -1,7 +1,6 @@
-package com.mapple.seckill.cons;
+package com.mapple.common.utils.redis.cons;
 
 import lombok.Data;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Component;
@@ -23,11 +22,6 @@ public class RedisConstants {
     private String password;
     private Integer database;
 
-    @Value("${nok}")
-    public String nok;
-    @Value("${env}")
-    public String env;
-
     public static String HOST;
     public static String PORT;
     public static String ENV;
@@ -40,6 +34,5 @@ public class RedisConstants {
         PORT = port;
         DATABASE = database;
         PASSWORD = password;
-        ENV = env;
     }
 }

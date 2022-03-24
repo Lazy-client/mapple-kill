@@ -6,7 +6,7 @@
  * 版权所有，侵权必究！
  */
 
-package com.mapple.common.utils;
+package com.mapple.common.utils.redis;
 
 import com.google.gson.Gson;
 import org.springframework.data.redis.core.*;
