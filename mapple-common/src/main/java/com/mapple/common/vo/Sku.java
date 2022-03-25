@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
@@ -19,13 +20,32 @@ import java.util.Date;
 @NoArgsConstructor
 public class Sku implements Serializable {
     @ApiModelProperty("场次Id")
-    private String sessionId;
+    private String id;
     /**
      * 场次名称
      */
     @ApiModelProperty("场次名称")
     private String sessionName;
 
+    @NotNull
+    @ApiModelProperty("年利率")
+    private BigDecimal interestRate;
+
+    @NotNull
+    @ApiModelProperty("存款时间 比如存5年2个月 格式为：5-2")
+    private String depositTime;
+
+    @NotNull
+    @ApiModelProperty("风险等级 低：1 中：2 高： 3")
+    private Integer riskLevel;
+
+    @NotNull
+    @ApiModelProperty("是否能提前取钱 1表示能提前 0表示不能")
+    private Boolean cashAdvance;
+
+    @NotNull
+    @ApiModelProperty("是否能自动赎回 1表示自动赎回 0表示不自动")
+    private Boolean autoRedemption;
     /**
      * 产品对象
      */

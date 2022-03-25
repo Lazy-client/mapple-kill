@@ -1,21 +1,17 @@
 package com.mapple.coupon.controller;
 
-import java.util.Arrays;
-import java.util.Map;
-
-import com.mapple.common.exception.RRException;
-import com.mapple.coupon.entity.vo.productSessionVo_new;
+import com.mapple.common.utils.PageUtils;
+import com.mapple.common.utils.result.CommonResult;
+import com.mapple.coupon.entity.ProductEntity;
+import com.mapple.coupon.service.ProductService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.web.bind.annotation.*;
 
-import com.mapple.coupon.entity.ProductEntity;
-import com.mapple.coupon.service.ProductService;
-import com.mapple.common.utils.PageUtils;
-import com.mapple.common.utils.result.CommonResult;
-
 import javax.annotation.Resource;
 import javax.validation.Valid;
+import java.util.Arrays;
+import java.util.Map;
 
 
 /**

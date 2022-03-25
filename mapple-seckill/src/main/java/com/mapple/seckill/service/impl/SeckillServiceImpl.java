@@ -80,12 +80,18 @@ public class SeckillServiceImpl implements SecKillService {
         String[] times = json.split("-");
         List<Sku> skus = JSON.parseArray(products, Sku.class);
         //秒杀期间的场次
-        if (time >= Long.parseLong(times[0], 19) && time < Long.parseLong(times[1], 19)) {
+        if (time >= Long.parseLong(times[0]) && time < Long.parseLong(times[1])) {
             return skus;
         }
         //掩盖随机码
-        assert skus != null;
-        skus.forEach(sku -> sku.setRandomCode(null));
+        else if (time < Long.parseLong(times[0])) {
+            assert skus != null;
+            skus.forEach(sku -> {
+                sku.setRandomCode(null);
+                sku.setId(sessionId);
+            });
+        }
+
         return skus;
     }
 
@@ -111,7 +117,7 @@ public class SeckillServiceImpl implements SecKillService {
                         String skus = hashOperations.get(RedisKeyUtils.SKUS_PREFIX, sessionId);
                         session.setSkus(skus);
                         sessionList.add(session);
-                    } else {
+                    } else if (currentTime < Long.parseLong(sToEnd[0])) {
                         sessionListNotStart.add(session);
                     }
                 }
