@@ -72,12 +72,6 @@ public class Sku implements Serializable {
     private String description;
 
     /**
-     * 产品默认图片地址
-     */
-    @ApiModelProperty("产品默认图片地址")
-    private String defaultImg;
-
-    /**
      * 标题
      */
     @ApiModelProperty("标题")

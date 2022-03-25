@@ -2,6 +2,7 @@ package io.renren.modules.job.task;
 
 import com.alibaba.fastjson.JSON;
 import io.renren.common.utils.RedisKeyUtils;
+import io.renren.common.utils.RedisUtils;
 import io.renren.modules.job.task.vo.Sku;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +26,8 @@ public class ClearFinishedSession implements ITask {
 
     @Resource
     private HashOperations<String, String, String> hashOperations;
+    @Resource
+    private RedisUtils redisUtils;
 
     @Override
     public void run(String params) {
@@ -41,6 +44,16 @@ public class ClearFinishedSession implements ITask {
                             List<Sku> list = JSON.parseArray(hashOperations.get(RedisKeyUtils.SKUS_PREFIX, sessionId), Sku.class);
                             assert list != null;
                             list.forEach((sku -> {
+                                String randomCode = sku.getRandomCode();
+                                //
+                                int stock = Integer.parseInt(redisUtils.get(RedisKeyUtils.STOCK_PREFIX + randomCode));
+                                if (stock != 0) {
+                                    // todo
+                                    // 归还session 冷场的库存
+                                    // 设置session 为冷场
+
+                                }
+                                redisUtils.delete(RedisKeyUtils.STOCK_PREFIX + randomCode);
                                 //删除 sku
                                 hashOperations.delete(RedisKeyUtils.SKU_PREFIX, sessionId + "-" + sku.getProductId());
                             }));
