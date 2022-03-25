@@ -39,10 +39,11 @@ public class ProductServiceImpl extends ServiceImpl<ProductDao, ProductEntity> i
         String[] strs = depositTime.split("-");
         int year = Integer.parseInt(strs[0]);
         int month = Integer.parseInt(strs[1]);
-        if (year <= 0 || year >= 100 || month < 0 || month >= 12) {
+        if ((year==0&&month>0)||(year>0&&year<100&&month==0)){
+            save(product);
+        }else {
             throw new RRException("存期格式错误");
         }
-        save(product);
     }
 
 }
