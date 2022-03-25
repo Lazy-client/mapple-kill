@@ -31,26 +31,30 @@ public class ClearFinishedSession implements ITask {
         long currentTime = new Date().getTime();
         logger.info("clearFinishedSession 定时任务正在执行，参数为：{}", params);
         Map<String, String> entries = hashOperations.entries(RedisKeyUtils.SESSIONS_PREFIX);
-        entries.forEach(
-                (sessionId, v) -> {
-                    String[] times = v.split("-");
-                    //过期的场次
-                    if (currentTime >= Long.parseLong(times[1])) {
-                        //清理缓存
-                        List<Sku> list = JSON.parseArray(hashOperations.get(RedisKeyUtils.SKUS_PREFIX, sessionId), Sku.class);
-                        assert list != null;
-                        list.forEach((sku -> {
-                            //删除 sku
-                            hashOperations.delete(RedisKeyUtils.SKU_PREFIX,sessionId + "-" + sku.getProductId());
-                        }));
+        try {
+            entries.forEach(
+                    (sessionId, v) -> {
+                        String[] times = v.split("-");
+                        //过期的场次
+                        if (currentTime >= Long.parseLong(times[1])) {
+                            //清理缓存
+                            List<Sku> list = JSON.parseArray(hashOperations.get(RedisKeyUtils.SKUS_PREFIX, sessionId), Sku.class);
+                            assert list != null;
+                            list.forEach((sku -> {
+                                //删除 sku
+                                hashOperations.delete(RedisKeyUtils.SKU_PREFIX, sessionId + "-" + sku.getProductId());
+                            }));
+                        }
+                        //删除场次关联的skus
+                        hashOperations.delete(RedisKeyUtils.SKUS_PREFIX, sessionId);
+                        //删除session
+                        hashOperations.delete(RedisKeyUtils.SESSIONS_PREFIX, sessionId);
                     }
-                    //删除场次关联的skus
-                    hashOperations.delete(RedisKeyUtils.SKUS_PREFIX, sessionId);
-                    //删除session
-                    hashOperations.delete(RedisKeyUtils.SESSIONS_PREFIX, sessionId);
-                }
-        );
-
-        logger.info("success-{}", params);
+            );
+            logger.info("success-{}", params);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.error("error-{}", params);
+        }
     }
 }
