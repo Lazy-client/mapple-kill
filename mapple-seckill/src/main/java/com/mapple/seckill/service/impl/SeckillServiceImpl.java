@@ -78,11 +78,13 @@ public class SeckillServiceImpl implements SecKillService {
         String[] times = json.split("-");
         List<Sku> skus = JSON.parseArray(products, Sku.class);
         //秒杀期间的场次
+        logger.info("skus--{}", skus);
         if (time >= Long.parseLong(times[0]) && time < Long.parseLong(times[1])) {
             return skus;
         }
         //掩盖随机码
         else if (time < Long.parseLong(times[0])) {
+            logger.info("进入掩盖随机码");
             assert skus != null;
             skus.forEach(sku -> {
                 sku.setRandomCode(null);
