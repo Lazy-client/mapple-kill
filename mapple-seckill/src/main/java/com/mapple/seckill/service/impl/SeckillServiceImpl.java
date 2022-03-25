@@ -78,6 +78,7 @@ public class SeckillServiceImpl implements SecKillService {
         String[] times = json.split("-");
         List<Sku> skus = JSON.parseArray(products, Sku.class);
         //秒杀期间的场次
+        logger.info("products ---->{}", products);
         logger.info("skus--{}", skus);
         if (time >= Long.parseLong(times[0]) && time < Long.parseLong(times[1])) {
             return skus;
