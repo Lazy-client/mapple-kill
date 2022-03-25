@@ -41,7 +41,7 @@ public class SeckillServiceImpl implements SecKillService {
         if (!StringUtils.isEmpty(userId)) {
             logger.info(userId);
             //id ====> sessionId-productId
-            long currentTime = new Date().getTime();
+            long currentTime = System.currentTimeMillis();
             //校验场次的sku是否存在
             String skuJason = hashOperations.get(RedisKeyUtils.SESSIONS_PREFIX, id);
             if (!StringUtils.isEmpty(skuJason)) {
@@ -56,8 +56,6 @@ public class SeckillServiceImpl implements SecKillService {
                         if (acquire) {//库存与扣成功
                             hashOperations.put(RedisKeyUtils.SECKILL_USER_PREFIX, userId + "-" + key, "1");
                             //todo 生成订单发消息
-
-
                             return "ok";
                         }
                     }
@@ -69,7 +67,7 @@ public class SeckillServiceImpl implements SecKillService {
 
     @Override
     public List<Sku> search(String sessionId) {
-        long time = new Date().getTime();
+        long time = System.currentTimeMillis();
         //开始时间-结束时间
         String json = hashOperations.get(RedisKeyUtils.SESSIONS_PREFIX, sessionId);
         if (StringUtils.isEmpty(json)) {
@@ -97,7 +95,7 @@ public class SeckillServiceImpl implements SecKillService {
 
     @Override
     public Map<String, List<Session>> searchSessions() {
-        long currentTime = new Date().getTime();
+        long currentTime = System.currentTimeMillis();
         Map<String, String> sessions = hashOperations.entries(RedisKeyUtils.SESSIONS_PREFIX);
         Set<String> sessionIds = sessions.keySet();
         List<Session> sessionList = new ArrayList<>();
