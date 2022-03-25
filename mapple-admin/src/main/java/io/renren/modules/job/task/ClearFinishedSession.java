@@ -32,6 +32,7 @@ public class ClearFinishedSession implements ITask {
     @Override
     public void run(String params) {
         long currentTime = new Date().getTime();
+        logger.info("当前时间戳{}", currentTime);
         logger.info("clearFinishedSession 定时任务正在执行，参数为：{}", params);
         Map<String, String> entries = hashOperations.entries(RedisKeyUtils.SESSIONS_PREFIX);
         try {
