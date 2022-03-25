@@ -41,8 +41,7 @@ public class ClearFinishedSession implements ITask {
                         assert list != null;
                         list.forEach((sku -> {
                             //删除 sku
-                            hashOperations.delete(sessionId + "-" + sku.getProductId());
-
+                            hashOperations.delete(RedisKeyUtils.SKU_PREFIX,sessionId + "-" + sku.getProductId());
                         }));
                     }
                     //删除场次关联的skus
