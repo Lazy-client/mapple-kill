@@ -24,10 +24,11 @@ public class PageAspect {
     @Around("pagePointCut()")
     public Object around(ProceedingJoinPoint point) throws Throwable {
         Object[] args = point.getArgs();
-        HashMap<String, Object> arg = (HashMap<String, Object>) args[0];
-        arg.put("limit", "10");
-        //执行方法
-
+        if (args != null && args.length > 0) {
+            HashMap<String, Object> arg = (HashMap<String, Object>) args[0];
+            arg.put("limit", "10");
+            //执行方法
+        }
         return point.proceed();
     }
 }
