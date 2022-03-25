@@ -4,6 +4,9 @@ import java.util.Arrays;
 import java.util.Map;
 
 import com.mapple.common.exception.RRException;
+import com.mapple.coupon.entity.vo.productSessionVo_new;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.web.bind.annotation.*;
 
 import com.mapple.coupon.entity.ProductEntity;
@@ -52,11 +55,13 @@ public class ProductController {
     }
 
     /**
-     * 保存
+     * 保存产品信息
      */
+    @ApiOperation(value = "添加产品信息")
     @PostMapping("/save")
-    //@RequiresPermissions("coupon:product:save")
-    public CommonResult save(@Valid @RequestBody ProductEntity product){
+    public CommonResult save(@Valid @ApiParam(name = "productSessionVo_new",
+            value = "请传入productEntity中的信息，注意产品存期的格式",
+            required = true)@RequestBody ProductEntity product){
         productService.saveProduct(product);
         return CommonResult.ok();
     }
