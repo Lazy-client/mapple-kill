@@ -31,6 +31,10 @@ public class ProductServiceImpl extends ServiceImpl<ProductDao, ProductEntity> i
 
     @Override
     public void saveProduct(ProductEntity product) {
+        Integer riskLevel = product.getRiskLevel();
+        if (riskLevel!=1&&riskLevel!=2&&riskLevel!=3){
+            throw new RRException("风险等级格式错误");
+        }
         String depositTime = product.getDepositTime();
         String pattern = "\\d{1,2}-\\d{1,2}";
         if (!depositTime.matches(pattern)) {
