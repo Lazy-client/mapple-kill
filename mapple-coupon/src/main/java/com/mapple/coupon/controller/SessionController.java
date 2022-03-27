@@ -1,17 +1,18 @@
 package com.mapple.coupon.controller;
 
-import java.util.Arrays;
-import java.util.Map;
+import com.mapple.common.utils.PageUtils;
+import com.mapple.common.utils.result.CommonResult;
+import com.mapple.coupon.entity.SessionEntity;
+import com.mapple.coupon.service.SessionService;
 
 import org.springframework.web.bind.annotation.*;
 
-import com.mapple.coupon.entity.SessionEntity;
-import com.mapple.coupon.service.SessionService;
-import com.mapple.common.utils.PageUtils;
-import com.mapple.common.utils.result.CommonResult;
-
 import javax.annotation.Resource;
 import javax.validation.Valid;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -77,8 +78,8 @@ public class SessionController {
     @PostMapping("/delete")
     //@RequiresPermissions("coupon:session:delete")
     public CommonResult delete(@RequestBody String[] ids){
-		sessionService.removeByIds(Arrays.asList(ids));
-
+        List<String> list = Arrays.asList(ids);
+        sessionService.delete(list);
         return CommonResult.ok();
     }
 

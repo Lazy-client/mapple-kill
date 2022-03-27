@@ -1,25 +1,30 @@
 package com.mapple.coupon.service.impl;
 
 import cn.hutool.core.date.DateUtil;
-import com.mapple.common.exception.RRException;
-import com.mapple.common.utils.redis.cons.RedisKeyUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.BoundHashOperations;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.stereotype.Service;
-
-import java.util.Date;
-import java.util.Map;
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.mapple.common.exception.RRException;
 import com.mapple.common.utils.PageUtils;
 import com.mapple.common.utils.Query;
-
+import com.mapple.common.utils.redis.RedisUtils;
+import com.mapple.common.utils.redis.cons.RedisKeyUtils;
+import com.mapple.common.vo.Sku;
 import com.mapple.coupon.dao.SessionDao;
 import com.mapple.coupon.entity.SessionEntity;
 import com.mapple.coupon.service.SessionService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.BoundHashOperations;
+import org.springframework.data.redis.core.HashOperations;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.Resource;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 
 @Service("sessionService")
@@ -31,11 +36,14 @@ public class SessionServiceImpl extends ServiceImpl<SessionDao, SessionEntity> i
     @Autowired
     public RedisTemplate<String, Object> redisTemplate;
 
+    @Resource
+    public HashOperations<String, String, String> hashOperations;
+
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
         IPage<SessionEntity> page = this.page(
                 new Query<SessionEntity>().getPage(params),
-                new QueryWrapper<SessionEntity>()
+                new QueryWrapper<>()
         );
 
         return new PageUtils(page);
@@ -43,6 +51,7 @@ public class SessionServiceImpl extends ServiceImpl<SessionDao, SessionEntity> i
 
     /**
      * 存储场次信息
+     *
      * @param session
      * @return
      */
@@ -58,32 +67,63 @@ public class SessionServiceImpl extends ServiceImpl<SessionDao, SessionEntity> i
         Date nowTime = new Date();
 
         //当前时间在开始时间之前，且开始时间在结束时间之前，时间设置没问题
-        if (nowTime.compareTo(startTime)<0&&startTime.compareTo(endTime)<0){
+        if (nowTime.compareTo(startTime) < 0 && startTime.compareTo(endTime) < 0) {
             //插入mysql成功
             Integer count = sessionDao.selectCount(new QueryWrapper<SessionEntity>().eq("start_time", startTime_str).eq("end_time", endTime_str));
-            if (count==0){
+            if (count == 0) {
                 int insertSession = sessionDao.insert(session);
-                if (insertSession==1){
+                if (insertSession == 1) {
                     //获取sessionId
                     String sessionId = session.getId();
                     //不存在该session时
                     BoundHashOperations<String, Object, Object> operations = redisTemplate.boundHashOps(RedisKeyUtils.SESSIONS_PREFIX);
-                    if (!operations.hasKey(sessionId)){
+                    if (!operations.hasKey(sessionId)) {
                         //把场次放入redis中
                         try {
-                            operations.put(sessionId,startTime_long+"-"+endTime_long+"-"+session.getSessionName());
+                            operations.put(sessionId, startTime_long + "-" + endTime_long + "-" + session.getSessionName());
                             return sessionId;
-                        }catch (Exception e){
+                        } catch (Exception e) {
                             throw new RRException("数据插入错误");
                         }
                     }
                 }
-            }
-            else {
+            } else {
                 throw new RRException("场次重复");
             }
         }
         throw new RRException("时间设置有误");
     }
 
+    @Resource
+    RedisUtils redisUtils;
+
+    @Override
+    @Transactional
+    public void delete(List<String> ids) {
+        removeByIds(ids);
+        long currentTime = System.currentTimeMillis();
+        List<String> strings = hashOperations.multiGet(RedisKeyUtils.SESSIONS_PREFIX, ids);
+        Map<String, String> entries = hashOperations.entries(RedisKeyUtils.SESSIONS_PREFIX);
+        entries.keySet().stream().filter((strings::contains)).forEach(
+                (sessionId) -> {
+                    String[] times = entries.get(sessionId).split("-");
+                    //未开始的场次
+                    if (currentTime < Long.parseLong(times[0])) {
+                        //清理缓存
+                        List<Sku> list = JSON.parseArray(hashOperations.get(RedisKeyUtils.SKUS_PREFIX, sessionId), Sku.class);
+                        assert list != null;
+                        list.forEach((sku -> {
+                            String randomCode = sku.getRandomCode();
+                            redisUtils.delete(RedisKeyUtils.STOCK_PREFIX + randomCode);
+                            //删除 sku
+                            hashOperations.delete(RedisKeyUtils.SKU_PREFIX, sessionId + "-" + sku.getProductId());
+                        }));
+                        //删除场次关联的skus
+                        hashOperations.delete(RedisKeyUtils.SKUS_PREFIX, sessionId);
+                        //删除session
+                        hashOperations.delete(RedisKeyUtils.SESSIONS_PREFIX, sessionId);
+                    }
+                }
+        );
+    }
 }
