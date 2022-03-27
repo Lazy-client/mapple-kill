@@ -36,6 +36,7 @@ pipeline {
 
         stage('制作Docker镜像') {
             steps {
+                sh 'docker rmi -f mapple-admin mapple-gateway mapple-seckill mapple-coupon mapple-consume'
                 sh 'cd ${WS}/mapple-admin && docker build -t mapple-admin .'
                 sh 'cd ${WS}/mapple-gateway && docker build -t mapple-gateway .'
                 sh 'cd ${WS}/mapple-seckill && docker build -t mapple-seckill .'
