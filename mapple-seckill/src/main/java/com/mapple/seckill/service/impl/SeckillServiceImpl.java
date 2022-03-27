@@ -116,7 +116,7 @@ public class SeckillServiceImpl implements SecKillService {
                     //当前秒杀的场次
                     if (currentTime >= Long.parseLong(sToEnd[0]) && currentTime < Long.parseLong(sToEnd[1])) {
                         String skus = hashOperations.get(RedisKeyUtils.SKUS_PREFIX, sessionId);
-                        session.setSkus(skus);
+                        session.setSkus(JSON.parseArray(skus));
                         sessionList.add(session);
                     } else if (currentTime < Long.parseLong(sToEnd[0])) {
                         sessionListNotStart.add(session);

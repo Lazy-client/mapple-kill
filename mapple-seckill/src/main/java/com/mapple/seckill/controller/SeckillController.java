@@ -1,14 +1,12 @@
 package com.mapple.seckill.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.mapple.common.utils.redis.cons.RedisConstants;
-import com.mapple.common.utils.redis.cons.RedisKeyUtils;
 import com.mapple.common.utils.result.CommonResult;
 import com.mapple.common.vo.Session;
 import com.mapple.common.vo.Sku;
 import com.mapple.seckill.service.SecKillService;
 import io.swagger.annotations.*;
-import org.redisson.api.RMap;
-import org.redisson.api.RMapCache;
 import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.Resource;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * @author zsc
@@ -89,14 +86,11 @@ public class SeckillController {
     @ApiOperation(value = "获取redis的key", notes = "这只是个测试接口，不是业务")
     @GetMapping("/redisKey")
     public CommonResult redisKey() {
-        RMapCache<String, String> mapCache = redissonClient.getMapCache(RedisKeyUtils.SECKILL_USER_PREFIX);
-        RMap<String, String> rMap = redissonClient.getMap(RedisKeyUtils.SECKILL_USER_PREFIX);
-        String s = rMap.get("1503572720200978433-a920b9cd31bc40bf98ba12c7d8d0bb66");
-        logger.info(s);
-        rMap.fastPut("55555", "666666");
-        System.out.println(hashOperations.get(RedisKeyUtils.SECKILL_USER_PREFIX, "55555"));
-        return Objects.requireNonNull(CommonResult
-                .ok()
-        );
+        String txt =
+                "[{\"defaultImg\":\"/image\",\"description\":\"秒杀产品描述\",\"endTime\":1647587757000,\"id\":\"1504667488302624770\",\"productName\":\"秒杀产品3.18 11:54\",\"randomCode\":\"dd96795e80ac499abf467374ad381888\",\"seckillPrice\":10000,\"sessionId\":\"1504658242097872898\",\"sessionName\":\"3.18 11:00场次\",\"startTime\":1647584157000,\"title\":\"标题\",\"totalCount\":50000},{\"defaultImg\":\"/image\",\"description\":\"秒杀产品描述\",\"endTime\":1647587757000,\"id\":\"1504671308004900865\",\"productName\":\"秒杀产品3.18 12:09\",\"randomCode\":\"7c45adef3845440b8b98b57bf24464f9\",\"seckillPrice\":10000,\"sessionId\":\"1504658242097872898\",\"sessionName\":\"3.18 11:00场次\",\"startTime\":1647584157000,\"title\":\"标题\",\"totalCount\":50000},{\"defaultImg\":\"/image\",\"description\":\"这是一款银行存款产品\",\"endTime\":1647587757000,\"id\":\"1504658242097872898\",\"productId\":\"1503967060392857601\",\"productName\":\"银行存款产品\",\"randomCode\":\"3761cb514377431a8c67be78b42a1723\",\"seckillPrice\":100000,\"sessionName\":\"3.18 11:00场次\",\"startTime\":1647584157000,\"title\":\"string\",\"totalCount\":100000}]"
+                ;
+        JSON value = JSON.parseArray(txt);
+        return CommonResult.ok()
+                .put("data", value);
     }
 }

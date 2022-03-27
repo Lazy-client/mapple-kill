@@ -23,7 +23,7 @@ import java.util.Map;
 @Component("clearFinishedSession")
 public class ClearFinishedSession implements ITask {
 
-    private Logger logger = LoggerFactory.getLogger(getClass());
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Resource
     private HashOperations<String, String, String> hashOperations;

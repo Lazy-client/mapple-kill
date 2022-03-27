@@ -1,6 +1,7 @@
 package com.mapple.common.vo;
 
 
+import com.alibaba.fastjson.JSON;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -28,6 +29,6 @@ public class Session implements Serializable {
     @ApiModelProperty("当前商品秒杀的结束时间")
     private long endTime;
     @ApiModelProperty("场次关联产品的json串")
-    private String skus;
+    private JSON skus;
 
 }
