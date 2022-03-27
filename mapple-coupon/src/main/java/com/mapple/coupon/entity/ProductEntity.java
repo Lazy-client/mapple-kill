@@ -11,6 +11,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
@@ -58,6 +59,7 @@ public class ProductEntity implements Serializable {
 	 * 年利率
 	 */
 	@NotNull
+	@Min(value = 0,message = "年利率输入错误")
 	@ApiModelProperty("年利率")
 	private BigDecimal interestRate;
 
