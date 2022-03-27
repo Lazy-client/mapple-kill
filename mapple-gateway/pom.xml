@@ -16,6 +16,12 @@
         <maven.compiler.target>8</maven.compiler.target>
     </properties>
     <dependencies>
+        <!-- 限流熔断 -->
+        <dependency>
+            <groupId>com.alibaba.csp</groupId>
+            <artifactId>sentinel-spring-cloud-gateway-adapter</artifactId>
+        </dependency>
+
         <!-- gateway 不能引入web依赖和actuator依赖-->
         <!--gateway-->
         <dependency>
