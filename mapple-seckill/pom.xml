@@ -14,10 +14,10 @@
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
+        <rocketmq-spring-boot-starter-version>2.0.3</rocketmq-spring-boot-starter-version>
     </properties>
 
     <dependencies>
-
 
         <dependency>
             <groupId>com.mapple</groupId>
@@ -25,8 +25,12 @@
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
 
-
-
+        <!--RocketMQ-->
+        <dependency>
+            <groupId>org.apache.rocketmq</groupId>
+            <artifactId>rocketmq-spring-boot-starter</artifactId>
+            <version>${rocketmq-spring-boot-starter-version}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>

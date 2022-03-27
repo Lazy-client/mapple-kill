@@ -11,4 +11,5 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @MapperScan("com.mapple.consume.mapper")
 public class ConsumeConfig {
+
 }
