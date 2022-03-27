@@ -43,7 +43,7 @@ public class SeckillServiceImpl implements SecKillService {
             //id ====> sessionId-productId
             long currentTime = System.currentTimeMillis();
             //校验场次的sku是否存在
-            String skuJason = hashOperations.get(RedisKeyUtils.SESSIONS_PREFIX, id);
+            String skuJason = hashOperations.get(RedisKeyUtils.SKU_PREFIX, id);
             if (!StringUtils.isEmpty(skuJason)) {
                 logger.info("sku找到----{}", skuJason);
                 Sku sku = JSON.parseObject(skuJason, Sku.class);
