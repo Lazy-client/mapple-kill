@@ -10,6 +10,7 @@ package io.renren.modules.app.controller;
 
 
 import io.renren.common.utils.R;
+import io.renren.modules.app.entity.UserEntity;
 import io.renren.modules.app.form.LoginForm;
 import io.renren.modules.app.service.UserService;
 import io.renren.modules.app.utils.JwtUtils;
@@ -49,13 +50,14 @@ public class AppLoginController {
 
         //用户登录
         String userId = userService.login(form);
-
+        UserEntity userEntity = userService.getById(userId);
         //生成token
         String token = jwtUtils.generateToken(userId);
 
         Map<String, Object> map = new HashMap<>();
         map.put("token", token);
         map.put("expire", jwtUtils.getExpire());
+        map.put("user",userEntity);
 
         return R.ok(map);
     }

@@ -33,7 +33,7 @@ public class UserEntity implements Serializable {
 	 * 用户ID
 	 */
 	@TableId(type = ASSIGN_ID)
-	@ApiModelProperty(value = "产品id",required = false)
+	@ApiModelProperty(value = "用户id",required = false)
 	private String userId;
 	/**
 	 * 用户名
