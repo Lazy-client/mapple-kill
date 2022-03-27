@@ -48,7 +48,7 @@ public class ProductSessionController {
     @GetMapping("/list")
     //@RequiresPermissions("coupon:productsession:list")
     public CommonResult list(@ApiParam(name = "productSessionVo",
-            value = "请传入：场次sessionId、商品对象productEntity、产品库存量totalCount",
+            value = "分页数据xxx与场次sessionId=xxx，封装在map中",
             required = true) @RequestParam Map<String, Object> params) {
         PageUtils page = productSessionService.queryPage(params);
 
@@ -113,8 +113,8 @@ public class ProductSessionController {
      */
     @PostMapping("/update")
     //@RequiresPermissions("coupon:productsession:update")
-    public CommonResult update(@RequestBody ProductSessionEntity productSession) {
-        productSessionService.updateById(productSession);
+    public CommonResult update(@RequestBody List<ProductSessionEntity> productSessionList) {
+        productSessionService.updateBatchById(productSessionList);
         return CommonResult.ok();
     }
 
