@@ -100,8 +100,15 @@ public class SessionServiceImpl extends ServiceImpl<SessionDao, SessionEntity> i
     @Override
     @Transactional
     public void delete(List<String> ids) {
-        removeByIds(ids);
         long currentTime = System.currentTimeMillis();
+        List<SessionEntity> sessionEntities = listByIds(ids);
+        sessionEntities.forEach(sessionEntity -> {
+            if (currentTime >=
+                    sessionEntity.getStartTime().getTime()) {
+                throw new RRException("只允许删除未开始的场次");
+            }
+        });
+        removeByIds(ids);
         List<String> strings = hashOperations.multiGet(RedisKeyUtils.SESSIONS_PREFIX, ids);
         Map<String, String> entries = hashOperations.entries(RedisKeyUtils.SESSIONS_PREFIX);
         entries.keySet().stream().filter((strings::contains)).forEach(
