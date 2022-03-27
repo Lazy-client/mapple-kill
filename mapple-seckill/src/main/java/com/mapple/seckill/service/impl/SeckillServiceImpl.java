@@ -45,15 +45,19 @@ public class SeckillServiceImpl implements SecKillService {
             //校验场次的sku是否存在
             String skuJason = hashOperations.get(RedisKeyUtils.SESSIONS_PREFIX, id);
             if (!StringUtils.isEmpty(skuJason)) {
+                logger.info("sku找到----{}", skuJason);
                 Sku sku = JSON.parseObject(skuJason, Sku.class);
                 if (currentTime >= sku.getStartTime().getTime() && currentTime < sku.getEndTime().getTime()) {//校验时间
+                    logger.info("时间校验通过");
                     //校验用户是有参与过秒杀
                     if (!hashOperations.hasKey(RedisKeyUtils.SECKILL_USER_PREFIX, userId)) {
+                        logger.info("用户{}未参与过秒杀活动", userId);
                         //分布式锁减库存
                         RSemaphore semaphore = redissonClient.getSemaphore(RedisKeyUtils.STOCK_PREFIX + key);
 
                         boolean acquire = semaphore.tryAcquire(1, 100, TimeUnit.MILLISECONDS);
                         if (acquire) {//库存与扣成功
+                            logger.info("用户{}----秒杀成功", userId);
                             hashOperations.put(RedisKeyUtils.SECKILL_USER_PREFIX, userId + "-" + key, "1");
                             //todo 生成订单发消息
                             return "ok";

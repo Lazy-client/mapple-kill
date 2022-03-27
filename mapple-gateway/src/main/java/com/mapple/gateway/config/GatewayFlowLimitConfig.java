@@ -63,21 +63,16 @@ public class GatewayFlowLimitConfig {
     public void initGatewayRules() {
 
         logger.info(routes.toString());
-        Set<GatewayFlowRule> rules = new HashSet<>();
-        rules.add(new GatewayFlowRule("server-source") //资源名称,对应路由id
-                .setCount(1) // 限流阈值
-                .setIntervalSec(1) // 统计时间窗口，单位是秒，默认是 1 秒
-        );
 
 
         Set<GatewayFlowRule> flowRules = routes
                 .stream()
                 .map(route -> {
                             if (ServiceName.MAPPLE_SECKILL.getService().equals(route.getId()))
-                                return new GatewayFlowRule(route.getId())
-                                        .setCount(800)
-                                        .setBurst(250)
-                                        .setIntervalSec(1);
+                                return new GatewayFlowRule(route.getId())//资源名称,对应路由id
+                                        .setCount(800) // 限流阈值
+                                        .setBurst(250) //瞬时爆发的流量
+                                        .setIntervalSec(1);// 统计时间窗口，单位是秒，默认是 1 秒
 
                             return new GatewayFlowRule(route.getId())
                                     .setCount(150)
@@ -99,7 +94,7 @@ public class GatewayFlowLimitConfig {
     @PostConstruct
     public void initBlockHandlers() {
         BlockRequestHandler blockRequestHandler = (serverWebExchange, throwable) -> {
-            Map map = new HashMap<>();
+            HashMap<String, Object> map = new HashMap<>();
             map.put("code", 666);
             map.put("message", "流量过大,接口被限流了");
             return ServerResponse.status(HttpStatus.OK).
