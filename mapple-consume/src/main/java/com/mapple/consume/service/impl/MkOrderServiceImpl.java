@@ -1,20 +1,25 @@
 package com.mapple.consume.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.mapple.common.utils.result.CommonResult;
 import com.mapple.consume.entity.MkOrder;
+import com.mapple.consume.listener.MkOrderTransactionListener;
+import com.mapple.consume.listener.MkOrderTransactionListener2;
 import com.mapple.consume.mapper.MkOrderMapper;
 import com.mapple.consume.service.MkOrderService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.rocketmq.client.exception.MQBrokerException;
 import org.apache.rocketmq.client.exception.MQClientException;
+import org.apache.rocketmq.client.producer.*;
 import org.apache.rocketmq.common.message.Message;
-import org.apache.rocketmq.remoting.exception.RemotingException;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
+import org.apache.rocketmq.spring.support.RocketMQHeaders;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
+
+import java.util.UUID;
 
 /**
  * <p>
@@ -31,11 +36,23 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
     @Autowired
     private RocketMQTemplate rocketMQTemplate;
 
+    @Value("${rocketmq.name-server}")
+    private String nameServer;
+
+    @Value("${rocketmq.producer.group}")
+    private String producerGroup;
+
     @Value("${mq.order.topic}")
     private String topic;
 
     @Value("${mq.order.tag}")
     private String tag;
+
+    @Value("${mq.order.producer.group}")
+    private String transactionProducerGroup;
+
+    @Value("${mq.order.producer.topic}")
+    private String transactionTopic;
 
     /**
      * 传入一个订单之后，消息生产者将order封装成信息，进入消息队列，进行流量削峰
@@ -43,20 +60,34 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
      * 调用相应的接口的方法，落盘到数据库
      * 消息接收方
      */
+    // Transaction
     @Override
     public CommonResult orderEnqueue(MkOrder order) {
-
         log.info("获取到topic: {}, 获取到tag: {}", topic, tag);
-//        String key = order.getUserId().concat(order.getProductId()).concat(order.getSessionId());
         try {
-            // 此处应该使用fastJSON自带的toString方法，将对象字符串化
-            orderSendOneWay(topic, order);
+            orderSendTransaction2(order);
         } catch (Exception e) {
             e.printStackTrace();
             return CommonResult.error("消息发送失败");
         }
         return CommonResult.ok();
     }
+
+    // SendOneWay
+    //    @Override
+    //    public CommonResult orderEnqueue(MkOrder order) {
+    //        log.info("获取到topic: {}, 获取到tag: {}", topic, tag);
+    //        try {
+    //            // 此处应该使用fastJSON自带的toString方法，将对象字符串化
+    //             orderSendOneWay(topic, order);
+    //        } catch (Exception e) {
+    //            e.printStackTrace();
+    //            return CommonResult.error("消息发送失败");
+    //        }
+    //        return CommonResult.ok();
+    //    }
+
+    // Common Version
     //    @Override
     //    public CommonResult orderEnqueue(MkOrder order) {
     //
@@ -80,17 +111,61 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
      * @param keys  标识
      * @param body  消息体
      */
-    private void sendOrder(String topic, String tag, String keys, String body) throws InterruptedException, RemotingException, MQClientException, MQBrokerException {
-        Message message = new Message(topic, tag, keys, body.getBytes());
-        // "1s 5s 10s 30s 1m 2m 3m 4m 5m 6m 7m 8m 9m 10m 20m 30m 1h 2h"
-        // 设置消息延迟等级,延迟5秒发送
-        message.setDelayTimeLevel(2);
-        rocketMQTemplate.getProducer().send(message);
+    // Common Version
+//    private void sendOrder(String topic, String tag, String keys, String body) throws InterruptedException, RemotingException, MQClientException, MQBrokerException {
+//        Message message = new Message(topic, tag, keys, body.getBytes());
+//        // "1s 5s 10s 30s 1m 2m 3m 4m 5m 6m 7m 8m 9m 10m 20m 30m 1h 2h"
+//        // 设置消息延迟等级,延迟5秒发送
+//        message.setDelayTimeLevel(2);
+//        rocketMQTemplate.getProducer().send(message);
+//    }
+
+    // SendOneWay Version
+//    private void orderSendOneWay(String topic, MkOrder order) {
+//        // 异步发送，不需要Broker的确认回复，性能更高，但是存在消息丢失的可能
+//        rocketMQTemplate.sendOneWay(topic, MessageBuilder.withPayload(order).build());
+//    }
+
+    /**
+     * 发送事务消息
+     * Transaction Version
+     */
+    private void orderSendTransaction(MkOrder order) {
+        String transactionId = UUID.randomUUID().toString();
+        // 设置事务id
+        order.setTransactionId(transactionId);
+        // 使用模板发送事务消息
+        rocketMQTemplate.createAndStartTransactionMQProducer(
+                transactionProducerGroup,
+                new MkOrderTransactionListener(),
+                null,
+                null);
+        // 发送事务消息
+        String keys = order.getUserId().concat(order.getProductId()).concat(order.getSessionId());
+        TransactionSendResult result =
+                rocketMQTemplate.sendMessageInTransaction(
+                        transactionProducerGroup,
+                        transactionTopic,
+                        MessageBuilder.withPayload(order).build(),
+                        tag);
+        log.info("【事务消息发送状态】：{}", result.getLocalTransactionState());
     }
 
+    private void orderSendTransaction2(MkOrder order) throws MQClientException {
+        String transactionId = UUID.randomUUID().toString();
+        // 设置事务id
+        order.setTransactionId(transactionId);
+        // 使用模板发送事务消息
+        TransactionMQProducer producer = new TransactionMQProducer();
+        producer.setNamesrvAddr(nameServer);
+        producer.setProducerGroup(transactionProducerGroup);
+        producer.setTransactionListener(new MkOrderTransactionListener2());
+        producer.start();
+        // 发送事务消息
+        String keys = order.getUserId().concat(order.getProductId()).concat(order.getSessionId());
+        Message message = new Message(transactionTopic, tag, keys, JSON.toJSONString(order).getBytes());
+        TransactionSendResult result = producer.sendMessageInTransaction(message, null);
+        log.info("【事务消息发送状态】：{}", result.getLocalTransactionState());
 
-    private void orderSendOneWay(String topic, MkOrder order) {
-        // 异步发送，不需要Broker的确认回复，性能更高，但是存在消息丢失的可能
-        rocketMQTemplate.sendOneWay(topic, MessageBuilder.withPayload(order).build());
     }
 }

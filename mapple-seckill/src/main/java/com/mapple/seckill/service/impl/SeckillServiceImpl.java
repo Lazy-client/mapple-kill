@@ -4,14 +4,20 @@ import com.alibaba.fastjson.JSON;
 import com.mapple.common.utils.CryptogramUtil;
 import com.mapple.common.utils.jwt.JwtUtils;
 import com.mapple.common.utils.redis.cons.RedisKeyUtils;
+import com.mapple.common.vo.MkOrder;
 import com.mapple.common.vo.Session;
 import com.mapple.common.vo.Sku;
 import com.mapple.seckill.service.SecKillService;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.rocketmq.client.producer.SendCallback;
+import org.apache.rocketmq.client.producer.SendResult;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.redisson.api.RSemaphore;
 import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.HashOperations;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -25,6 +31,7 @@ import java.util.concurrent.TimeUnit;
  * @date 2022/2/17 18:00
  */
 @Service
+@Slf4j
 public class SeckillServiceImpl implements SecKillService {
 
 
@@ -33,6 +40,9 @@ public class SeckillServiceImpl implements SecKillService {
     RedissonClient redissonClient;
     @Resource
     private HashOperations<String, String, String> hashOperations;
+
+    @Resource
+    private RocketMQTemplate rocketMQTemplate;
 
     @Override
     public String kill(String key, String id, String token) throws InterruptedException {
@@ -57,7 +67,24 @@ public class SeckillServiceImpl implements SecKillService {
                         if (acquire) {//库存与扣成功
                             logger.info("用户{}----秒杀成功", userId);
                             hashOperations.put(RedisKeyUtils.SECKILL_USER_PREFIX, userId + "-" + key, "1");
-                            //todo 生成订单发消息
+                            //TODO 生成订单发消息
+                            MkOrder order = new MkOrder();
+                            order.setUserId(userId);
+                            // 拆解
+                            String[] split = id.split("-");
+                            order.setSessionId(split[0]);
+                            order.setProductId(split[1]);
+                            rocketMQTemplate.asyncSend("Mk-Topic", MessageBuilder.withPayload(order).build(), new SendCallback() {
+                                @Override
+                                public void onSuccess(SendResult sendResult) {
+                                    log.info("发送成功: {}", sendResult.getSendStatus());
+                                }
+
+                                @Override
+                                public void onException(Throwable throwable) {
+                                    log.info("发送失败: {}", throwable.getMessage());
+                                }
+                            });
                             return "ok";
                         }
                     }
