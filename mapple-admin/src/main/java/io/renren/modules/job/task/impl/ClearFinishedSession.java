@@ -1,9 +1,10 @@
-package io.renren.modules.job.task;
+package io.renren.modules.job.task.impl;
 
 import com.alibaba.fastjson.JSON;
 import io.renren.common.utils.DateUtils;
 import io.renren.common.utils.RedisKeyUtils;
 import io.renren.common.utils.RedisUtils;
+import io.renren.modules.job.task.ITask;
 import io.renren.modules.job.task.vo.Sku;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

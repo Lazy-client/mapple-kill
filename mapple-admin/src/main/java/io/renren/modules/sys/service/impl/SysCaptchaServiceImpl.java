@@ -21,6 +21,7 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.awt.image.BufferedImage;
 import java.util.Date;
 
@@ -34,6 +35,8 @@ public class SysCaptchaServiceImpl extends ServiceImpl<SysCaptchaDao, SysCaptcha
     @Autowired
     private Producer producer;
 
+    @Resource
+    private SysCaptchaDao sysCaptchaDao;
     @Override
     public BufferedImage getCaptcha(String uuid) {
         if(StringUtils.isBlank(uuid)){
@@ -67,5 +70,10 @@ public class SysCaptchaServiceImpl extends ServiceImpl<SysCaptchaDao, SysCaptcha
         }
 
         return false;
+    }
+
+    @Override
+    public void truncate() {
+        sysCaptchaDao.truncate();
     }
 }

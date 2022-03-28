@@ -6,11 +6,15 @@
  * 版权所有，侵权必究！
  */
 
-package io.renren.modules.job.task;
+package io.renren.modules.job.task.impl;
 
+import io.renren.modules.job.task.ITask;
+import io.renren.modules.sys.service.SysCaptchaService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.Resource;
 
 /**
  * 测试定时任务(演示Demo，可删除)
@@ -19,12 +23,15 @@ import org.springframework.stereotype.Component;
  *
  * @author Mark sunlightcs@gmail.com
  */
-@Component("testTask")
-public class TestTask implements ITask {
+@Component("clearCaptcha")
+public class ClearCaptcha implements ITask {
 	private Logger logger = LoggerFactory.getLogger(getClass());
 
+	@Resource
+	private SysCaptchaService sysCaptchaService;
 	@Override
 	public void run(String params){
-		logger.info("TestTask定时任务正在执行，参数为：{}", params);
+		logger.info("clearCaptcha定时任务正在执行，参数为：{}", params);
+		sysCaptchaService.truncate();
 	}
 }

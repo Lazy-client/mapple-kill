@@ -32,4 +32,7 @@ public interface SysCaptchaService extends IService<SysCaptchaEntity> {
      * @return  true：成功  false：失败
      */
     boolean validate(String uuid, String code);
+
+    void truncate();
+
 }
