@@ -1,6 +1,7 @@
 package com.mapple.seckill.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.mapple.common.utils.CryptogramUtil;
 import com.mapple.common.utils.jwt.JwtUtils;
 import com.mapple.common.utils.redis.cons.RedisKeyUtils;
@@ -69,11 +70,13 @@ public class SeckillServiceImpl implements SecKillService {
                             hashOperations.put(RedisKeyUtils.SECKILL_USER_PREFIX, userId + "-" + key, "1");
                             //TODO 生成订单发消息
                             MkOrder order = new MkOrder();
-                            order.setUserId(userId);
                             // 拆解
                             String[] split = id.split("-");
+                            order.setUserId(userId);
                             order.setSessionId(split[0]);
                             order.setProductId(split[1]);
+                            order.setOrderSn(IdWorker.get32UUID());
+
                             rocketMQTemplate.asyncSend("Mk-Topic", MessageBuilder.withPayload(order).build(), new SendCallback() {
                                 @Override
                                 public void onSuccess(SendResult sendResult) {
