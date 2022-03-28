@@ -108,29 +108,33 @@ public class SessionServiceImpl extends ServiceImpl<SessionDao, SessionEntity> i
                 throw new RRException("只允许删除未开始的场次");
             }
         });
-        removeByIds(ids);
-        List<String> strings = hashOperations.multiGet(RedisKeyUtils.SESSIONS_PREFIX, ids);
-        Map<String, String> entries = hashOperations.entries(RedisKeyUtils.SESSIONS_PREFIX);
-        entries.keySet().stream().filter((strings::contains)).forEach(
-                (sessionId) -> {
-                    String[] times = entries.get(sessionId).split("-");
-                    //未开始的场次
-                    if (currentTime < Long.parseLong(times[0])) {
-                        //清理缓存
-                        List<Sku> list = JSON.parseArray(hashOperations.get(RedisKeyUtils.SKUS_PREFIX, sessionId), Sku.class);
-                        assert list != null;
-                        list.forEach((sku -> {
-                            String randomCode = sku.getRandomCode();
-                            redisUtils.delete(RedisKeyUtils.STOCK_PREFIX + randomCode);
-                            //删除 sku
-                            hashOperations.delete(RedisKeyUtils.SKU_PREFIX, sessionId + "-" + sku.getProductId());
-                        }));
-                        //删除场次关联的skus
-                        hashOperations.delete(RedisKeyUtils.SKUS_PREFIX, sessionId);
-                        //删除session
-                        hashOperations.delete(RedisKeyUtils.SESSIONS_PREFIX, sessionId);
-                    }
-                }
-        );
-    }
+        boolean suc = removeByIds(ids);
+        if (!suc)
+            throw new RRException("删除失败,无法删除不存在的");
+            Map<String, String> entries = hashOperations.entries(RedisKeyUtils.SESSIONS_PREFIX);
+            entries.keySet()
+                    .stream()
+                    .filter(ids::contains)
+                    .forEach(
+                            (sessionId) -> {
+                                String[] times = entries.get(sessionId).split("-");
+                                //未开始的场次
+                                if (currentTime < Long.parseLong(times[0])) {
+                                    //清理缓存
+                                    List<Sku> list = JSON.parseArray(hashOperations.get(RedisKeyUtils.SKUS_PREFIX, sessionId), Sku.class);
+                                    assert list != null;
+                                    list.forEach((sku -> {
+                                        String randomCode = sku.getRandomCode();
+                                        redisUtils.delete(RedisKeyUtils.STOCK_PREFIX + randomCode);
+                                        //删除 sku
+                                        hashOperations.delete(RedisKeyUtils.SKU_PREFIX, sessionId + "-" + sku.getProductId());
+                                    }));
+                                    //删除场次关联的skus
+                                    hashOperations.delete(RedisKeyUtils.SKUS_PREFIX, sessionId);
+                                    //删除session
+                                    hashOperations.delete(RedisKeyUtils.SESSIONS_PREFIX, sessionId);
+                                }
+                            }
+                    );
+        }
 }
