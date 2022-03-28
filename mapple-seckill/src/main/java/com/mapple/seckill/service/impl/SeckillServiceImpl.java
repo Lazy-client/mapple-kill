@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.client.producer.SendCallback;
 import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
+import org.redisson.api.RMapCache;
 import org.redisson.api.RSemaphore;
 import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
@@ -67,7 +68,8 @@ public class SeckillServiceImpl implements SecKillService {
                         boolean acquire = semaphore.tryAcquire(1, 100, TimeUnit.MILLISECONDS);
                         if (acquire) {//库存与扣成功
                             logger.info("用户{}----秒杀成功", userId);
-                            hashOperations.put(RedisKeyUtils.SECKILL_USER_PREFIX, userId + "-" + key, "1");
+                            RMapCache<Object, Object> userMap = redissonClient.getMapCache(RedisKeyUtils.SECKILL_USER_PREFIX);
+                            userMap.put(userId + "-" + key, "1", 6, TimeUnit.HOURS);
                             //TODO 生成订单发消息
                             MkOrder order = new MkOrder();
                             // 拆解
