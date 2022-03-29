@@ -23,5 +23,7 @@ public interface ProductSessionService extends IService<ProductSessionEntity> {
     String saveProductSession(productSessionVo productSession);
 
     List<String> saveProductSession_new(productSessionVo_new productSession);
+
+    int deductStock(String productId, String sessionId, Integer productCount);
 }
 

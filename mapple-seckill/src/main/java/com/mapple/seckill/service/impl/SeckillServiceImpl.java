@@ -19,6 +19,7 @@ import org.redisson.api.RSemaphore;
 import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
@@ -46,6 +47,9 @@ public class SeckillServiceImpl implements SecKillService {
 
     @Resource
     private RocketMQTemplate rocketMQTemplate;
+
+    @Value("${mq.order.topic}")
+    private String messageTopic;
 
     @Override
     public String kill(String key, String id, String token) throws InterruptedException {
@@ -79,18 +83,7 @@ public class SeckillServiceImpl implements SecKillService {
                             order.setSessionId(split[0]);
                             order.setProductId(split[1]);
                             order.setOrderSn(IdWorker.get32UUID());
-
-                            rocketMQTemplate.asyncSend("Mk-Topic", MessageBuilder.withPayload(order).build(), new SendCallback() {
-                                @Override
-                                public void onSuccess(SendResult sendResult) {
-                                    log.info("发送成功: {}", sendResult.getSendStatus());
-                                }
-
-                                @Override
-                                public void onException(Throwable throwable) {
-                                    log.info("发送失败: {}", throwable.getMessage());
-                                }
-                            });
+                            rocketMQTemplate.send(messageTopic, MessageBuilder.withPayload(order).build());
                             return "ok";
                         }
                     }

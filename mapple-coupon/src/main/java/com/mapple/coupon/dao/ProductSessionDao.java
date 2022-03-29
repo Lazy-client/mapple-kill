@@ -3,6 +3,8 @@ package com.mapple.coupon.dao;
 import com.mapple.coupon.entity.ProductSessionEntity;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Update;
 
 /**
  * 产品场次关联表
@@ -13,5 +15,8 @@ import org.apache.ibatis.annotations.Mapper;
  */
 @Mapper
 public interface ProductSessionDao extends BaseMapper<ProductSessionEntity> {
-	
+    @Update("update mk_product_session " +
+            "set total_count = total_count - #{productCount} " +
+            "where product_id = #{productId} and session_id = #{sessionId}")
+    int deductStock(String productId, String sessionId, Integer productCount);
 }
