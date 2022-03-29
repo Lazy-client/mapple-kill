@@ -17,5 +17,5 @@ import java.util.Map;
 @Service
 public interface CouponFeignService {
     @GetMapping("/coupon/coupon/product/list")
-    public R list(@RequestParam Map<String, Object> params);
+    R list(@RequestParam Map<String, Object> params);
 }

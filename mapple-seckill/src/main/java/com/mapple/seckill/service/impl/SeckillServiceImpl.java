@@ -173,8 +173,6 @@ public class SeckillServiceImpl implements SecKillService {
         if (currentTime < jsonObject.getLongValue("startTime")) {
             jsonObject.remove("randomCode");
         }
-
-
         return jsonObject;
     }
 }
