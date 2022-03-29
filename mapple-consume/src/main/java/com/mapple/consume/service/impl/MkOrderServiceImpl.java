@@ -1,6 +1,5 @@
 package com.mapple.consume.service.impl;
 
-import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -8,26 +7,18 @@ import com.mapple.common.utils.PageUtils;
 import com.mapple.common.utils.Query;
 import com.mapple.common.utils.result.CommonResult;
 import com.mapple.consume.entity.MkOrder;
-import com.mapple.consume.listener.MkOrderTransactionListener;
-import com.mapple.consume.listener.MkOrderTransactionListener2;
 import com.mapple.consume.mapper.MkOrderMapper;
 import com.mapple.consume.service.CouponFeignService;
 import com.mapple.consume.service.MkOrderService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
-import org.apache.rocketmq.client.exception.MQClientException;
-import org.apache.rocketmq.client.producer.*;
-import org.apache.rocketmq.common.message.Message;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
-import org.apache.rocketmq.spring.support.RocketMQHeaders;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.Map;
-import java.util.UUID;
 
 /**
  * <p>
@@ -110,7 +101,7 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
         String sessionId = order.getSessionId();
         Integer productCount = order.getProductCount();
         // 调用Coupon模块的减库存接口
-        int result = couponService.deductStock(productId, sessionId, productCount);
+        int result = couponService.deductStock(productId, sessionId);
         log.info("result结果: {}", result);
         // TODO 减本账户余额，给公共账户加余额
         String userId = order.getUserId();

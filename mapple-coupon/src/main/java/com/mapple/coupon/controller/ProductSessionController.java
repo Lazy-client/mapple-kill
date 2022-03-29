@@ -1,24 +1,25 @@
 package com.mapple.coupon.controller;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.mapple.common.utils.PageUtils;
+import com.mapple.common.utils.result.CommonResult;
+import com.mapple.coupon.entity.ProductSessionEntity;
 import com.mapple.coupon.entity.vo.productSessionVo;
 import com.mapple.coupon.entity.vo.productSessionVo_new;
-import io.swagger.annotations.*;
+import com.mapple.coupon.service.ProductSessionService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
-import com.mapple.coupon.entity.ProductSessionEntity;
-import com.mapple.coupon.service.ProductSessionService;
-import com.mapple.common.utils.PageUtils;
-import com.mapple.common.utils.result.CommonResult;
-
 import javax.annotation.Resource;
 import javax.validation.Valid;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -121,17 +122,17 @@ public class ProductSessionController {
         return CommonResult.ok();
     }
 
+        protected Logger logger = LoggerFactory.getLogger(getClass());
     /**
      * 减库存
      */
     @ApiOperation(value = "扣减库存", notes = "扣减productCount数量的库存")
-    @PostMapping("/deductStock/{productId}/{sessionId}/{productCount}")
+    @PostMapping("/deductStock/{productId}/{sessionId}")
     // @RequiresPermissions("coupon:productSession:deductStock")
     public int deductStock(@PathVariable String productId,
-                           @PathVariable String sessionId,
-                           @PathVariable Integer productCount) {
-        
-        return productSessionService.deductStock(productId, sessionId, productCount);
+                           @PathVariable String sessionId) {
+        logger.info("进入此处");
+        return productSessionService.deductStock(productId, sessionId);
     }
 
     /**
