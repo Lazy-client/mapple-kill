@@ -1,5 +1,6 @@
 package com.mapple.seckill.service;
 
+import com.alibaba.fastjson.JSON;
 import com.mapple.common.vo.Session;
 import com.mapple.common.vo.Sku;
 
@@ -17,4 +18,6 @@ public interface SecKillService {
     List<Sku> search(String sessionId);
 
     Map<String, List<Session>> searchSessions();
+
+    JSON searchById(String sessionId, String productId);
 }

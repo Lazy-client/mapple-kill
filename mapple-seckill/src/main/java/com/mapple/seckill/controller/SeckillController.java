@@ -72,6 +72,15 @@ public class SeckillController {
         return CommonResult.ok().put("data", search);
 
     }
+    @ApiOperation(value = "搜索某个场次下的某个产品详情")
+    @GetMapping("searchById")
+    public CommonResult searchById(@ApiParam(value = "场次Id", required = true) @RequestParam String sessionId,
+                                   @ApiParam(value = "产品Id",required = true ) @RequestParam String productId) {
+
+        JSON search = secKillService.searchById(sessionId,productId);
+        return CommonResult.ok().put("data", search);
+
+    }
 
     @ApiOperation(value = "搜索所有场次信息", notes = "进行中，以及未开始")
     @GetMapping("searchSessions")

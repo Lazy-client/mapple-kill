@@ -1,6 +1,7 @@
 package com.mapple.seckill.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.mapple.common.utils.CryptogramUtil;
 import com.mapple.common.utils.jwt.JwtUtils;
@@ -148,11 +149,11 @@ public class SeckillServiceImpl implements SecKillService {
                     session.setEndTime(Long.parseLong(sToEnd[1]));
                     session.setSessionName(sToEnd[2]);
                     //当前秒杀的场次
-                    if (currentTime >= Long.parseLong(sToEnd[0]) && currentTime < Long.parseLong(sToEnd[1])) {
+                    if (currentTime >= session.getStartTime() && currentTime < session.getEndTime()) {
                         String skus = hashOperations.get(RedisKeyUtils.SKUS_PREFIX, sessionId);
                         session.setSkus(JSON.parseArray(skus));
                         sessionList.add(session);
-                    } else if (currentTime < Long.parseLong(sToEnd[0])) {
+                    } else if (currentTime < session.getStartTime()) {
                         sessionListNotStart.add(session);
                     }
                 }
@@ -161,5 +162,21 @@ public class SeckillServiceImpl implements SecKillService {
         map.put("ing", sessionList);
         map.put("notStart", sessionListNotStart);
         return map;
+    }
+
+    @Override
+    public JSON searchById(String sessionId, String productId) {
+        long currentTime = System.currentTimeMillis();
+        JSONObject jsonObject = JSON.parseObject(hashOperations.get(RedisKeyUtils.SKU_PREFIX, sessionId + "-" + productId));
+        if (jsonObject == null)
+            return null;
+
+        // 未开始,掩盖随机码
+        if (currentTime < jsonObject.getLongValue("startTime")) {
+            jsonObject.remove("randomCode");
+        }
+
+
+        return jsonObject;
     }
 }
