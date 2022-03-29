@@ -35,7 +35,7 @@ public class ClearFinishedSession implements ITask {
     public void run(String params) {
         logger.info("clearFinishedSession 定时任务正在执行，参数为：{}", params);
         long currentTime = System.currentTimeMillis();
-        logger.info("当前时间戳{}----时间{}", currentTime,DateUtils.format(new Date(),DateUtils.DATE_TIME_PATTERN));
+        logger.info("当前时间戳{}----时间{}", currentTime, DateUtils.format(new Date(), DateUtils.DATE_TIME_PATTERN));
         Map<String, String> entries = hashOperations.entries(RedisKeyUtils.SESSIONS_PREFIX);
         try {
             entries.forEach(
@@ -45,19 +45,19 @@ public class ClearFinishedSession implements ITask {
                         if (currentTime >= Long.parseLong(times[1])) {
                             //清理缓存
                             List<Sku> list = JSON.parseArray(hashOperations.get(RedisKeyUtils.SKUS_PREFIX, sessionId), Sku.class);
-                            assert list != null;
-                            list.forEach((sku -> {
-                                String randomCode = sku.getRandomCode();
-                                redisUtils.delete(RedisKeyUtils.STOCK_PREFIX + randomCode);
-                                //删除 sku
-                                hashOperations.delete(RedisKeyUtils.SKU_PREFIX, sessionId + "-" + sku.getProductId());
-                            }));
-
-                            logger.info("正在清理数据");
-                            //删除场次关联的skus
-                            hashOperations.delete(RedisKeyUtils.SKUS_PREFIX, sessionId);
-                            //删除session
-                            hashOperations.delete(RedisKeyUtils.SESSIONS_PREFIX, sessionId);
+                            if (list != null && !list.isEmpty()) {
+                                list.forEach((sku -> {
+                                    String randomCode = sku.getRandomCode();
+                                    redisUtils.delete(RedisKeyUtils.STOCK_PREFIX + randomCode);
+                                    //删除 sku
+                                    hashOperations.delete(RedisKeyUtils.SKU_PREFIX, sessionId + "-" + sku.getProductId());
+                                }));
+                                logger.info("正在清理数据");
+                                //删除场次关联的skus
+                                hashOperations.delete(RedisKeyUtils.SKUS_PREFIX, sessionId);
+                                //删除session
+                                hashOperations.delete(RedisKeyUtils.SESSIONS_PREFIX, sessionId);
+                            }
                         }
 
                     }

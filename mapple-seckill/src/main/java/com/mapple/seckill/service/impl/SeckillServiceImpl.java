@@ -71,13 +71,11 @@ public class SeckillServiceImpl implements SecKillService {
                             logger.info("用户{}----秒杀成功", userId);
                             RMapCache<Object, Object> userMap = redissonClient.getMapCache(RedisKeyUtils.SECKILL_USER_PREFIX);
                             userMap.put(userId + "-" + key, "1", 6, TimeUnit.HOURS);
-                            //TODO 生成订单发消息
+                            //TODO 生成订单发消息 设置订单属性
                             MkOrder order = new MkOrder();
-                            // 拆解
-                            String[] split = id.split("-");
                             order.setUserId(userId);
-                            order.setSessionId(split[0]);
-                            order.setProductId(split[1]);
+                            order.setSessionId(sku.getId());
+                            order.setProductId(sku.getProductId());
                             order.setOrderSn(IdWorker.get32UUID());
 
                             rocketMQTemplate.asyncSend("Mk-Topic", MessageBuilder.withPayload(order).build(), new SendCallback() {
