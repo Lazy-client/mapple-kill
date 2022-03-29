@@ -9,11 +9,10 @@ import java.util.Date;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import org.hibernate.validator.constraints.Range;
 
 import javax.validation.Valid;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.*;
 
 /**
  * 产品信息表
@@ -64,6 +63,7 @@ public class ProductEntity implements Serializable {
 	private BigDecimal interestRate;
 
 	@NotNull
+	@Pattern(regexp = "\\d{1,2}-\\d{1,2}",message = "存款时间格式错误")
 	@ApiModelProperty("存款时间 比如存5年2个月 格式为：5-2")
 	private String depositTime;
 
