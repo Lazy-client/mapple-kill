@@ -4,9 +4,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.mapple.coupon.entity.vo.productSessionVo;
 import com.mapple.coupon.entity.vo.productSessionVo_new;
 import io.swagger.annotations.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,6 +31,7 @@ import javax.validation.Valid;
 @Api(tags = {"场次和产品关联"})
 @RestController
 @RequestMapping("coupon/productsession")
+@Slf4j
 public class ProductSessionController {
     @Resource
     private ProductSessionService productSessionService;
@@ -116,6 +119,19 @@ public class ProductSessionController {
     public CommonResult update(@RequestBody List<ProductSessionEntity> productSessionList) {
         productSessionService.updateBatchById(productSessionList);
         return CommonResult.ok();
+    }
+
+    /**
+     * 减库存
+     */
+    @ApiOperation(value = "扣减库存", notes = "扣减productCount数量的库存")
+    @PostMapping("/deductStock/{productId}/{sessionId}/{productCount}")
+    // @RequiresPermissions("coupon:productSession:deductStock")
+    public int deductStock(@PathVariable String productId,
+                           @PathVariable String sessionId,
+                           @PathVariable Integer productCount) {
+        
+        return productSessionService.deductStock(productId, sessionId, productCount);
     }
 
     /**

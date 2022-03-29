@@ -1,14 +1,20 @@
 package com.mapple.consume.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.mapple.common.utils.PageUtils;
+import com.mapple.common.utils.Query;
 import com.mapple.common.utils.result.CommonResult;
 import com.mapple.consume.entity.MkOrder;
 import com.mapple.consume.listener.MkOrderTransactionListener;
 import com.mapple.consume.listener.MkOrderTransactionListener2;
 import com.mapple.consume.mapper.MkOrderMapper;
+import com.mapple.consume.service.CouponFeignService;
 import com.mapple.consume.service.MkOrderService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.client.producer.*;
 import org.apache.rocketmq.common.message.Message;
@@ -19,6 +25,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -33,8 +41,11 @@ import java.util.UUID;
 @Slf4j
 public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> implements MkOrderService {
 
-    @Autowired
+    @Resource
     private RocketMQTemplate rocketMQTemplate;
+
+    @Resource
+    private CouponFeignService couponService;
 
     @Value("${rocketmq.name-server}")
     private String nameServer;
@@ -65,12 +76,45 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
     public CommonResult orderEnqueue(MkOrder order) {
         log.info("获取到topic: {}, 获取到tag: {}", topic, tag);
         try {
-            orderSendTransaction2(order);
+//            orderSendTransaction2(order);
+            orderSendOneWay(topic, order);
         } catch (Exception e) {
             e.printStackTrace();
             return CommonResult.error("消息发送失败");
         }
         return CommonResult.ok();
+    }
+
+    @Override
+    public PageUtils queryPage(Map<String, Object> params) {
+        String userId = (String) params.get("userId");
+        Integer status = (Integer) params.get("status");
+        IPage<MkOrder> page = this.page(
+                new Query<MkOrder>().getPage(params),
+                new QueryWrapper<MkOrder>()
+                        .eq(StringUtils.isNotBlank(userId), "user_id", userId)
+                        // 0-未支付状态, 1-已支付
+                        .eq("status", status)
+        );
+
+        return new PageUtils(page);
+    }
+
+    @Override
+    public void payOrder(MkOrder order) {
+        // 设置订单状态为已支付
+        order.setStatus(1);
+        this.updateById(order);
+        // 减库存
+        String productId = order.getProductId();
+        String sessionId = order.getSessionId();
+        Integer productCount = order.getProductCount();
+        // 调用Coupon模块的减库存接口
+        int result = couponService.deductStock(productId, sessionId, productCount);
+        log.info("result结果: {}", result);
+        // TODO 减本账户余额，给公共账户加余额
+        String userId = order.getUserId();
+
     }
 
     // SendOneWay
@@ -103,14 +147,7 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
     //        return CommonResult.ok();
     //    }
 
-    /**
-     * 发送订单消息
-     *
-     * @param topic 主题
-     * @param tag   标签
-     * @param keys  标识
-     * @param body  消息体
-     */
+
     // Common Version
 //    private void sendOrder(String topic, String tag, String keys, String body) throws InterruptedException, RemotingException, MQClientException, MQBrokerException {
 //        Message message = new Message(topic, tag, keys, body.getBytes());
@@ -121,51 +158,51 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
 //    }
 
     // SendOneWay Version
-//    private void orderSendOneWay(String topic, MkOrder order) {
-//        // 异步发送，不需要Broker的确认回复，性能更高，但是存在消息丢失的可能
-//        rocketMQTemplate.sendOneWay(topic, MessageBuilder.withPayload(order).build());
-//    }
+    private void orderSendOneWay(String topic, MkOrder order) {
+        // 异步发送，不需要Broker的确认回复，性能更高，但是存在消息丢失的可能
+        rocketMQTemplate.sendOneWay(topic, MessageBuilder.withPayload(order).build());
+    }
 
-    /**
+    /*
      * 发送事务消息
      * Transaction Version
      */
-    private void orderSendTransaction(MkOrder order) {
-        String transactionId = UUID.randomUUID().toString();
-        // 设置事务id
-        order.setTransactionId(transactionId);
-        // 使用模板发送事务消息
-        rocketMQTemplate.createAndStartTransactionMQProducer(
-                transactionProducerGroup,
-                new MkOrderTransactionListener(),
-                null,
-                null);
-        // 发送事务消息
-        String keys = order.getUserId().concat(order.getProductId()).concat(order.getSessionId());
-        TransactionSendResult result =
-                rocketMQTemplate.sendMessageInTransaction(
-                        transactionProducerGroup,
-                        transactionTopic,
-                        MessageBuilder.withPayload(order).build(),
-                        tag);
-        log.info("【事务消息发送状态】：{}", result.getLocalTransactionState());
-    }
-
-    private void orderSendTransaction2(MkOrder order) throws MQClientException {
-        String transactionId = UUID.randomUUID().toString();
-        // 设置事务id
-        order.setTransactionId(transactionId);
-        // 使用模板发送事务消息
-        TransactionMQProducer producer = new TransactionMQProducer();
-        producer.setNamesrvAddr(nameServer);
-        producer.setProducerGroup(transactionProducerGroup);
-        producer.setTransactionListener(new MkOrderTransactionListener2());
-        producer.start();
-        // 发送事务消息
-        String keys = order.getUserId().concat(order.getProductId()).concat(order.getSessionId());
-        Message message = new Message(transactionTopic, tag, keys, JSON.toJSONString(order).getBytes());
-        TransactionSendResult result = producer.sendMessageInTransaction(message, null);
-        log.info("【事务消息发送状态】：{}", result.getLocalTransactionState());
-
-    }
+//    private void orderSendTransaction(MkOrder order) {
+//        String transactionId = UUID.randomUUID().toString();
+//        // 设置事务id
+//        order.setTransactionId(transactionId);
+//        // 使用模板发送事务消息
+//        rocketMQTemplate.createAndStartTransactionMQProducer(
+//                transactionProducerGroup,
+//                new MkOrderTransactionListener(),
+//                null,
+//                null);
+//        // 发送事务消息
+//        String keys = order.getUserId().concat(order.getProductId()).concat(order.getSessionId());
+//        TransactionSendResult result =
+//                rocketMQTemplate.sendMessageInTransaction(
+//                        transactionProducerGroup,
+//                        transactionTopic,
+//                        MessageBuilder.withPayload(order).build(),
+//                        tag);
+//        log.info("【事务消息发送状态】：{}", result.getLocalTransactionState());
+//    }
+//
+//    private void orderSendTransaction2(MkOrder order) throws MQClientException {
+//        String transactionId = UUID.randomUUID().toString();
+//        // 设置事务id
+//        order.setTransactionId(transactionId);
+//        // 使用模板发送事务消息
+//        TransactionMQProducer producer = new TransactionMQProducer();
+//        producer.setNamesrvAddr(nameServer);
+//        producer.setProducerGroup(transactionProducerGroup);
+//        producer.setTransactionListener(new MkOrderTransactionListener2());
+//        producer.start();
+//        // 发送事务消息
+//        String keys = order.getUserId().concat(order.getProductId()).concat(order.getSessionId());
+//        Message message = new Message(transactionTopic, tag, keys, JSON.toJSONString(order).getBytes());
+//        TransactionSendResult result = producer.sendMessageInTransaction(message, null);
+//        log.info("【事务消息发送状态】：{}", result.getLocalTransactionState());
+//
+//    }
 }

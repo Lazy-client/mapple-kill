@@ -36,8 +36,14 @@ public class MkOrder implements Serializable {
     @ApiModelProperty(value = "场次id")
     private String sessionId;
 
+    @ApiModelProperty(value = "场次id")
+    private String sessionName;
+
     @ApiModelProperty(value = "产品id")
     private String productId;
+
+    @ApiModelProperty(value = "场次id")
+    private String productName;
 
     @ApiModelProperty(value = "用户id")
     private String userId;

@@ -1,8 +1,11 @@
 package com.mapple.consume.service;
 
+import com.mapple.common.utils.PageUtils;
 import com.mapple.common.utils.result.CommonResult;
 import com.mapple.consume.entity.MkOrder;
 import com.baomidou.mybatisplus.extension.service.IService;
+
+import java.util.Map;
 
 /**
  * <p>
@@ -15,4 +18,8 @@ import com.baomidou.mybatisplus.extension.service.IService;
 public interface MkOrderService extends IService<MkOrder> {
 
     CommonResult orderEnqueue(MkOrder order);
+
+    PageUtils queryPage(Map<String, Object> params);
+
+    void payOrder(MkOrder order);
 }

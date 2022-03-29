@@ -201,6 +201,11 @@ public class ProductSessionServiceImpl extends ServiceImpl<ProductSessionDao, Pr
 
 }
 
+    @Override
+    public int deductStock(String productId, String sessionId, Integer productCount) {
+        return baseMapper.deductStock(productId, sessionId, productCount);
+    }
+
 
     /**
      * 原来的save操作

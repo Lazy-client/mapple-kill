@@ -19,9 +19,9 @@ public class MkOrderTransactionConsumer implements RocketMQListener<MessageExt> 
 
     @Override
     public void onMessage(MessageExt messageExt) {
-        String body = new String(messageExt.getBody(), StandardCharsets.UTF_8);
-        log.info("事务消费者接受消息成功......");
-        MkOrder order = JSON.parseObject(body, MkOrder.class);
-        log.info("生成事务订单成功, 消息id: {}, 订单id: {}", messageExt.getMsgId(), order.getId());
+//        String body = new String(messageExt.getBody(), StandardCharsets.UTF_8);
+//        log.info("事务消费者接受消息成功......");
+//        MkOrder order = JSON.parseObject(body, MkOrder.class);
+//        log.info("生成事务订单成功, 消息id: {}, 订单id: {}", messageExt.getMsgId(), order.getId());
     }
 }
