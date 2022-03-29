@@ -6,8 +6,10 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.Digits;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
@@ -21,6 +23,7 @@ import java.util.Date;
 @NoArgsConstructor
 public class productSessionVo_Skus implements Serializable {
 
+//    @NotNull
     private String id;
 
     @ApiModelProperty("场次id")
@@ -56,23 +59,25 @@ public class productSessionVo_Skus implements Serializable {
     @ApiModelProperty("产品介绍描述")
     private String description;
 
-    @NotNull
+
+    @Min(0)
     @ApiModelProperty("年利率")
     private BigDecimal interestRate;
 
-    @NotNull
+
+    @Pattern(regexp="\\d{1,2}-\\d{1,2}",message = "存款时间格式不正确")
     @ApiModelProperty("存款时间 比如存5年2个月 格式为：5-2")
     private String depositTime;
 
-    @NotNull
+
     @ApiModelProperty("风险等级 低：1 中：2 高： 3")
     private Integer riskLevel;
 
-    @NotNull
+
     @ApiModelProperty("是否能提前取钱 1表示能提前 0表示不能")
     private Boolean cashAdvance;
 
-    @NotNull
+
     @ApiModelProperty("是否能自动赎回 1表示自动赎回 0表示不自动")
     private Boolean autoRedemption;
 //    /**

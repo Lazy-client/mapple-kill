@@ -22,6 +22,7 @@ import com.mapple.coupon.entity.vo.productVo_new;
 import com.mapple.coupon.service.ProductSessionService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -59,7 +60,24 @@ public class ProductSessionServiceImpl extends ServiceImpl<ProductSessionDao, Pr
      * redis操作hash
      */
     @Resource
-    private HashOperations<String, String, Object> hashOperations;
+    private HashOperations<String, String, String> hashOperations;
+
+    //redis hash操作绑定sku_prefix
+    BoundHashOperations<String, Object, Object> operationsForSku;
+
+    //redis kv操作库存stock操作
+    ValueOperations<String, String> opsForValue;
+
+    /**
+     * 构造函数
+     * @param redisTemplate
+     * @param stringRedisTemplate
+     */
+    public ProductSessionServiceImpl(RedisTemplate<String, Object> redisTemplate,RedisTemplate<String, String> stringRedisTemplate) {
+        this.operationsForSku = redisTemplate.boundHashOps(RedisKeyUtils.SKU_PREFIX);
+        //redis 操作字符 放入库存stock
+        this.opsForValue = stringRedisTemplate.opsForValue();
+    }
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -76,6 +94,33 @@ public class ProductSessionServiceImpl extends ServiceImpl<ProductSessionDao, Pr
         );
 
         return new PageUtils(page);
+    }
+
+    /**
+     * 保存stock库存到redis的方法
+     * @param token
+     * @param totalCount
+     */
+    private void saveStockInRedis(String token, String totalCount) {
+        String key = RedisKeyUtils.STOCK_PREFIX + token;
+        //如果不存在该商品的库存信息stock，则放入redis
+        if (StringUtils.isEmpty(opsForValue.get(key))) {
+            opsForValue.set(key, totalCount);
+        }
+    }
+
+    /**
+     * 保存sku到redis的方法
+     * @param redisKey
+     * @param productSessionVo_skus1
+     */
+    public void saveSkuInRedis(String redisKey, productSessionVo_Skus productSessionVo_skus1) {
+        //存入redis的方法
+        if (!operationsForSku.hasKey(redisKey)) {
+            //用fastJson序列化json格式
+            String seckillValue = JSON.toJSONString(productSessionVo_skus1);
+            operationsForSku.put(redisKey, seckillValue);
+        }
     }
 
     /**
@@ -99,10 +144,15 @@ public class ProductSessionServiceImpl extends ServiceImpl<ProductSessionDao, Pr
             ArrayList<String> productIdList = new ArrayList<>();
             //将id封装到productIdlist中进行校验
             for (int i = 0; i < productList.size(); i++) {
-                productIdList.add(productList.get(i).getProductId());
+                productVo_new productVo_new = productList.get(i);
+                productIdList.add(productVo_new.getProductId());
+                //加个判空的代码
+                if (productVo_new.getTotalCount() == null || productVo_new.getSeckillPrice() == null) {
+                    throw new RRException("库存或秒杀价格为空");
+                }
                 //顺便校验关联表中是否存在重复信息
-                Integer count = productSessionDao.selectCount(new QueryWrapper<ProductSessionEntity>().eq("session_id", sessionId).eq("product_id", productList.get(i).getProductId()));
-                if (count==1){
+                Integer count = productSessionDao.selectCount(new QueryWrapper<ProductSessionEntity>().eq("session_id", sessionId).eq("product_id", productVo_new.getProductId()));
+                if (count == 1) {
                     throw new RRException("该场次产品插入重复");
                 }
             }
@@ -121,40 +171,33 @@ public class ProductSessionServiceImpl extends ServiceImpl<ProductSessionDao, Pr
                     productSessionEntities.add(productSessionEntity);
                 }
             }
-            if (saveBatch(productSessionEntities)) {
-                // 1.放入redis中缓存一份sku
-                productSessionVo_Skus productSessionVo_skus1 = new productSessionVo_Skus();
-                //redis hash操作绑定sku_prefix
-                BoundHashOperations<String, Object, Object> operationsForSku = redisTemplate.boundHashOps(RedisKeyUtils.SKU_PREFIX);
-                //redis 操作字符 放入库存stock
-                ValueOperations<String, String> opsForValue = stringRedisTemplate.opsForValue();
+            if (!saveBatch(productSessionEntities)) {
+                throw new RRException("数据插入错误");
+            } else {
+
                 //redis hash操作绑定SKUS_PREFIX  ，缓存skus
                 BoundHashOperations<String, Object, Object> operationsForSkus = redisTemplate.boundHashOps(RedisKeyUtils.SKUS_PREFIX);
                 //声明存放skus的list
                 ArrayList<productSessionVo_Skus> productSessionVo_skus_list = new ArrayList<>();
                 for (int i = 0; i < productIdList.size(); i++) {
                     //循环封装进productSessionVo_Skus
+                    productSessionVo_Skus productSessionVo_skus1 = new productSessionVo_Skus();
                     String redisKey = sessionId + "-" + productIdList.get(i);
                     productSessionVo_skus1.setProductId(productIdList.get(i));
+                    productSessionVo_skus1.setSessionId(sessionId);
                     BeanUtils.copyProperties(sessionEntity, productSessionVo_skus1);
                     BeanUtils.copyProperties(productEntities.get(i), productSessionVo_skus1);
                     BeanUtils.copyProperties(productList.get(i), productSessionVo_skus1);
                     //生成随机码
                     String token = UUID.randomUUID().toString().replace("-", "");
                     productSessionVo_skus1.setRandomCode(token);
-                    //存入redis的方法
-                    if (!operationsForSku.hasKey(redisKey)) {
-                        //用fastJson序列化json格式
-                        String seckillValue = JSON.toJSONString(productSessionVo_skus1);
-                        operationsForSku.put(redisKey, seckillValue);
-                    }
 
-                    //2. 把秒杀商品的库存量缓存一份到redis中
-                    String key = RedisKeyUtils.STOCK_PREFIX + token;
-                    //如果不存在该商品的库存信息stock，则放入redis
-                    if (StringUtils.isEmpty(opsForValue.get(key))) {
-                        opsForValue.set(key, productList.get(i).getTotalCount().toString());
-                    }
+                    // 1.放入redis中缓存一份sku (抽取）
+                    saveSkuInRedis(redisKey, productSessionVo_skus1);
+
+                    //2. 把秒杀商品的库存量stock缓存一份到redis中 (抽取）
+                    String totalCount=productList.get(i).getTotalCount().toString();
+                    saveStockInRedis(token,totalCount);
 
                     // 3.再放入redis中缓存skus信息
                     //如果K中不存在这个sessionId
@@ -173,12 +216,6 @@ public class ProductSessionServiceImpl extends ServiceImpl<ProductSessionDao, Pr
                             }
                         }
                         if (productSessionVo_skus_list != null && productSessionVo_skus_list.size() >= 1 && flag == 0) {
-//                            productSessionVo_Skus productSessionVo_skus = new productSessionVo_Skus();
-//                            BeanUtils.copyProperties(productSessionVo, productSessionVo_skus);
-//                            BeanUtils.copyProperties(productEntity, productSessionVo_skus);
-//                            BeanUtils.copyProperties(sessionEntity, productSessionVo_skus);
-//                            productSessionVo_skus.setId(productSessionEntity.getId());
-//                            productSessionVo_skus.setRandomCode(token);
                             productSessionVo_skus_list.add(productSessionVo_skus1);
                             operationsForSkus.put(sessionId, JSON.toJSONString(productSessionVo_skus_list));
                         }
@@ -186,8 +223,6 @@ public class ProductSessionServiceImpl extends ServiceImpl<ProductSessionDao, Pr
                 }
                 //redis放入skus的操作
                 operationsForSkus.put(sessionId, JSON.toJSONString(productSessionVo_skus_list));
-            } else {
-                throw new RRException("数据插入错误");
             }
             ArrayList<String> ids = new ArrayList<>();
             for (ProductSessionEntity productSessionEntity : productSessionEntities) {
@@ -199,7 +234,8 @@ public class ProductSessionServiceImpl extends ServiceImpl<ProductSessionDao, Pr
             throw new RRException("场次不存在");
         }
 
-}
+    }
+
 
 
     /**

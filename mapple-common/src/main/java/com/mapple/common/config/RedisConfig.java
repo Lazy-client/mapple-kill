@@ -35,6 +35,7 @@ public class RedisConfig {
         redisTemplate.setValueSerializer(new StringRedisSerializer());
         redisTemplate.setEnableTransactionSupport(true);
         redisTemplate.setConnectionFactory(factory);
+        redisTemplate.setEnableTransactionSupport(true);
         return redisTemplate;
     }
 

@@ -3,6 +3,7 @@ package com.mapple.coupon.controller;
 import com.mapple.common.utils.PageUtils;
 import com.mapple.common.utils.result.CommonResult;
 import com.mapple.coupon.entity.ProductEntity;
+import com.mapple.coupon.entity.vo.productSessionVo_Skus;
 import com.mapple.coupon.service.ProductService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -67,9 +68,10 @@ public class ProductController {
      */
     @PostMapping("/update")
     //@RequiresPermissions("coupon:product:update")
-    public CommonResult update(@RequestBody ProductEntity product){
-		productService.updateById(product);
-
+    public CommonResult update(@Valid @ApiParam(name = "productSessionVo_Skus",
+            value = "请传入sessionId和productId,然后加上要修改的字段",
+            required = true)@RequestBody productSessionVo_Skus productSessionVo_Skus){
+        productService.updateProductById(productSessionVo_Skus);
         return CommonResult.ok();
     }
 
