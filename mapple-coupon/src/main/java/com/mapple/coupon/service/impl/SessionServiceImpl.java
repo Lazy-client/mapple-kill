@@ -60,6 +60,7 @@ public class SessionServiceImpl extends ServiceImpl<SessionDao, SessionEntity> i
                     else if (time > e.getEndTime().getTime())
                         e.setSessionStatus("已结束");
                 })
+                .sorted((e1, e2) -> e2.getGmtCreate().compareTo(e1.getGmtCreate()))
                 .collect(Collectors.toList()));
         return new PageUtils(page);
     }
