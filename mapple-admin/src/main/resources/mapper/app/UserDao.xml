@@ -3,5 +3,7 @@
 
 <mapper namespace="io.renren.modules.app.dao.UserDao">
 
-
+    <update id="deductBalance">
+        update mk_user set balance = balance - #{payAmount} where user_id = #{userId}
+    </update>
 </mapper>

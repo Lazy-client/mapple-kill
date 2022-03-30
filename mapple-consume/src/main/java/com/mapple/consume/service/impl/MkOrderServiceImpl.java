@@ -2,22 +2,28 @@ package com.mapple.consume.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.api.R;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.mapple.common.utils.PageUtils;
 import com.mapple.common.utils.Query;
+import com.mapple.common.utils.redis.RedisUtils;
+import com.mapple.common.utils.redis.cons.RedisKeyUtils;
 import com.mapple.common.utils.result.CommonResult;
 import com.mapple.consume.entity.MkOrder;
 import com.mapple.consume.mapper.MkOrderMapper;
+import com.mapple.consume.service.AdminFeignService;
 import com.mapple.consume.service.CouponFeignService;
 import com.mapple.consume.service.MkOrderService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
 import java.util.Map;
 
 /**
@@ -37,6 +43,9 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
 
     @Resource
     private CouponFeignService couponFeignService;
+
+    @Resource
+    private AdminFeignService adminFeignService;
 
     @Value("${rocketmq.name-server}")
     private String nameServer;
@@ -91,8 +100,11 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
         return new PageUtils(page);
     }
 
+    @Resource
+    private ValueOperations<String, String> valueOperations;
+
     @Override
-    public void payOrder(MkOrder order) {
+    public CommonResult payOrder(MkOrder order) {
         // 设置订单状态为已支付
         order.setStatus(1);
         this.updateById(order);
@@ -102,10 +114,30 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
         Integer productCount = order.getProductCount();
         // 调用Coupon模块的减库存接口
         int result = couponFeignService.deductStock(productId, sessionId);
-        log.info("result结果: {}", result);
-        // TODO 减本账户余额，给公共账户加余额
+        if (result < 1) {
+            log.info("result==={}", result);
+            return CommonResult.error("扣减库存失败");
+        }
+        // 减本账户余额
         String userId = order.getUserId();
+        BigDecimal payAmount = order.getPayAmount();
+        // 调用admin模块的接口
 
+        log.info("进入远程调用，减余额");
+        R r = adminFeignService.deductBalance(userId, payAmount);
+
+        log.info("余额调用结束，结果{}", r.getMsg());
+        long code = r.getCode();
+        String msg = r.getMsg();
+        // 给Redis公共账户加钱
+        if (code == 0) {
+            log.info("PayAmount转换的值: {}", payAmount.longValue());
+            Long increment = valueOperations.increment(RedisKeyUtils.PUBLIC_ACCOUNT, payAmount.longValue());
+            if (increment == null || increment <= 0)
+                return CommonResult.error("扣减公共账户余额失败");
+            return CommonResult.ok("执行成功");
+        }
+        return CommonResult.error(msg);
     }
 
     // SendOneWay

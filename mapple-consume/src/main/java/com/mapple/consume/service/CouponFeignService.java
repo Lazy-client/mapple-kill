@@ -20,6 +20,6 @@ public interface CouponFeignService {
      * 具体接口路径 /deductStock/{productId}/{sessionId}/{productCount}
      */
     @PostMapping("/coupon/coupon/productsession/deductStock/{productId}/{sessionId}")
-    public int deductStock(@PathVariable String productId,
-                                    @PathVariable String sessionId);
+    int deductStock(@PathVariable String productId,
+                    @PathVariable String sessionId);
 }
