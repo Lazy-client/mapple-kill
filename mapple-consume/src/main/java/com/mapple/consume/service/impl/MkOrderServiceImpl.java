@@ -2,12 +2,14 @@ package com.mapple.consume.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.api.R;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.mapple.common.utils.PageUtils;
 import com.mapple.common.utils.Query;
 import com.mapple.common.utils.result.CommonResult;
 import com.mapple.consume.entity.MkOrder;
 import com.mapple.consume.mapper.MkOrderMapper;
+import com.mapple.consume.service.AdminFeignService;
 import com.mapple.consume.service.CouponFeignService;
 import com.mapple.consume.service.MkOrderService;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +20,7 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
 import java.util.Map;
 
 /**
@@ -37,6 +40,9 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
 
     @Resource
     private CouponFeignService couponFeignService;
+
+    @Resource
+    private AdminFeignService adminFeignService;
 
     @Value("${rocketmq.name-server}")
     private String nameServer;
@@ -92,7 +98,7 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
     }
 
     @Override
-    public void payOrder(MkOrder order) {
+    public CommonResult payOrder(MkOrder order) {
         // 设置订单状态为已支付
         order.setStatus(1);
         this.updateById(order);
@@ -102,9 +108,21 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
         Integer productCount = order.getProductCount();
         // 调用Coupon模块的减库存接口
         int result = couponFeignService.deductStock(productId, sessionId);
-        log.info("result结果: {}", result);
-        // TODO 减本账户余额，给公共账户加余额
+        if (result < 1)
+            return CommonResult.error("扣减库存失败");
+        // 减本账户余额
         String userId = order.getUserId();
+        BigDecimal payAmount = order.getPayAmount();
+        // 调用admin模块的接口
+        R r = adminFeignService.deductBalance(userId, payAmount);
+        long code = r.getCode();
+        String msg = r.getMsg();
+        if (code == 0)
+            return CommonResult.ok(msg);
+        return CommonResult.error(msg);
+        // TODO 给公共账户加余额
+        // 从Redis中读取到公共账户的id
+        // 传入公共账户id，当前订单的支付金额，然后加上即可
 
     }
 
