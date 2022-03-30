@@ -1,10 +1,9 @@
 package com.mapple.coupon.controller;
 
 import com.alibaba.csp.sentinel.annotation.SentinelResource;
-import com.alibaba.csp.sentinel.slots.block.BlockException;
-import com.mapple.common.exception.RRExceptionHandler;
 import com.mapple.common.utils.PageUtils;
 import com.mapple.common.utils.result.CommonResult;
+import com.mapple.coupon.config.sentinelHandler;
 import com.mapple.coupon.entity.ProductEntity;
 import com.mapple.coupon.entity.vo.productSessionVo_Skus;
 import com.mapple.coupon.service.ProductService;
@@ -36,7 +35,7 @@ public class ProductController {
      */
     @GetMapping("/list")
     @SentinelResource(value = "couponlist"
-            ,blockHandlerClass = RRExceptionHandler.class
+            ,blockHandlerClass = sentinelHandler.class
             ,blockHandler = "handlerExceptionSentinel")
     //@RequiresPermissions("coupon:product:list")
     public CommonResult list(@RequestParam Map<String, Object> params){
