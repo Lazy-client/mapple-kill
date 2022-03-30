@@ -34,10 +34,9 @@ public class ProductController {
      * 列表
      */
     @GetMapping("/list")
-    @SentinelResource(value = "couponlist"
-            ,blockHandlerClass = sentinelHandler.class
-            ,blockHandler = "handlerExceptionSentinel")
-    //@RequiresPermissions("coupon:product:list")
+//    @SentinelResource(value = "couponlist"
+//            ,blockHandlerClass = sentinelHandler.class
+//            ,blockHandler = "handlerExceptionSentinel")
     public CommonResult list(@RequestParam Map<String, Object> params){
         PageUtils page = productService.queryPage(params);
 
