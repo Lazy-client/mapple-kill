@@ -1,19 +1,17 @@
 package com.mapple.coupon.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
-
-import java.io.Serializable;
-import java.util.Date;
-
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;
+import java.io.Serializable;
+import java.util.Date;
 
 /**
  * 场次表
- * 
+ *
  * @author sicheng
  * @email sicheng_zhou@qq.com
  * @date 2022-03-13 15:23:08
@@ -59,5 +57,9 @@ public class SessionEntity implements Serializable {
 	@ApiModelProperty(value = "更新时间")
 	@TableField(fill = FieldFill.INSERT_UPDATE)
 	private Date gmtModified;
+
+	@ApiModelProperty(value = "活动的开始,结束,进行中状态")
+	@TableField(exist = false)
+	private String sessionStatus;
 
 }

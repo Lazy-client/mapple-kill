@@ -25,6 +25,7 @@ import javax.annotation.Resource;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @Service("sessionService")
@@ -41,11 +42,25 @@ public class SessionServiceImpl extends ServiceImpl<SessionDao, SessionEntity> i
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
+        long time = System.currentTimeMillis();
         IPage<SessionEntity> page = this.page(
                 new Query<SessionEntity>().getPage(params),
                 new QueryWrapper<>()
         );
 
+
+        page.setRecords(page
+                .getRecords()
+                .stream()
+                .peek(e -> {
+                    if (time < e.getStartTime().getTime())
+                        e.setSessionStatus("未开始");
+                    else if (time >= e.getStartTime().getTime() && time < e.getEndTime().getTime())
+                        e.setSessionStatus("正在进行中");
+                    else if (time > e.getEndTime().getTime())
+                        e.setSessionStatus("已结束");
+                })
+                .collect(Collectors.toList()));
         return new PageUtils(page);
     }
 
@@ -111,30 +126,30 @@ public class SessionServiceImpl extends ServiceImpl<SessionDao, SessionEntity> i
         boolean suc = removeByIds(ids);
         if (!suc)
             throw new RRException("删除失败,无法删除不存在的");
-            Map<String, String> entries = hashOperations.entries(RedisKeyUtils.SESSIONS_PREFIX);
-            entries.keySet()
-                    .stream()
-                    .filter(ids::contains)
-                    .forEach(
-                            (sessionId) -> {
-                                String[] times = entries.get(sessionId).split("-");
-                                //未开始的场次
-                                if (currentTime < Long.parseLong(times[0])) {
-                                    //清理缓存
-                                    List<Sku> list = JSON.parseArray(hashOperations.get(RedisKeyUtils.SKUS_PREFIX, sessionId), Sku.class);
-                                    assert list != null;
-                                    list.forEach((sku -> {
-                                        String randomCode = sku.getRandomCode();
-                                        redisUtils.delete(RedisKeyUtils.STOCK_PREFIX + randomCode);
-                                        //删除 sku
-                                        hashOperations.delete(RedisKeyUtils.SKU_PREFIX, sessionId + "-" + sku.getProductId());
-                                    }));
-                                    //删除场次关联的skus
-                                    hashOperations.delete(RedisKeyUtils.SKUS_PREFIX, sessionId);
-                                    //删除session
-                                    hashOperations.delete(RedisKeyUtils.SESSIONS_PREFIX, sessionId);
-                                }
+        Map<String, String> entries = hashOperations.entries(RedisKeyUtils.SESSIONS_PREFIX);
+        entries.keySet()
+                .stream()
+                .filter(ids::contains)
+                .forEach(
+                        (sessionId) -> {
+                            String[] times = entries.get(sessionId).split("-");
+                            //未开始的场次
+                            if (currentTime < Long.parseLong(times[0])) {
+                                //清理缓存
+                                List<Sku> list = JSON.parseArray(hashOperations.get(RedisKeyUtils.SKUS_PREFIX, sessionId), Sku.class);
+                                assert list != null;
+                                list.forEach((sku -> {
+                                    String randomCode = sku.getRandomCode();
+                                    redisUtils.delete(RedisKeyUtils.STOCK_PREFIX + randomCode);
+                                    //删除 sku
+                                    hashOperations.delete(RedisKeyUtils.SKU_PREFIX, sessionId + "-" + sku.getProductId());
+                                }));
+                                //删除场次关联的skus
+                                hashOperations.delete(RedisKeyUtils.SKUS_PREFIX, sessionId);
+                                //删除session
+                                hashOperations.delete(RedisKeyUtils.SESSIONS_PREFIX, sessionId);
                             }
-                    );
-        }
+                        }
+                );
+    }
 }
