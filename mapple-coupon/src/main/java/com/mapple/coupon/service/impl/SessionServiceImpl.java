@@ -47,8 +47,7 @@ public class SessionServiceImpl extends ServiceImpl<SessionDao, SessionEntity> i
                 new Query<SessionEntity>().getPage(params),
                 new QueryWrapper<>()
         );
-
-
+        // todo  按开始时间排序
         page.setRecords(page
                 .getRecords()
                 .stream()
@@ -62,6 +61,7 @@ public class SessionServiceImpl extends ServiceImpl<SessionDao, SessionEntity> i
                 })
                 .sorted((e1, e2) -> e2.getGmtCreate().compareTo(e1.getGmtCreate()))
                 .collect(Collectors.toList()));
+
         return new PageUtils(page);
     }
 
