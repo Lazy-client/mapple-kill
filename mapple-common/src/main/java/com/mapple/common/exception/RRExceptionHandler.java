@@ -53,6 +53,7 @@ public class RRExceptionHandler {
         return CommonResult.error();
     }
 
+    @ExceptionHandler(BlockException.class)
     public static CommonResult handlerExceptionSentinel(BlockException exception) {
         return CommonResult.error(4444,"滚开，你被限流了");
     }
