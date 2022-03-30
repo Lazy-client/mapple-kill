@@ -36,7 +36,7 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
     private RocketMQTemplate rocketMQTemplate;
 
     @Resource
-    private CouponFeignService couponService;
+    private CouponFeignService couponFeignService;
 
     @Value("${rocketmq.name-server}")
     private String nameServer;
@@ -101,7 +101,7 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
         String sessionId = order.getSessionId();
         Integer productCount = order.getProductCount();
         // 调用Coupon模块的减库存接口
-        int result = couponService.deductStock(productId, sessionId);
+        int result = couponFeignService.deductStock(productId, sessionId);
         log.info("result结果: {}", result);
         // TODO 减本账户余额，给公共账户加余额
         String userId = order.getUserId();
