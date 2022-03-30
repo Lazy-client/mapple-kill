@@ -3,7 +3,6 @@ package com.mapple.coupon.controller;
 import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import com.mapple.common.utils.PageUtils;
 import com.mapple.common.utils.result.CommonResult;
-import com.mapple.coupon.config.sentinelHandler;
 import com.mapple.coupon.entity.ProductEntity;
 import com.mapple.coupon.entity.vo.productSessionVo_Skus;
 import com.mapple.coupon.service.ProductService;

@@ -1,5 +1,6 @@
 package com.mapple.consume.service;
 
+import com.mapple.consume.service.fallback.FallbackService;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -9,7 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
  * @author : Gelcon
  * @date : 2022/3/29 20:43
  */
-@FeignClient(value = "mapple-coupon")
+@FeignClient(value = "mapple-coupon",fallback = FallbackService.class)
 @Service
 public interface CouponFeignService {
     /**
