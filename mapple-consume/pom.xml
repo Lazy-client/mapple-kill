@@ -31,6 +31,8 @@
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
 
+        <!--        Seata-->
+
         <!--RocketMQ-->
         <dependency>
             <groupId>org.apache.rocketmq</groupId>

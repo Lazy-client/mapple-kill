@@ -12,7 +12,7 @@ import java.math.BigDecimal;
  * @author : Gelcon
  * @date : 2022/3/30 18:29
  */
-@FeignClient(value = "mapple-admin")
+@FeignClient(value = "renren-fast")
 @Service
 public interface AdminFeignService {
 
