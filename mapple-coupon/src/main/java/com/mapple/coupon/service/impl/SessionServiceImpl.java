@@ -43,12 +43,14 @@ public class SessionServiceImpl extends ServiceImpl<SessionDao, SessionEntity> i
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
         long time = System.currentTimeMillis();
+        QueryWrapper<SessionEntity> wrapper = new QueryWrapper<>();
         IPage<SessionEntity> page = this.page(
                 new Query<SessionEntity>().getPage(params),
-                new QueryWrapper<>()
+                wrapper.orderByDesc("start_time")
         );
 
 
+        // todo  按开始时间排序
         page.setRecords(page
                 .getRecords()
                 .stream()
@@ -61,6 +63,7 @@ public class SessionServiceImpl extends ServiceImpl<SessionDao, SessionEntity> i
                         e.setSessionStatus("已结束");
                 })
                 .collect(Collectors.toList()));
+
         return new PageUtils(page);
     }
 

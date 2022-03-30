@@ -73,9 +73,8 @@ public class MkOrderController {
         MkOrder order = orderService.getById(orderId);
         if (order.getStatus() == 1)
             return CommonResult.error("订单已支付，请勿重复操作！");
-        order.setStatus(1);
-        orderService.payOrder(order);
-        return CommonResult.ok("支付成功！");
+
+        return orderService.payOrder(order);
     }
 
     /**
