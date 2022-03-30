@@ -1,6 +1,7 @@
 package com.mapple.common.exception;
 
 
+import com.alibaba.csp.sentinel.slots.block.BlockException;
 import com.mapple.common.utils.result.CommonResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,5 +51,9 @@ public class RRExceptionHandler {
     public CommonResult handleException(Exception e) {
         logger.error(e.getMessage(), e);
         return CommonResult.error();
+    }
+
+    public static CommonResult handlerExceptionSentinel(BlockException exception) {
+        return CommonResult.error(4444,"滚开，你被限流了");
     }
 }

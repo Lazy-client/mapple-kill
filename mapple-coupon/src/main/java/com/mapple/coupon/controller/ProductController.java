@@ -2,6 +2,7 @@ package com.mapple.coupon.controller;
 
 import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import com.alibaba.csp.sentinel.slots.block.BlockException;
+import com.mapple.common.exception.RRExceptionHandler;
 import com.mapple.common.utils.PageUtils;
 import com.mapple.common.utils.result.CommonResult;
 import com.mapple.coupon.entity.ProductEntity;
@@ -34,16 +35,14 @@ public class ProductController {
      * 列表
      */
     @GetMapping("/list")
-    @SentinelResource(value = "couponlist",blockHandler = "handleException")
+    @SentinelResource(value = "couponlist"
+            ,blockHandlerClass = RRExceptionHandler.class
+            ,blockHandler = "handlerExceptionSentinel")
     //@RequiresPermissions("coupon:product:list")
     public CommonResult list(@RequestParam Map<String, Object> params){
         PageUtils page = productService.queryPage(params);
 
         return CommonResult.ok().put("page", page);
-    }
-
-    public CommonResult handleException(BlockException exception) {
-        return CommonResult.error(444,exception.getClass().getCanonicalName()+"\t 服务不可用");
     }
 
     /**
