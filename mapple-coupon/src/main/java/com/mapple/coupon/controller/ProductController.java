@@ -1,7 +1,9 @@
 package com.mapple.coupon.controller;
 
+import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import com.mapple.common.utils.PageUtils;
 import com.mapple.common.utils.result.CommonResult;
+import com.mapple.coupon.config.sentinelHandler;
 import com.mapple.coupon.entity.ProductEntity;
 import com.mapple.coupon.entity.vo.productSessionVo_Skus;
 import com.mapple.coupon.service.ProductService;
@@ -32,13 +34,14 @@ public class ProductController {
      * 列表
      */
     @GetMapping("/list")
-    //@RequiresPermissions("coupon:product:list")
+//    @SentinelResource(value = "couponlist"
+//            ,blockHandlerClass = sentinelHandler.class
+//            ,blockHandler = "handlerExceptionSentinel")
     public CommonResult list(@RequestParam Map<String, Object> params){
         PageUtils page = productService.queryPage(params);
 
         return CommonResult.ok().put("page", page);
     }
-
 
     /**
      * 信息
@@ -69,7 +72,7 @@ public class ProductController {
     @PostMapping("/update")
     //@RequiresPermissions("coupon:product:update")
     public CommonResult update(@Valid @ApiParam(name = "productSessionVo_Skus",
-            value = "请传入sessionId和productId,然后加上要修改的字段",
+            value = "请传入sessionId和productId,然后加上要修改的字段，注意一次修改一个产品信息，修改产品字段或者修改场次和产品关联的两个字段：秒杀价和库存，都可以在这个接口传入",
             required = true)@RequestBody productSessionVo_Skus productSessionVo_Skus){
         productService.updateProductById(productSessionVo_Skus);
         return CommonResult.ok();

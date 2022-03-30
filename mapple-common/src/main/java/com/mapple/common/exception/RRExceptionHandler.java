@@ -1,6 +1,7 @@
 package com.mapple.common.exception;
 
 
+import com.alibaba.csp.sentinel.slots.block.BlockException;
 import com.mapple.common.utils.result.CommonResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
