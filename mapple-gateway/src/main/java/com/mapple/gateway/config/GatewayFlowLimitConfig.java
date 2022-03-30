@@ -47,7 +47,7 @@ public class GatewayFlowLimitConfig {
     }
 
     // 初始化一个限流的过滤器
-    @Bean
+    @Bean(name = "sentinelGatewayFlowLimitFilter")
     @Order(Ordered.HIGHEST_PRECEDENCE)
     public GlobalFilter sentinelGatewayFilter() {
         return new SentinelGatewayFilter();
