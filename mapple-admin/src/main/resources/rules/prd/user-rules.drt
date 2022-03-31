@@ -1,0 +1,23 @@
+//模板文件
+template header
+ageMin
+ageMax
+jobValue
+overdueValue
+balanceMin
+dishonestValue
+
+package drools.templates
+
+import io.renren.modules.app.entity.UserEntity;
+template "fixRate"
+rule "calculate rule_@{row.rowNumber}"
+dialect "mvel"
+no-loop true
+when
+ $user:UserEntity(age>=@{ageMin} && age<=@{ageMax} @{,notHasJob==jobValue} @{,isOverdue==overdueValue} , balance>=@{balanceMin} @{,isDishonest==dishonestValue})
+then
+ System.out.println( $user + " is a work user who can buy product!" );
+  end
+ end template
+
