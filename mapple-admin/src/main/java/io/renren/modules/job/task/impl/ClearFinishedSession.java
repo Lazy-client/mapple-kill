@@ -55,13 +55,14 @@ public class ClearFinishedSession implements ITask {
                                     stockKeys.add(RedisKeyUtils.STOCK_PREFIX + randomCode);
                                 }
                                 //删除 sku
+                                logger.info("正在{}清理数据", times[2]);
                                 hashOperations.delete(RedisKeyUtils.SKU_PREFIX, skuKeys);
                                 valueOperations.getOperations().delete(stockKeys);
-                                logger.info("正在清理数据");
                                 //删除场次关联的skus
                                 hashOperations.delete(RedisKeyUtils.SKUS_PREFIX, sessionId);
                                 //删除session
                                 hashOperations.delete(RedisKeyUtils.SESSIONS_PREFIX, sessionId);
+                                logger.info("{}清理数据结束", times[2]);
                             }
                         }
 
