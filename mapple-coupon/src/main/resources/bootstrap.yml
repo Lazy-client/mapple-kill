@@ -1,6 +1,7 @@
 spring:
   profiles:
-      active:
+    active:
+    include: common
   application:
     name: mapple-coupon
   cloud:

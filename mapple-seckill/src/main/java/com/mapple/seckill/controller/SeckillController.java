@@ -12,6 +12,7 @@ import org.redisson.api.RMapCache;
 import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,7 +36,8 @@ public class SeckillController {
     protected Logger logger = LoggerFactory.getLogger(getClass());
     @Resource
     private SecKillService secKillService;
-
+    @Value("${ok.kill}")
+    private String ok;
     @Resource
     private HashOperations<String, String, String> hashOperations;
 
@@ -72,12 +74,13 @@ public class SeckillController {
         return CommonResult.ok().put("data", search);
 
     }
+
     @ApiOperation(value = "搜索某个场次下的某个产品详情")
     @GetMapping("searchById")
     public CommonResult searchById(@ApiParam(value = "场次Id", required = true) @RequestParam String sessionId,
-                                   @ApiParam(value = "产品Id",required = true ) @RequestParam String productId) {
+                                   @ApiParam(value = "产品Id", required = true) @RequestParam String productId) {
 
-        JSON search = secKillService.searchById(sessionId,productId);
+        JSON search = secKillService.searchById(sessionId, productId);
         return CommonResult.ok().put("data", search);
 
     }
@@ -101,10 +104,10 @@ public class SeckillController {
         RMapCache<Object, Object> userMap = redissonClient.getMapCache(RedisKeyUtils.SECKILL_USER_PREFIX);
         userMap.put("userId" + "-" + "key", "1", 60, TimeUnit.SECONDS);
         String txt =
-                "[{\"defaultImg\":\"/image\",\"description\":\"秒杀产品描述\",\"endTime\":1647587757000,\"id\":\"1504667488302624770\",\"productName\":\"秒杀产品3.18 11:54\",\"randomCode\":\"dd96795e80ac499abf467374ad381888\",\"seckillPrice\":10000,\"sessionId\":\"1504658242097872898\",\"sessionName\":\"3.18 11:00场次\",\"startTime\":1647584157000,\"title\":\"标题\",\"totalCount\":50000},{\"defaultImg\":\"/image\",\"description\":\"秒杀产品描述\",\"endTime\":1647587757000,\"id\":\"1504671308004900865\",\"productName\":\"秒杀产品3.18 12:09\",\"randomCode\":\"7c45adef3845440b8b98b57bf24464f9\",\"seckillPrice\":10000,\"sessionId\":\"1504658242097872898\",\"sessionName\":\"3.18 11:00场次\",\"startTime\":1647584157000,\"title\":\"标题\",\"totalCount\":50000},{\"defaultImg\":\"/image\",\"description\":\"这是一款银行存款产品\",\"endTime\":1647587757000,\"id\":\"1504658242097872898\",\"productId\":\"1503967060392857601\",\"productName\":\"银行存款产品\",\"randomCode\":\"3761cb514377431a8c67be78b42a1723\",\"seckillPrice\":100000,\"sessionName\":\"3.18 11:00场次\",\"startTime\":1647584157000,\"title\":\"string\",\"totalCount\":100000}]"
-                ;
+                "[{\"defaultImg\":\"/image\",\"description\":\"秒杀产品描述\",\"endTime\":1647587757000,\"id\":\"1504667488302624770\",\"productName\":\"秒杀产品3.18 11:54\",\"randomCode\":\"dd96795e80ac499abf467374ad381888\",\"seckillPrice\":10000,\"sessionId\":\"1504658242097872898\",\"sessionName\":\"3.18 11:00场次\",\"startTime\":1647584157000,\"title\":\"标题\",\"totalCount\":50000},{\"defaultImg\":\"/image\",\"description\":\"秒杀产品描述\",\"endTime\":1647587757000,\"id\":\"1504671308004900865\",\"productName\":\"秒杀产品3.18 12:09\",\"randomCode\":\"7c45adef3845440b8b98b57bf24464f9\",\"seckillPrice\":10000,\"sessionId\":\"1504658242097872898\",\"sessionName\":\"3.18 11:00场次\",\"startTime\":1647584157000,\"title\":\"标题\",\"totalCount\":50000},{\"defaultImg\":\"/image\",\"description\":\"这是一款银行存款产品\",\"endTime\":1647587757000,\"id\":\"1504658242097872898\",\"productId\":\"1503967060392857601\",\"productName\":\"银行存款产品\",\"randomCode\":\"3761cb514377431a8c67be78b42a1723\",\"seckillPrice\":100000,\"sessionName\":\"3.18 11:00场次\",\"startTime\":1647584157000,\"title\":\"string\",\"totalCount\":100000}]";
         JSON value = JSON.parseArray(txt);
         return CommonResult.ok()
-                .put("data", value);
+                .put("data", value)
+                .put("common", ok);
     }
 }

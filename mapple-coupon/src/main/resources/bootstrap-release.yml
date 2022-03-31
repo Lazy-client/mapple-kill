@@ -1,6 +1,8 @@
 spring:
   application:
     name: mapple-coupon
+  profiles:
+      include: common
   cloud:
 #    sentinel:
 #      transport:
