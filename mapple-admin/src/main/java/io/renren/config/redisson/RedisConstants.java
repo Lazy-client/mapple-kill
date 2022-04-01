@@ -1,4 +1,4 @@
-package io.renren.common.redisson;
+package io.renren.config.redisson;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;

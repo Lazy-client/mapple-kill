@@ -1,4 +1,4 @@
-package io.renren.common.redisson;
+package io.renren.config.redisson;
 
 import org.redisson.api.RBloomFilter;
 import org.redisson.api.RedissonClient;
@@ -11,11 +11,11 @@ import org.springframework.context.annotation.Configuration;
  * @date 2022/4/1 14:24
  */
 @Configuration
-public class UserBloomFilter {
+public class UserBloomFilterConfig {
     @Bean
     public RBloomFilter<String> userBloomFilter(RedissonClient redissonClient){
-        RBloomFilter<String> user = redissonClient.getBloomFilter("user");
-        user.tryInit(1000000L,0.01);
-        return user;
+        RBloomFilter<String> userBloomFilter = redissonClient.getBloomFilter("user");
+        userBloomFilter.tryInit(10000000L,0.01);
+        return userBloomFilter;
     }
 }

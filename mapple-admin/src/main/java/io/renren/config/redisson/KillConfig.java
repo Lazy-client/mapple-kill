@@ -1,4 +1,4 @@
-package io.renren.common.redisson;
+package io.renren.config.redisson;
 
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.Redisson;
