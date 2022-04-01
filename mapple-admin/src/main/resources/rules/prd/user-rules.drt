@@ -5,6 +5,8 @@ whenStr
 package drools.templates
 
 import io.renren.modules.app.entity.UserEntity;
+import io.renren.modules.app.entity.drools.UserRuleAction
+
 template "fixRate"
 rule "calculate rule_@{row.rowNumber}"
 dialect "mvel"
@@ -13,6 +15,7 @@ when
  $user:UserEntity(@{whenStr})
 then
  System.out.println( $user + " is a work user who can buy product!" );
+ UserRuleAction.doParse($user, drools.getRule());
   end
  end template
 

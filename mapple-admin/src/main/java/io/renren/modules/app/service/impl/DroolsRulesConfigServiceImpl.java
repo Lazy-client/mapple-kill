@@ -109,9 +109,10 @@ public class DroolsRulesConfigServiceImpl extends ServiceImpl<DroolsRulesConfigD
         }
         DroolsRules droolsRules = new DroolsRules();
         droolsRules.setRules(drlContent);
-        droolsRulesDao.update(droolsRules,new QueryWrapper<DroolsRules>().eq("id",1));
+        droolsRulesDao.insert(droolsRules);
         //map中缓存一份
         RulesContainer.put("rule", drlContent);
+        RulesContainer.put("ruleId", droolsRules.getId());
     }
 
     /**
@@ -125,7 +126,8 @@ public class DroolsRulesConfigServiceImpl extends ServiceImpl<DroolsRulesConfigD
             rule = RulesContainer.get("rule");
             log.info("规则取自缓存");
         } else {
-            rule = droolsRulesDao.selectById(1).getRules();
+            DroolsRules droolsRules = droolsRulesDao.selectOne(new QueryWrapper<DroolsRules>().orderByDesc("gmt_create").last("limit 1"));
+            rule = droolsRules.getRules();
             RulesContainer.put("rule", rule);
         }
         helper.addContent(rule, ResourceType.DRL);

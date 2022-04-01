@@ -10,6 +10,7 @@ package io.renren.modules.app.form;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
@@ -20,6 +21,7 @@ import javax.validation.constraints.NotBlank;
  * @author Mark sunlightcs@gmail.com
  */
 @Data
+@AllArgsConstructor
 @ApiModel(value = "登录表单")
 public class LoginForm {
     @ApiModelProperty(value = "用户名")

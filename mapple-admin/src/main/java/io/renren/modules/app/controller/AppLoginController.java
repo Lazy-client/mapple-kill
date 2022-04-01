@@ -52,7 +52,7 @@ public class AppLoginController {
      * 登录
      */
     @PostMapping("login")
-    @ApiOperation("登录")
+    @ApiOperation("登录(已经加入初筛）")
     public R login(@RequestBody LoginForm form){
         //表单校验
 //        ValidatorUtils.validateEntity(form);
