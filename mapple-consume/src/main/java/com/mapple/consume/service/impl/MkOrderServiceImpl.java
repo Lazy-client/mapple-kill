@@ -95,12 +95,13 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
     public PageUtils queryPage(Map<String, Object> params) {
         String userId = (String) params.get("userId");
         Integer status = (Integer) params.get("status");
+        Object page1 = params.get("page");
         IPage<MkOrder> page = this.page(
                 new Query<MkOrder>().getPage(params),
                 new QueryWrapper<MkOrder>()
                         .eq(StringUtils.isNotBlank(userId), "user_id", userId)
                         // 0-未支付状态, 1-已支付
-                        .eq("status", status)
+                        .eq(status != null,  "status", status)
         );
 
         return new PageUtils(page);
