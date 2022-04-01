@@ -75,6 +75,11 @@ public class JwtUtils {
         return JwtUtils.getUserId(jwt);
     }
 
+    public static String getUserIdByToken(String token) {
+        String jwt = CryptogramUtil.doDecrypt(token);
+        return JwtUtils.getUserId(jwt);
+    }
+
     /**
      * token是否过期
      *
