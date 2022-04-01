@@ -16,12 +16,14 @@ import io.renren.modules.app.service.UserService;
 import io.renren.modules.app.utils.JwtUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.redisson.api.RBloomFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,6 +41,8 @@ public class AppLoginController {
     @Autowired
     private JwtUtils jwtUtils;
 
+    @Resource
+    private RBloomFilter<String> userBloomFilter;
     /**
      * 登录
      */
@@ -58,6 +62,9 @@ public class AppLoginController {
         map.put("token", token);
         map.put("expire", jwtUtils.getExpire());
         map.put("user",userEntity);
+
+        //todo 布隆过滤器将通过初筛的人加入到白名单快速过滤
+        //userBloomFilter.add("")
 
         return R.ok(map);
     }

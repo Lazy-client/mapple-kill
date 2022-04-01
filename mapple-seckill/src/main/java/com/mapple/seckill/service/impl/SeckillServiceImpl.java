@@ -68,7 +68,7 @@ public class SeckillServiceImpl implements SecKillService {
                         logger.info("用户{}未参与过秒杀活动", userId);
                         //分布式锁减库存
                         RSemaphore semaphore = redissonClient.getSemaphore(RedisKeyUtils.STOCK_PREFIX + key);
-                        // todo 生产环境调为20ms内未减掉库存,那么库存就空了
+                        // todo 生产环境调为10ms内未减掉库存,那么库存就空了
                         boolean acquire = semaphore.tryAcquire(1, 10, TimeUnit.MILLISECONDS);
                         if (acquire) {//库存与扣成功
                             logger.info("用户{}----秒杀成功", userId);
@@ -133,6 +133,7 @@ public class SeckillServiceImpl implements SecKillService {
                     String times = sessions.get(sessionId);
                     String[] sToEnd = times.split("-");
                     Session session = new Session();
+                    // todo 未通过初筛,不设置sessionId,后续数据用户也看不到了
                     session.setSessionId(sessionId);
                     //设置 session-name
                     session.setStartTime(Long.parseLong(sToEnd[0]));
@@ -140,6 +141,7 @@ public class SeckillServiceImpl implements SecKillService {
                     session.setSessionName(sToEnd[2]);
                     //当前秒杀的场次
                     if (currentTime >= session.getStartTime() && currentTime < session.getEndTime()) {
+                        //todo 如果初筛未通过 只能看到sessionName 和时间,id也不能返回
                         String skus = hashOperations.get(RedisKeyUtils.SKUS_PREFIX, sessionId);
                         session.setSkus(JSON.parseArray(skus));
                         sessionList.add(session);
