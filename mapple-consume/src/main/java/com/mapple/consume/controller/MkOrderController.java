@@ -88,5 +88,11 @@ public class MkOrderController {
         orderService.removeByIds(orderIds);
         return CommonResult.ok("批量删除订单成功！");
     }
+
+    @ApiOperation(value = "公共账户余额接口", notes = "直接从Redis中获取公共账户余额")
+    @GetMapping("publicAccountBalance")
+    public CommonResult publicAccountBalance() {
+        return orderService.publicAccountBalance();
+    }
 }
 

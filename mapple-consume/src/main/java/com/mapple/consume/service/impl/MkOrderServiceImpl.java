@@ -148,6 +148,12 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
         throw new RRException(msg);
     }
 
+    @Override
+    public CommonResult publicAccountBalance() {
+        String balance = valueOperations.get(RedisKeyUtils.PUBLIC_ACCOUNT);
+        return CommonResult.ok().put("balance", balance);
+    }
+
     // SendOneWay
     //    @Override
     //    public CommonResult orderEnqueue(MkOrder order) {
