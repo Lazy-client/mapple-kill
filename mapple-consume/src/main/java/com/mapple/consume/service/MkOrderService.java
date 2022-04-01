@@ -19,7 +19,7 @@ public interface MkOrderService extends IService<MkOrder> {
 
     CommonResult orderEnqueue(MkOrder order);
 
-    PageUtils queryPage(Map<String, Object> params);
+    PageUtils queryPage(Map<String, Object> params, String userId);
 
     CommonResult payOrder(MkOrder order);
 
