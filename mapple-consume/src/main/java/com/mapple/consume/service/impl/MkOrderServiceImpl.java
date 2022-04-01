@@ -7,11 +7,9 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.mapple.common.exception.RRException;
 import com.mapple.common.utils.PageUtils;
 import com.mapple.common.utils.Query;
-import com.mapple.common.utils.redis.RedisUtils;
 import com.mapple.common.utils.redis.cons.RedisKeyUtils;
 import com.mapple.common.utils.result.CommonResult;
 import com.mapple.consume.entity.MkOrder;
-import com.mapple.consume.exception.ConsumeException;
 import com.mapple.consume.mapper.MkOrderMapper;
 import com.mapple.consume.service.AdminFeignService;
 import com.mapple.consume.service.CouponFeignService;
@@ -90,17 +88,14 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
         }
         return CommonResult.ok();
     }
-
     @Override
-    public PageUtils queryPage(Map<String, Object> params) {
-        String userId = (String) params.get("userId");
-        Integer status = (Integer) params.get("status");
+    public PageUtils queryPage(Map<String, Object> params, String userId) {
         IPage<MkOrder> page = this.page(
                 new Query<MkOrder>().getPage(params),
                 new QueryWrapper<MkOrder>()
                         .eq(StringUtils.isNotBlank(userId), "user_id", userId)
                         // 0-未支付状态, 1-已支付
-                        .eq("status", status)
+                        .eq(params.get("status") != null,  "status", Integer.parseInt(params.get("status").toString()))
         );
 
         return new PageUtils(page);
@@ -147,6 +142,47 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
         }
         throw new RRException(msg);
     }
+
+//    @Override
+//    @GlobalTransactional(timeoutMills = 30000, name = "Consume-PayOrder")    // Seata分布式事务
+//    public CommonResult payOrder(MkOrder order) {
+//        log.info("开始全局事务......");
+//        // 减库存
+//        String productId = order.getProductId();
+//        String sessionId = order.getSessionId();
+//        Integer productCount = order.getProductCount();
+//        // 调用Coupon模块的减库存接口
+//        int result = couponFeignService.deductStock(productId, sessionId);
+//        if (result < 1) {
+//            log.info("result==={}", result);
+//            throw new RRException("扣减库存失败");
+//        }
+//        // 减本账户余额
+//        String userId = order.getUserId();
+//        BigDecimal payAmount = order.getPayAmount();
+//        // 调用admin模块的接口
+//        log.info("进入远程调用，减余额");
+//        R r = adminFeignService.deductBalance(userId, payAmount);
+//        log.info("余额调用结束，结果{}", r.getMsg());
+//        long code = r.getCode();
+//        String msg = r.getMsg();
+//        // 给Redis公共账户加钱
+//        if (code == 0) {
+//            log.info("PayAmount转换的值: {}", payAmount.longValue());
+//            Long increment = valueOperations.increment(RedisKeyUtils.PUBLIC_ACCOUNT, payAmount.longValue());
+//            if (increment == null || increment <= 0)
+//                throw new RRException("扣减公共账户余额失败");
+//            else {
+//                // 设置订单状态为已支付
+//                order.setStatus(1);
+//                boolean flag = this.updateById(order);
+//                if (!flag)
+//                    throw new RRException("更新订单状态失败");
+//                return CommonResult.ok("执行成功");
+//            }
+//        }
+//        throw new RRException(msg);
+//    }
 
     @Override
     public CommonResult publicAccountBalance() {

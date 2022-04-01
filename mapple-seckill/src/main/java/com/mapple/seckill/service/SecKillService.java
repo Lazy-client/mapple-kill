@@ -17,7 +17,7 @@ public interface SecKillService {
 
     List<Sku> search(String sessionId);
 
-    Map<String, List<Session>> searchSessions();
+    Map<String, List<Session>> searchSessions(String token);
 
     JSON searchById(String sessionId, String productId);
 }
