@@ -1,0 +1,31 @@
+package drools.templates
+
+import io.renren.modules.app.entity.Person
+import io.renren.modules.app.entity.drools.UserRuleAction;
+import io.renren.modules.app.entity.UserEntity;
+
+// 根据名字匹配指定的人
+//rule "1.find target person"
+//    when
+//        $p : Person( name == "bob" )
+//    then
+////        UserRuleAction.doParse($p, drools.getRule());
+//        System.out.println("Rule name is [" + drools.getRule().getName() + "]");
+//        System.out.println("Rule package is [" + drools.getRule().getPackageName() + "]");
+//end
+
+// 根据年龄匹配找到打工人
+//rule "2.find the work person"
+//    when
+//        $p : Person( age >= 25 && age < 65 , name== w"bob" )
+//    then
+//        System.out.println( $p + " is a work person！" );
+//end
+
+// 根据年龄匹配找到打工人
+rule "3.find the right user who can buy product"
+    when
+        $user : UserEntity( age >= 25 , notHasJob==false , isOverdue==false , balance>=20000, isDishonest==false)
+    then
+        System.out.println( $user + " is a work user who can buy product!" );
+end

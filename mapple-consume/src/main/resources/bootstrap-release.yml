@@ -1,4 +1,6 @@
 spring:
+  profiles:
+    include: common
   application:
     name: mapple-consumer
   cloud:

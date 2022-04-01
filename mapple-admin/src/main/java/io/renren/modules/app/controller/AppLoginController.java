@@ -16,14 +16,18 @@ import io.renren.modules.app.service.UserService;
 import io.renren.modules.app.utils.JwtUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.redisson.api.RBloomFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * APP登录授权
@@ -38,6 +42,11 @@ public class AppLoginController {
     private UserService userService;
     @Autowired
     private JwtUtils jwtUtils;
+    @Autowired
+    private PersonRuleController personRuleController;
+
+    @Resource
+    private RBloomFilter<String> userBloomFilter;
 
     /**
      * 登录
@@ -53,6 +62,16 @@ public class AppLoginController {
         UserEntity userEntity = userService.getById(userId);
         //生成token
         String token = jwtUtils.generateToken(userId);
+
+        //初筛流程
+        ArrayList<UserEntity> userEntities = new ArrayList<>();
+        userEntities.add(userEntity);
+        R r = personRuleController.filterManyUserByRules(userEntities);
+        if (Objects.equals(r.get("result"), "pass")){
+            String userIdPass = userEntity.getUserId();
+            //布隆过滤器将通过初筛的人加入到白名单快速过滤
+            userBloomFilter.add(userIdPass);
+        }
 
         Map<String, Object> map = new HashMap<>();
         map.put("token", token);
