@@ -7,11 +7,9 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.mapple.common.exception.RRException;
 import com.mapple.common.utils.PageUtils;
 import com.mapple.common.utils.Query;
-import com.mapple.common.utils.redis.RedisUtils;
 import com.mapple.common.utils.redis.cons.RedisKeyUtils;
 import com.mapple.common.utils.result.CommonResult;
 import com.mapple.consume.entity.MkOrder;
-import com.mapple.consume.exception.ConsumeException;
 import com.mapple.consume.mapper.MkOrderMapper;
 import com.mapple.consume.service.AdminFeignService;
 import com.mapple.consume.service.CouponFeignService;
@@ -94,14 +92,13 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
         String userId = (String) params.get("userId");
-        Integer status = (Integer) params.get("status");
-        Object page1 = params.get("page");
+
         IPage<MkOrder> page = this.page(
                 new Query<MkOrder>().getPage(params),
                 new QueryWrapper<MkOrder>()
                         .eq(StringUtils.isNotBlank(userId), "user_id", userId)
                         // 0-未支付状态, 1-已支付
-                        .eq(status != null,  "status", status)
+                        .eq(params.get("status") != null,  "status", Integer.parseInt(params.get("status").toString()))
         );
 
         return new PageUtils(page);
