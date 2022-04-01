@@ -132,6 +132,7 @@ public class SeckillServiceImpl implements SecKillService {
     @Override
     public Map<String, List<Session>> searchSessions(String token) {
         long currentTime = System.currentTimeMillis();
+        logger.info("token=====>{}",token);
         boolean passed = userBloomFilter.contains(getUserId(token));
         Map<String, String> sessions = hashOperations.entries(RedisKeyUtils.SESSIONS_PREFIX);
         Set<String> sessionIds = sessions.keySet();
@@ -144,8 +145,10 @@ public class SeckillServiceImpl implements SecKillService {
                     String[] sToEnd = times.split("-");
                     Session session = new Session();
                     // 未通过初筛,不设置sessionId,后续数据用户也看不到了
-                    if (passed)
+                    if (passed){
+                        logger.info("user is pass:{}",passed);
                         session.setSessionId(sessionId);
+                    }
                     //设置 session-name
                     session.setStartTime(Long.parseLong(sToEnd[0]));
                     session.setEndTime(Long.parseLong(sToEnd[1]));
