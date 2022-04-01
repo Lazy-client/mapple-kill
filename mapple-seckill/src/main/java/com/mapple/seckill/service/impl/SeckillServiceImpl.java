@@ -12,6 +12,7 @@ import com.mapple.common.vo.Sku;
 import com.mapple.seckill.service.SecKillService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
+import org.redisson.api.RBloomFilter;
 import org.redisson.api.RMapCache;
 import org.redisson.api.RSemaphore;
 import org.redisson.api.RedissonClient;
@@ -51,8 +52,7 @@ public class SeckillServiceImpl implements SecKillService {
 
     @Override
     public String kill(String key, String id, String token) throws InterruptedException {
-        String jwt = CryptogramUtil.doDecrypt(token);
-        String userId = JwtUtils.getUserId(jwt);
+        String userId = getUserId(token);
         if (!StringUtils.isEmpty(userId)) {
             logger.info(userId);
             //id ====> sessionId-productId
@@ -90,6 +90,11 @@ public class SeckillServiceImpl implements SecKillService {
         return null;
     }
 
+    private String getUserId(String token) {
+        String jwt = CryptogramUtil.doDecrypt(token);
+        return JwtUtils.getUserId(jwt);
+    }
+
     @Override
     public List<Sku> search(String sessionId) {
         long time = System.currentTimeMillis();
@@ -121,30 +126,38 @@ public class SeckillServiceImpl implements SecKillService {
         return skus;
     }
 
+    @Resource
+    RBloomFilter<String> userBloomFilter;
+
     @Override
-    public Map<String, List<Session>> searchSessions() {
+    public Map<String, List<Session>> searchSessions(String token) {
         long currentTime = System.currentTimeMillis();
+        boolean passed = userBloomFilter.contains(getUserId(token));
         Map<String, String> sessions = hashOperations.entries(RedisKeyUtils.SESSIONS_PREFIX);
         Set<String> sessionIds = sessions.keySet();
         List<Session> sessionList = new ArrayList<>();
         List<Session> sessionListNotStart = new ArrayList<>();
+
         sessionIds.forEach(
                 sessionId -> {
                     String times = sessions.get(sessionId);
                     String[] sToEnd = times.split("-");
                     Session session = new Session();
-                    // todo 未通过初筛,不设置sessionId,后续数据用户也看不到了
-                    session.setSessionId(sessionId);
+                    // 未通过初筛,不设置sessionId,后续数据用户也看不到了
+                    if (passed)
+                        session.setSessionId(sessionId);
                     //设置 session-name
                     session.setStartTime(Long.parseLong(sToEnd[0]));
                     session.setEndTime(Long.parseLong(sToEnd[1]));
                     session.setSessionName(sToEnd[2]);
                     //当前秒杀的场次
                     if (currentTime >= session.getStartTime() && currentTime < session.getEndTime()) {
-                        //todo 如果初筛未通过 只能看到sessionName 和时间,id也不能返回
-                        String skus = hashOperations.get(RedisKeyUtils.SKUS_PREFIX, sessionId);
-                        session.setSkus(JSON.parseArray(skus));
-                        sessionList.add(session);
+                        //如果初筛未通过 只能看到sessionName 和时间,id也不能返回
+                        if (passed){
+                            String skus = hashOperations.get(RedisKeyUtils.SKUS_PREFIX, sessionId);
+                            session.setSkus(JSON.parseArray(skus));
+                            sessionList.add(session);
+                        }
                     } else if (currentTime < session.getStartTime()) {
                         sessionListNotStart.add(session);
                     }
