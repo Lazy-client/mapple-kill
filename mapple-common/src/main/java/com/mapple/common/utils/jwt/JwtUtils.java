@@ -70,10 +70,6 @@ public class JwtUtils {
             return null;
         return claim.getSubject();
     }
-    private String getUserIdByToken(String token) {
-        String jwt = CryptogramUtil.doDecrypt(token);
-        return JwtUtils.getUserId(jwt);
-    }
 
     public static String getUserIdByToken(String token) {
         String jwt = CryptogramUtil.doDecrypt(token);
