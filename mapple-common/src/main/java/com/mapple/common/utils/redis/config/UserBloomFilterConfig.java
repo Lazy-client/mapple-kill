@@ -1,4 +1,4 @@
-package io.renren.config.redisson;
+package com.mapple.common.utils.redis.config;
 
 import org.redisson.api.RBloomFilter;
 import org.redisson.api.RMap;
@@ -21,7 +21,7 @@ public class UserBloomFilterConfig {
     }
 
     @Bean
-    public RMap<String,String> RulesContainer(RedissonClient redissonClient){
+    public RMap<String,String> ruleMap(RedissonClient redissonClient){
         return redissonClient.getMap("rule");
     }
 }

@@ -17,10 +17,9 @@ import org.kie.api.io.ResourceType;
 import org.kie.api.runtime.KieSession;
 import org.kie.internal.io.ResourceFactory;
 import org.kie.internal.utils.KieHelper;
+import org.redisson.api.RMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -42,7 +41,6 @@ public class DroolsRulesConfigServiceImpl extends ServiceImpl<DroolsRulesConfigD
     final
     DroolsRulesDao droolsRulesDao;
 
-    Map<String, String> RulesContainer = new HashMap<>();
 
     public DroolsRulesConfigServiceImpl(DroolsRulesConfigDao droolsRulesConfigDao, DroolsRulesDao droolsRulesDao) {
         this.droolsRulesConfigDao = droolsRulesConfigDao;
@@ -114,6 +112,8 @@ public class DroolsRulesConfigServiceImpl extends ServiceImpl<DroolsRulesConfigD
         RulesContainer.put("rule", drlContent);
     }
 
+    @Resource
+    RMap<String,String> RulesContainer;
     /**
      * @param userList
      */

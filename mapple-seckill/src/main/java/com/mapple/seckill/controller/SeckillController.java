@@ -13,11 +13,7 @@ import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.HashOperations;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -38,8 +34,6 @@ public class SeckillController {
     private SecKillService secKillService;
     @Value("${ok.kill}")
     private String ok;
-    @Resource
-    private HashOperations<String, String, String> hashOperations;
 
     @ApiOperation(value = "点击秒杀", notes = "随机码一定要传")
     @ApiImplicitParams(value = {
@@ -87,8 +81,8 @@ public class SeckillController {
 
     @ApiOperation(value = "搜索所有场次信息", notes = "进行中，以及未开始")
     @GetMapping("searchSessions")
-    public CommonResult searchSessions() {
-        Map<String, List<Session>> data = secKillService.searchSessions();
+    public CommonResult searchSessions(@RequestHeader String token) {
+        Map<String, List<Session>> data = secKillService.searchSessions(token);
         return CommonResult.ok().put("data", data);
     }
 

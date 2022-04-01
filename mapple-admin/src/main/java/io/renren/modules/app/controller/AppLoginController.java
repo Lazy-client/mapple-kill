@@ -9,6 +9,7 @@
 package io.renren.modules.app.controller;
 
 
+import io.renren.common.utils.LoggerUtil;
 import io.renren.common.utils.R;
 import io.renren.modules.app.entity.UserEntity;
 import io.renren.modules.app.form.LoginForm;
@@ -71,6 +72,7 @@ public class AppLoginController {
             String userIdPass = userEntity.getUserId();
             //布隆过滤器将通过初筛的人加入到白名单快速过滤
             userBloomFilter.add(userIdPass);
+            LoggerUtil.getLogger().info("userId===={} pass",userIdPass);
         }
 
         Map<String, Object> map = new HashMap<>();
