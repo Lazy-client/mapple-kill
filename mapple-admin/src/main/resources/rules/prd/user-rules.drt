@@ -1,0 +1,18 @@
+//模板文件
+template header
+whenStr
+
+package drools.templates
+
+import io.renren.modules.app.entity.UserEntity;
+template "fixRate"
+rule "calculate rule_@{row.rowNumber}"
+dialect "mvel"
+no-loop true
+when
+ $user:UserEntity(@{whenStr})
+then
+ System.out.println( $user + " is a work user who can buy product!" );
+  end
+ end template
+

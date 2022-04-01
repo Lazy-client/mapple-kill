@@ -34,9 +34,36 @@
         <remote-addr>192.168.1.10:22</remote-addr>
         <remote-username>root</remote-username>
         <remote-passwd>123456</remote-passwd>
+<!--        drools版本-->
+        <drools.version>7.47.0.Final</drools.version>
     </properties>
 
     <dependencies>
+<!--        drools的依赖-->
+        <dependency>
+            <groupId>org.kie</groupId>
+            <artifactId>kie-spring</artifactId>
+            <version>${drools.version}</version>
+            <exclusions>
+                <!-- 依赖的spring版本全部以spring boot依赖的为准 -->
+                <exclusion>
+                    <groupId>org.springframework</groupId>
+                    <artifactId>spring-tx</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.springframework</groupId>
+                    <artifactId>spring-beans</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.springframework</groupId>
+                    <artifactId>spring-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.springframework</groupId>
+                    <artifactId>spring-context</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
 
         <!--seata-->
         <dependency>
@@ -85,6 +112,18 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+<!--        引入log4j2测试drools-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-log4j2</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -268,6 +307,7 @@
             <artifactId>redisson</artifactId>
             <version>3.13.4</version>
         </dependency>
+
     </dependencies>
 
     <build>

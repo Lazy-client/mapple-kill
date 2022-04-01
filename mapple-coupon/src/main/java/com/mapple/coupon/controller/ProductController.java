@@ -38,7 +38,6 @@ public class ProductController {
 //            ,blockHandler = "handlerExceptionSentinel")
     public CommonResult list(@RequestParam Map<String, Object> params){
         PageUtils page = productService.queryPage(params);
-
         return CommonResult.ok().put("page", page);
     }
 
