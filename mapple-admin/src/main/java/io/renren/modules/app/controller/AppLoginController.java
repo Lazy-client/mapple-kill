@@ -22,8 +22,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * APP登录授权
@@ -39,6 +41,9 @@ public class AppLoginController {
     @Autowired
     private JwtUtils jwtUtils;
 
+    @Autowired
+    PersonRuleController personRuleController;
+
     /**
      * 登录
      */
@@ -53,6 +58,16 @@ public class AppLoginController {
         UserEntity userEntity = userService.getById(userId);
         //生成token
         String token = jwtUtils.generateToken(userId);
+
+        //初筛流程
+        ArrayList<UserEntity> userEntities = new ArrayList<>();
+        userEntities.add(userEntity);
+        R r = personRuleController.filterManyUserByRules(userEntities);
+        if (Objects.equals(r.get("result"), "pass")){
+            String userIdPass = userEntity.getUserId();
+            //todo 获取通过用户的id，传入过滤器
+        }
+
 
         Map<String, Object> map = new HashMap<>();
         map.put("token", token);

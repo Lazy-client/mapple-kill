@@ -1,11 +1,6 @@
 //模板文件
 template header
-ageMin
-ageMax
-jobValue
-overdueValue
-balanceMin
-dishonestValue
+whenStr
 
 package drools.templates
 
@@ -15,7 +10,7 @@ rule "calculate rule_@{row.rowNumber}"
 dialect "mvel"
 no-loop true
 when
- $user:UserEntity(age>=@{ageMin} && age<=@{ageMax} @{,notHasJob==jobValue} @{,isOverdue==overdueValue} , balance>=@{balanceMin} @{,isDishonest==dishonestValue})
+ $user:UserEntity(@{whenStr})
 then
  System.out.println( $user + " is a work user who can buy product!" );
   end

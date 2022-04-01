@@ -61,7 +61,7 @@ public class DroolsAutoConfiguration {
         return getKieServices().newKieContainer(kieRepository.getDefaultReleaseId());
     }
 
-    private KieServices getKieServices() {
+    public KieServices getKieServices() {
         return KieServices.Factory.get();
     }
 

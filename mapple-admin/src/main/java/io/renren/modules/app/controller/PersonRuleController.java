@@ -1,11 +1,10 @@
 package io.renren.modules.app.controller;
 
 import io.renren.common.utils.R;
-import io.renren.modules.app.entity.DroolsRulesConfig;
+import io.renren.modules.app.entity.drools.DroolsRulesConfig;
 import io.renren.modules.app.entity.Person;
 import io.renren.modules.app.entity.UserEntity;
 import io.renren.modules.app.service.DroolsRulesConfigService;
-import io.renren.modules.app.utils.droolsUserEntityUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.kie.api.runtime.KieContainer;
@@ -26,9 +25,6 @@ import java.util.List;
 public class PersonRuleController {
     @Autowired
     private KieContainer kieContainer;
-
-    @Autowired
-    private droolsUserEntityUtils droolsUserEntityUtils;
 
     @Autowired
     private DroolsRulesConfigService droolsRulesConfigService;
@@ -59,48 +55,17 @@ public class PersonRuleController {
         }
     }
 
-    @ApiOperation("（实操）筛选一个用户")
-    @PostMapping ("oneUser")
-    public void filterUserByRules(@RequestBody UserEntity userEntity) {
-//        KieSession kSession = kieContainer.newKieSession();
-//        try {
-//            kSession.insert(userEntity);
-//            kSession.fireAllRules();
-//        } finally {
-//            kSession.dispose();
-//        }
-
-        droolsUserEntityUtils.executeRules(userEntity);
-        System.out.println("完成！");
+    @ApiOperation("（实操）筛选一个或多个用户")
+    @PostMapping("multiUser")
+    public R filterManyUserByRules(@RequestBody List<UserEntity> userEntities) {
+        String res = droolsRulesConfigService.filterUsers(userEntities);
+        return R.ok().put("result",res);
     }
-//
-//    @ApiOperation("（实操）筛选多个用户")
-//    @PostMapping("multiUser")
-//    public void filterManyUserByRules(@RequestBody List<UserEntity> userEntities) {
-//        KieSession kSession = kieContainer.newKieSession();
-//        try {
-//            for (UserEntity userEntity : userEntities) {
-//                kSession.insert(userEntity);
-//            }
-//            kSession.fireAllRules();
-//        } finally {
-//            kSession.dispose();
-//        }
-//    }
-//
-//    @ApiOperation("修改规则")
-//    @PostMapping("updateRule")
-//    public void updateRule(@RequestBody List<UserEntity> userEntities) {
-//
-//    }
 
     @ApiOperation("修改筛选规则")
-    @PostMapping ("update")
+    @PostMapping("update")
     public R updateRules(@Valid @RequestBody DroolsRulesConfig droolsRulesConfig) {
-        //修改规则
-        if (droolsRulesConfigService.updateById(droolsRulesConfig)) {
-            return R.ok();
-        }
-        return R.error();
+        droolsRulesConfigService.updateRules(droolsRulesConfig);
+        return R.ok();
     }
 }
