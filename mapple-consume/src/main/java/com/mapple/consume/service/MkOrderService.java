@@ -22,4 +22,6 @@ public interface MkOrderService extends IService<MkOrder> {
     PageUtils queryPage(Map<String, Object> params);
 
     CommonResult payOrder(MkOrder order);
+
+    CommonResult publicAccountBalance();
 }

@@ -18,6 +18,19 @@
 
 
     <dependencies>
+
+        <!--seata-->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-seata</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>fastjson</artifactId>
+                    <groupId>com.alibaba</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
         <!--SpringCloud ailibaba sentinel-datasource-nacos 后续做持久化用到-->
         <dependency>
             <groupId>com.alibaba.csp</groupId>

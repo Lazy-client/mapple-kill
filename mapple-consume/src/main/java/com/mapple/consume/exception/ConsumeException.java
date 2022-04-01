@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ConsumeException extends RuntimeException{
+public class ConsumeException extends RuntimeException {
     private Integer code;
     private String msg;
 }
