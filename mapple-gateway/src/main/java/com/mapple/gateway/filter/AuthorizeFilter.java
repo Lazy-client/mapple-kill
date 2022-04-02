@@ -2,12 +2,14 @@ package com.mapple.gateway.filter;
 
 import com.mapple.gateway.utils.CryptogramUtil;
 import com.mapple.gateway.utils.JwtUtils;
+import io.jsonwebtoken.Claims;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
@@ -37,7 +39,7 @@ public class AuthorizeFilter implements GlobalFilter, Ordered {
         //2. 则获取响应
         ServerHttpResponse response = exchange.getResponse();
         //3. 如果是登录请求则放行
-        if (request.getURI().getPath().startsWith(adminPath)) {
+        if (request.getURI().getPath().startsWith(adminPath) || request.getURI().getPath().startsWith("/coupon")) {
             return chain.filter(exchange);
         }
         //4. 获取请求头
@@ -47,16 +49,19 @@ public class AuthorizeFilter implements GlobalFilter, Ordered {
 
         //6. 判断请求头中是否有令牌
         if (!StringUtils.isEmpty(token)) {
-            String jwt = CryptogramUtil.doDecrypt(token);
-            String userId = JwtUtils.getUserId(jwt);
-            if (!StringUtils.isEmpty(userId))
-                return chain.filter(exchange);
+            Claims claims = JwtUtils.getClaimByToken(CryptogramUtil.doDecrypt(token));
+            if (claims == null || JwtUtils.isTokenExpired(claims.getExpiration())) {
+                //7. 响应中放入返回的状态吗, 没有权限访问
+                response.setStatusCode(HttpStatus.UNAUTHORIZED);
+                //8. 返回
+                return response.setComplete();
+            }
+            return chain.filter(exchange);
         }
         //7. 响应中放入返回的状态吗, 没有权限访问
-        //response.setStatusCode(HttpStatus.UNAUTHORIZED);
+        response.setStatusCode(HttpStatus.UNAUTHORIZED);
         //8. 返回
-        //return response.setComplete();
-        return chain.filter(exchange);
+        return response.setComplete();
     }
 
     @Override

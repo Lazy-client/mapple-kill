@@ -1,5 +1,6 @@
 package com.mapple.consume.controller;
 
+import com.mapple.common.utils.LoggerUtil;
 import com.mapple.common.utils.PageUtils;
 import com.mapple.common.utils.jwt.JwtUtils;
 import com.mapple.common.utils.result.CommonResult;
@@ -9,7 +10,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 
@@ -53,9 +53,10 @@ public class MkOrderController {
     @ApiOperation(value = "订单查询", notes = "status参数传入0，即为未支付订单，传入1即为已支付订单")
     @GetMapping("/list")
     //    @RequiresPermissions("sys:order:list")
-    public CommonResult list(@RequestParam Map<String, Object> params, HttpServletRequest httpServletRequest) {
-        String token = httpServletRequest.getHeader("token");
+    public CommonResult list(@RequestParam Map<String, Object> params, @RequestHeader String token) {
+        LoggerUtil.getLogger().info("token==={}", token);
         String userId = JwtUtils.getUserIdByToken(token);
+        LoggerUtil.getLogger().info("userId===={}", userId);
         PageUtils page = orderService.queryPage(params, userId);
 
         return CommonResult.ok().put("page", page);
