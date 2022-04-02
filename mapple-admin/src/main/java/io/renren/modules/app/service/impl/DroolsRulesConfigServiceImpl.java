@@ -3,13 +3,12 @@ package io.renren.modules.app.service.impl;
 import cn.hutool.core.util.CharsetUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import io.renren.common.utils.SpringContextUtils;
+import io.renren.modules.app.dao.DroolsLogDao;
 import io.renren.modules.app.dao.DroolsRulesConfigDao;
 import io.renren.modules.app.dao.DroolsRulesDao;
 import io.renren.modules.app.entity.UserEntity;
-import io.renren.modules.app.entity.drools.DroolsRules;
-import io.renren.modules.app.entity.drools.DroolsRulesConfig;
-import io.renren.modules.app.entity.drools.UserRuleAction;
-import io.renren.modules.app.entity.drools.WhenEntity;
+import io.renren.modules.app.entity.drools.*;
 import io.renren.modules.app.service.DroolsRulesConfigService;
 import org.apache.commons.lang3.StringUtils;
 import org.drools.template.ObjectDataCompiler;
@@ -20,6 +19,7 @@ import org.kie.internal.utils.KieHelper;
 import org.redisson.api.RMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -143,5 +143,26 @@ public class DroolsRulesConfigServiceImpl extends ServiceImpl<DroolsRulesConfigD
             return "pass";
         }
         return null;
+    }
+
+    @Async("myExecutor")
+    public void asyncExecuteLog(UserEntity userEntity,int status){
+        //写入日志表中
+        RMap<String, String> rulesContainer = (RMap<String, String>) SpringContextUtils.getBean("RulesContainer");
+        DroolsLogDao droolsLogDao = (DroolsLogDao) SpringContextUtils.getBean("droolsLogDao");
+        DroolsLog droolsLog = new DroolsLog();
+        //匹配状态
+        if (status==1){
+            droolsLog.setLog("姓名："+userEntity.getRealName()+" 用户名："+userEntity.getUsername()+" is matched Rule");
+            droolsLog.setPassStatus(true);
+        }
+        //不匹配状态
+        if (status==0){
+            droolsLog.setLog("姓名："+userEntity.getRealName()+" 用户名："+userEntity.getUsername()+" isn't matched Rule");
+            droolsLog.setPassStatus(false);
+        }
+        droolsLog.setRuleId(rulesContainer.get("ruleId"));
+        //插入到log表中
+        droolsLogDao.insert(droolsLog);
     }
 }

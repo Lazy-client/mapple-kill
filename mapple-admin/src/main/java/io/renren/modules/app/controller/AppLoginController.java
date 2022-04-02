@@ -11,13 +11,19 @@ package io.renren.modules.app.controller;
 
 import io.renren.common.utils.LoggerUtil;
 import io.renren.common.utils.R;
+import io.renren.common.utils.SpringContextUtils;
+import io.renren.modules.app.dao.DroolsLogDao;
 import io.renren.modules.app.entity.UserEntity;
+import io.renren.modules.app.entity.drools.DroolsLog;
 import io.renren.modules.app.form.LoginForm;
+import io.renren.modules.app.service.DroolsRulesConfigService;
 import io.renren.modules.app.service.UserService;
+import io.renren.modules.app.service.impl.DroolsRulesConfigServiceImpl;
 import io.renren.modules.app.utils.JwtUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.redisson.api.RBloomFilter;
+import org.redisson.api.RMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,6 +35,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * APP登录授权
@@ -48,6 +55,9 @@ public class AppLoginController {
 
     @Resource
     private RBloomFilter<String> userBloomFilter;
+
+    @Autowired
+    DroolsRulesConfigServiceImpl droolsRulesConfigService;
 
     /**
      * 登录
@@ -73,7 +83,11 @@ public class AppLoginController {
             //布隆过滤器将通过初筛的人加入到白名单快速过滤
             userBloomFilter.add(userIdPass);
             LoggerUtil.getLogger().info("userId===={} pass",userIdPass);
+        }else {
+            //记录未通过的用户log
+            droolsRulesConfigService.asyncExecuteLog(userEntity,0);
         }
+
 
         Map<String, Object> map = new HashMap<>();
         map.put("token", token);

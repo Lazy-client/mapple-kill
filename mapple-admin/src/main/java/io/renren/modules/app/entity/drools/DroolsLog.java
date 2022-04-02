@@ -1,7 +1,9 @@
 package io.renren.modules.app.entity.drools;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import static com.baomidou.mybatisplus.annotation.IdType.ASSIGN_ID;
@@ -17,4 +19,6 @@ public class DroolsLog {
     private String id;
     private String log;
     private String ruleId;
+    @ApiModelProperty(value = "通过状态，true通过，false不通过")
+    private Boolean passStatus;
 }
