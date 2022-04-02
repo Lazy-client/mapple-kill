@@ -20,5 +20,5 @@ public class RedisKeyUtils {
     public static String SECKILL_USER_PREFIX = "seckill:user:";
     public static String SECKILL_IP_BLACK_LIST = "seckill:ip:black_list";
     public static String JWT_WHITE_LIST = "seckill:jwt:white_list";
-    public static String PUBLIC_ACCOUNT="seckill:account";
+    public static String PUBLIC_ACCOUNT="seckill:account:";
 }
