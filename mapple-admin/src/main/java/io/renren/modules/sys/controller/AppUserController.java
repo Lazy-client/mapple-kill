@@ -27,7 +27,7 @@ public class AppUserController {
      */
     @ApiOperation("查询appUser列表")
     @GetMapping("/list")
-//    @RequiresPermissions("app:user:list")
+    @RequiresPermissions("app:user:list")
     public R list(@RequestParam Map<String, Object> params){
         PageUtils page = userService.queryPage(params);
         return R.ok().put("page", page);
@@ -39,7 +39,7 @@ public class AppUserController {
      */
     @GetMapping("/info/{userId}")
     @ApiOperation("查询appUser信息")
-//    @RequiresPermissions("app:user:info")
+    @RequiresPermissions("app:user:info")
     public R info(@PathVariable("userId") String userId){
         UserEntity user = userService.getById(userId);
         return R.ok().put("user", user);
@@ -59,7 +59,7 @@ public class AppUserController {
      * 修改
      */
     @PostMapping("/update")
-//    @RequiresPermissions("app:user:update")
+    @RequiresPermissions("app:user:update")
     public R update(@RequestBody UserEntity user){
         userService.updateById(user);
 
@@ -71,7 +71,7 @@ public class AppUserController {
      */
     @PostMapping("/delete")
     @ApiOperation("删除appUser")
-//    @RequiresPermissions("app:user:delete")
+    @RequiresPermissions("app:user:delete")
     public R delete(@RequestBody String[] userIds){
         userService.removeByIds(Arrays.asList(userIds));
         return R.ok();
