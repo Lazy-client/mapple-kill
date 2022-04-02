@@ -49,7 +49,7 @@ public class DroolsRulesConfigServiceImpl extends ServiceImpl<DroolsRulesConfigD
 
 
     @Override
-    public void updateRules(DroolsRulesConfig droolsRulesConfig) {
+    public String updateRules(DroolsRulesConfig droolsRulesConfig) {
         //修改规则
         if (droolsRulesConfig.getJobValue().equals("true")) {
             droolsRulesConfig.setJobValue(null);
@@ -64,13 +64,14 @@ public class DroolsRulesConfigServiceImpl extends ServiceImpl<DroolsRulesConfigD
         //更新droolsRulesConfig规则数据表
         updateById(droolsRulesConfig);
         //把规则字符串放入droolsrules表中
-        putRulesInDB();
+        return putRulesInDB();
     }
 
     /**
      * 规则生成以及持久化
+     * @return
      */
-    public void putRulesInDB() {
+    public String putRulesInDB() {
         DroolsRulesConfig droolsRulesConfig = droolsRulesConfigDao.selectOne(new QueryWrapper<DroolsRulesConfig>().eq("rule_name", "fix"));
         //notHasJob==false , isOverdue==false , balance>=20000, isDishonest==false
         //暴力拼接when条件语句
@@ -111,6 +112,7 @@ public class DroolsRulesConfigServiceImpl extends ServiceImpl<DroolsRulesConfigD
         //map中缓存一份
         RulesContainer.put("rule", drlContent);
         RulesContainer.put("ruleId", droolsRules.getId());
+        return droolsRules.getId();
     }
 
     @Resource
@@ -161,6 +163,7 @@ public class DroolsRulesConfigServiceImpl extends ServiceImpl<DroolsRulesConfigD
             droolsLog.setLog("姓名："+userEntity.getRealName()+" 用户名："+userEntity.getUsername()+" isn't matched Rule");
             droolsLog.setPassStatus(false);
         }
+        droolsLog.setUsername(userEntity.getUsername());
         droolsLog.setRuleId(rulesContainer.get("ruleId"));
         //插入到log表中
         droolsLogDao.insert(droolsLog);

@@ -11,7 +11,7 @@ import java.util.List;
  * @date 2022/3/31 10:47
  */
 public interface DroolsRulesConfigService extends IService<DroolsRulesConfig> {
-    void updateRules(DroolsRulesConfig droolsRulesConfig);
+    String updateRules(DroolsRulesConfig droolsRulesConfig);
 
     String filterUsers(List<UserEntity> userEntities);
 }

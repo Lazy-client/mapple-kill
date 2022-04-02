@@ -8,6 +8,7 @@ import io.renren.modules.app.service.DroolsRulesConfigService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import io.swagger.models.auth.In;
 import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,4 +74,15 @@ public class PersonRuleController {
         droolsRulesConfigService.updateRules(droolsRulesConfig);
         return R.ok();
     }
+
+    @ApiOperation("（可用）查询筛选规则")
+    @GetMapping("selectRule")
+    public R selectRules(@RequestParam @ApiParam(name = "Integer",
+            value = "请传入id=1,返回的三个Boolean如果为空表示：此规则字段当前没开启，有无工作都可，false表示必须为有工作才能通过筛选",
+            required = true)Integer ruleId) {
+        DroolsRulesConfig config = droolsRulesConfigService.getById(ruleId);
+        return R.ok().put("rule",config);
+    }
+
+
 }
