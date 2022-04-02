@@ -10,11 +10,13 @@ package io.renren.modules.app.service;
 
 import com.baomidou.mybatisplus.extension.api.R;
 import com.baomidou.mybatisplus.extension.service.IService;
+import io.renren.common.utils.PageUtils;
 import io.renren.modules.app.entity.UserEntity;
 import io.renren.modules.app.form.LoginForm;
 import io.renren.modules.app.form.RegisterForm;
 
 import java.math.BigDecimal;
+import java.util.Map;
 
 /**
  * 用户
@@ -23,7 +25,9 @@ import java.math.BigDecimal;
  */
 public interface UserService extends IService<UserEntity> {
 
-	UserEntity queryByUsername(String mobile);
+    PageUtils queryPage(Map<String, Object> params);
+
+    UserEntity queryByUsername(String mobile);
 
 	/**
 	 * 用户登录
