@@ -34,7 +34,7 @@ public interface UserService extends IService<UserEntity> {
 	 * @param form    登录表单
 	 * @return        返回用户ID
 	 */
-	String login(LoginForm form);
+	UserEntity login(LoginForm form);
 
 	String register(RegisterForm form);
 

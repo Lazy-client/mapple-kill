@@ -11,19 +11,14 @@ package io.renren.modules.app.controller;
 
 import io.renren.common.utils.LoggerUtil;
 import io.renren.common.utils.R;
-import io.renren.common.utils.SpringContextUtils;
-import io.renren.modules.app.dao.DroolsLogDao;
 import io.renren.modules.app.entity.UserEntity;
-import io.renren.modules.app.entity.drools.DroolsLog;
 import io.renren.modules.app.form.LoginForm;
-import io.renren.modules.app.service.DroolsRulesConfigService;
 import io.renren.modules.app.service.UserService;
 import io.renren.modules.app.service.impl.DroolsRulesConfigServiceImpl;
 import io.renren.modules.app.utils.JwtUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.redisson.api.RBloomFilter;
-import org.redisson.api.RMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -35,7 +30,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * APP登录授权
@@ -69,11 +63,9 @@ public class AppLoginController {
 //        ValidatorUtils.validateEntity(form);
 
         //用户登录
-        String userId = userService.login(form);
-        UserEntity userEntity = userService.getById(userId);
+        UserEntity userEntity = userService.login(form);
         //生成token
-        String token = jwtUtils.generateToken(userId);
-
+        String token = jwtUtils.generateToken(userEntity.getUserId());
         //初筛流程
         ArrayList<UserEntity> userEntities = new ArrayList<>();
         userEntities.add(userEntity);

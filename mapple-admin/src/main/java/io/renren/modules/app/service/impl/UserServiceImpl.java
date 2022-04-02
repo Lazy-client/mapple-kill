@@ -49,7 +49,7 @@ public class UserServiceImpl extends ServiceImpl<UserDao, UserEntity> implements
     }
 
     @Override
-    public String login(LoginForm form) {
+    public UserEntity login(LoginForm form) {
         UserEntity user = queryByUsername(form.getUsername());
         Assert.isNull(user, "用户名错误");
 
@@ -59,7 +59,7 @@ public class UserServiceImpl extends ServiceImpl<UserDao, UserEntity> implements
         }
 
         //如果没错，则返回用户唯一id
-        return user.getUserId();
+        return user;
     }
 
     @Override
