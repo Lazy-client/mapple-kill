@@ -145,7 +145,7 @@ public class DroolsRulesConfigServiceImpl extends ServiceImpl<DroolsRulesConfigD
         return null;
     }
 
-    @Async("myExecutor")
+    @Async("customizedApplicationTaskExecutor")
     public void asyncExecuteLog(UserEntity userEntity,int status){
         //写入日志表中
         RMap<String, String> rulesContainer = (RMap<String, String>) SpringContextUtils.getBean("RulesContainer");

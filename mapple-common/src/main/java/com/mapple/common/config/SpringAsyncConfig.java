@@ -1,4 +1,4 @@
-package io.renren.modules.app.config;
+package com.mapple.common.config;
 
 import lombok.Setter;
 import org.slf4j.Logger;
