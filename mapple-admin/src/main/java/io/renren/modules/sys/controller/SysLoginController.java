@@ -15,6 +15,7 @@ import io.renren.modules.sys.form.SysLoginForm;
 import io.renren.modules.sys.service.SysCaptchaService;
 import io.renren.modules.sys.service.SysUserService;
 import io.renren.modules.sys.service.SysUserTokenService;
+import io.swagger.annotations.ApiOperation;
 import org.apache.commons.io.IOUtils;
 import org.apache.shiro.crypto.hash.Sha256Hash;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,8 +64,9 @@ public class SysLoginController extends AbstractController {
 	/**
 	 * 登录
 	 */
-	@PostMapping("/sys/login")
+	@PostMapping(value = "/sys/login")
 	@SysLog("登陆系统")
+	@ApiOperation("登录")
 	public Map<String, Object> login(@RequestBody SysLoginForm form)throws IOException {
 		boolean captcha = sysCaptchaService.validate(form.getUuid(), form.getCaptcha());
 		if(!captcha){
