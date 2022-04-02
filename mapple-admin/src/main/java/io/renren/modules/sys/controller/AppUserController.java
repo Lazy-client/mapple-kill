@@ -4,6 +4,7 @@ import io.renren.common.utils.PageUtils;
 import io.renren.common.utils.R;
 import io.renren.modules.app.entity.UserEntity;
 import io.renren.modules.app.service.UserService;
+import io.swagger.annotations.ApiOperation;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,8 +25,9 @@ public class AppUserController {
     /**
      * 列表
      */
+    @ApiOperation("查询appUser列表")
     @GetMapping("/list")
-    @RequiresPermissions("app:user:list")
+//    @RequiresPermissions("app:user:list")
     public R list(@RequestParam Map<String, Object> params){
         PageUtils page = userService.queryPage(params);
         return R.ok().put("page", page);
@@ -36,7 +38,8 @@ public class AppUserController {
      * 信息
      */
     @GetMapping("/info/{userId}")
-    @RequiresPermissions("app:user:info")
+    @ApiOperation("查询appUser信息")
+//    @RequiresPermissions("app:user:info")
     public R info(@PathVariable("userId") String userId){
         UserEntity user = userService.getById(userId);
         return R.ok().put("user", user);
@@ -56,7 +59,7 @@ public class AppUserController {
      * 修改
      */
     @PostMapping("/update")
-    @RequiresPermissions("app:user:update")
+//    @RequiresPermissions("app:user:update")
     public R update(@RequestBody UserEntity user){
         userService.updateById(user);
 
@@ -67,7 +70,8 @@ public class AppUserController {
      * 删除
      */
     @PostMapping("/delete")
-    @RequiresPermissions("app:user:delete")
+    @ApiOperation("删除appUser")
+//    @RequiresPermissions("app:user:delete")
     public R delete(@RequestBody String[] userIds){
         userService.removeByIds(Arrays.asList(userIds));
         return R.ok();
