@@ -19,4 +19,6 @@ public interface AdminFeignService {
     @GetMapping("/renren-fast/app/user/deductBalance/{userId}/{payAmount}")
     R deductBalance(@PathVariable String userId,
                     @PathVariable BigDecimal payAmount);
+
+
 }

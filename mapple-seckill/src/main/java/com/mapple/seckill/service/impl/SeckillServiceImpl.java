@@ -78,8 +78,17 @@ public class SeckillServiceImpl implements SecKillService {
                             MkOrder order = new MkOrder();
                             order.setUserId(userId);
                             order.setSessionId(sku.getId());
+                            order.setSessionName(sku.getSessionName());
                             order.setProductId(sku.getProductId());
+                            order.setProductName(sku.getProductName());
                             order.setOrderSn(IdWorker.get32UUID());
+                            // 写死，默认只能抢购1份
+                            order.setProductCount(1);
+                            // 暂时先写成一样的
+                            order.setTotalAmount(sku.getSeckillPrice());
+                            order.setPayAmount(sku.getSeckillPrice());
+                            // 1天内不支付，自动取消
+                            order.setAutoConfirmDay(1);
                             rocketMQTemplate.send(messageTopic, MessageBuilder.withPayload(order).build());
                             return "ok";
                         }

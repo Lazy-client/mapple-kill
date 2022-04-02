@@ -45,6 +45,16 @@ public class SysMenuController extends AbstractController {
 		Set<String> permissions = shiroService.getUserPermissions(getUserId());
 		return R.ok().put("menuList", menuList).put("permissions", permissions);
 	}
+
+//	/**
+//	 * 导航菜单
+//	 */
+//	@GetMapping("/navUser/{userId}")
+//	public com.baomidou.mybatisplus.extension.api.R navUser(@PathVariable String userId){
+//		List<SysMenuEntity> menuList = sysMenuService.getUserMenuList(getUserId());
+//		Set<String> permissions = shiroService.getUserPermissions(getUserId());
+//		return com.baomidou.mybatisplus.extension.api.R.ok().put("menuList", menuList).put("permissions", permissions);
+//	}
 	
 	/**
 	 * 所有菜单列表
