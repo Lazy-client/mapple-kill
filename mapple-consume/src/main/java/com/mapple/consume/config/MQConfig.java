@@ -67,32 +67,32 @@ public class MQConfig {
      * @return  返回DefaultMQPushConsumer，交给Spring去管理
      */
 
-//    @Bean(name = "CustomPushConsumer")
-//    public DefaultMQPushConsumer customPushConsumer() throws MQClientException {
-//        log.info(consumerGroup + "*******" + nameServer + "*******" + messageTopic);
-//        DefaultMQPushConsumer consumer = new DefaultMQPushConsumer(consumerGroup);
-//        consumer.setNamesrvAddr(nameServer);
-//        consumer.subscribe(messageTopic, "*");
-//        // 设置每次消息拉取的时间间隔，单位毫秒
-//        consumer.setPullInterval(1000);
-//        // 设置每个队列每次拉取的最大消息数
-//        consumer.setPullBatchSize(24);
-//        // 设置消费者单次批量消费的消息数目上限
-//        consumer.setConsumeMessageBatchMaxSize(12);
-//        consumer.registerMessageListener((MessageListenerConcurrently) (msgs, context)
-//                -> {
-//            List<MkOrder> orderList = new ArrayList<>(msgs.size());
-//            Map<Integer, Integer> queueMsgMap = new HashMap<>(8);
-//            msgs.forEach(msg -> {
-//                orderList.add(JSONObject.parseObject(msg.getBody(), MkOrder.class));
-//                queueMsgMap.compute(msg.getQueueId(), (key, val) -> val == null ? 1 : ++val);
-//            });
-//            log.info("MkOrderList size: {}, content: {}", orderList.size(), orderList);
-//            // 处理批量消息
-//            orderService.saveBatch(orderList);
-//            return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
-//        });
-//        consumer.start();
-//        return consumer;
-//    }
+    @Bean(name = "CustomPushConsumer")
+    public DefaultMQPushConsumer customPushConsumer() throws MQClientException {
+        log.info(consumerGroup + "*******" + nameServer + "*******" + messageTopic);
+        DefaultMQPushConsumer consumer = new DefaultMQPushConsumer(consumerGroup);
+        consumer.setNamesrvAddr(nameServer);
+        consumer.subscribe(messageTopic, "*");
+        // 设置每次消息拉取的时间间隔，单位毫秒
+        consumer.setPullInterval(1000);
+        // 设置每个队列每次拉取的最大消息数
+        consumer.setPullBatchSize(24);
+        // 设置消费者单次批量消费的消息数目上限
+        consumer.setConsumeMessageBatchMaxSize(12);
+        consumer.registerMessageListener((MessageListenerConcurrently) (msgs, context)
+                -> {
+            List<MkOrder> orderList = new ArrayList<>(msgs.size());
+            Map<Integer, Integer> queueMsgMap = new HashMap<>(8);
+            msgs.forEach(msg -> {
+                orderList.add(JSONObject.parseObject(msg.getBody(), MkOrder.class));
+                queueMsgMap.compute(msg.getQueueId(), (key, val) -> val == null ? 1 : ++val);
+            });
+            log.info("MkOrderList size: {}, content: {}", orderList.size(), orderList);
+            // 处理批量消息
+            orderService.saveBatch(orderList);
+            return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
+        });
+        consumer.start();
+        return consumer;
+    }
 }

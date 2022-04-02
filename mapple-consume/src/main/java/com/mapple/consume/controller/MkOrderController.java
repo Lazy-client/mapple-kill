@@ -1,6 +1,5 @@
 package com.mapple.consume.controller;
 
-
 import com.mapple.common.utils.PageUtils;
 import com.mapple.common.utils.jwt.JwtUtils;
 import com.mapple.common.utils.result.CommonResult;
@@ -9,7 +8,6 @@ import com.mapple.consume.service.MkOrderService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.*;
-
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -43,8 +41,13 @@ public class MkOrderController {
 //        return orderService.orderEnqueue(order);
 //    }
 
+    /*
+     * 订单接口，供管理员使用
+     */
+
+
     /**
-     * 订单列表
+     * 订单列表,供用户使用
      * 0-未支付状态, 1-已支付
      */
     @ApiOperation(value = "订单查询", notes = "status参数传入0，即为未支付订单，传入1即为已支付订单")
@@ -54,6 +57,7 @@ public class MkOrderController {
         String token = httpServletRequest.getHeader("token");
         String userId = JwtUtils.getUserIdByToken(token);
         PageUtils page = orderService.queryPage(params, userId);
+
         return CommonResult.ok().put("page", page);
     }
 
