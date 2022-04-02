@@ -1,19 +1,15 @@
-package io.renren.modules.app.config;
+package com.mapple.common.config;
 
-import io.renren.modules.app.entity.drools.UserRuleAction;
 import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
 import java.util.concurrent.Executor;
@@ -50,7 +46,7 @@ public class SpringAsyncConfig implements AsyncConfigurer {
         }
     };
     @Override
-    @Bean("myExecutor")
+    @Bean("customizedApplicationTaskExecutor")
     public Executor getAsyncExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(corePoolSize);
