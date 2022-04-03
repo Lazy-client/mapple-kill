@@ -1,18 +1,14 @@
 package com.mapple.consume.entity;
 
-import java.math.BigDecimal;
-import com.baomidou.mybatisplus.annotation.IdType;
-import java.util.Date;
-import com.baomidou.mybatisplus.annotation.Version;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.FieldFill;
-import com.baomidou.mybatisplus.annotation.TableLogic;
-import com.baomidou.mybatisplus.annotation.TableField;
-import java.io.Serializable;
+import com.baomidou.mybatisplus.annotation.*;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.util.Date;
 
 /**
  * <p>
@@ -32,6 +28,8 @@ public class MkOrder implements Serializable {
     @ApiModelProperty(value = "主键id")
       @TableId(value = "id", type = IdType.ASSIGN_ID)
     private String id;
+    @ApiModelProperty(value = "随机码")
+    private String randomCode;
 
     @ApiModelProperty(value = "场次id")
     private String sessionId;

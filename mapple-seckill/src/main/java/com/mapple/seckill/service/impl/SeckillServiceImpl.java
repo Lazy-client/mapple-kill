@@ -78,6 +78,7 @@ public class SeckillServiceImpl implements SecKillService {
                             MkOrder order = new MkOrder();
                             order.setUserId(userId);
                             order.setSessionId(sku.getId());
+                            order.setRandomCode(sku.getRandomCode());
                             order.setSessionName(sku.getSessionName());
                             order.setProductId(sku.getProductId());
                             order.setProductName(sku.getProductName());

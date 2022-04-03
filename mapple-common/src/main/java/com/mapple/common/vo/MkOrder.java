@@ -29,6 +29,9 @@ public class MkOrder implements Serializable {
       @TableId(value = "id", type = IdType.ASSIGN_ID)
     private String id;
 
+    @ApiModelProperty(value = "随机码")
+    private String randomCode;
+
     @ApiModelProperty(value = "场次id")
     private String sessionId;
 
