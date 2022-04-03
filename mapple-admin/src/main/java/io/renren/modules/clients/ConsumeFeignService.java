@@ -4,6 +4,7 @@ import io.renren.modules.clients.fallbact.FallbackService;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -16,5 +17,5 @@ import java.util.List;
 @Service
 public interface ConsumeFeignService {
    @GetMapping("/consume/mk-order/getTimeOrders")
-   List<String> getTimeOrders(long timeout,long currentTime);
+   List<String> getTimeOrders(@RequestParam Long timeout,@RequestParam Long currentTime);
 }

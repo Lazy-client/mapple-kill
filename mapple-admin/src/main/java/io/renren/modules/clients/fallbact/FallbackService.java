@@ -6,14 +6,14 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 /**
- * @author hxx
+ * @author zsc
  * @date 2022/3/30 16:08
  */
 @Component
 public class FallbackService implements ConsumeFeignService {
 
     @Override
-    public List<String> getTimeOrders(long timeout, long currentTime) {
+    public List<String> getTimeOrders(Long timeout, Long currentTime) {
         return null;
     }
 }

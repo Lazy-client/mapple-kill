@@ -105,7 +105,7 @@ public class MkOrderController {
 
 
     @GetMapping("/getTimeOrders")
-    public List<String> getTimeOrders(long timeout,long currentTime){
+    public List<String> getTimeOrders(@RequestParam long timeout,@RequestParam long currentTime){
         //todo
         return null;
     }
