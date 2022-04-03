@@ -1,8 +1,8 @@
 package io.renren.modules.clients;
 
 import io.renren.modules.clients.fallbact.FallbackService;
-import io.renren.modules.job.task.vo.OrderVo;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.List;
 
@@ -11,8 +11,8 @@ import java.util.List;
  * @version 1.0
  * @date 2022/4/3 17:50
  */
-@FeignClient(value = "mapple-coupon",fallback = FallbackService.class)
+@FeignClient(value = "mapple-consume",fallback = FallbackService.class)
 public interface ConsumeFeignService {
-   // todo 加上路径
-   List<OrderVo> getTimeOrders(long timeout,long currentTime);
+   @GetMapping("/consume/mk-order/getTimeOrders")
+   List<String> getTimeOrders(long timeout,long currentTime);
 }

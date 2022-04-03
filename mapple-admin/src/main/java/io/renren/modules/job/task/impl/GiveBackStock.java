@@ -3,7 +3,6 @@ package io.renren.modules.job.task.impl;
 import io.renren.common.utils.RedisKeyUtils;
 import io.renren.modules.clients.ConsumeFeignService;
 import io.renren.modules.job.task.ITask;
-import io.renren.modules.job.task.vo.OrderVo;
 import io.seata.spring.annotation.GlobalTransactional;
 import org.redisson.api.RSemaphore;
 import org.redisson.api.RedissonClient;
@@ -38,11 +37,12 @@ public class GiveBackStock implements ITask {
         long currentTime = System.currentTimeMillis();
         // todo 查询mysql中 timeout 内未支付的订单，并删除这些过期的订单
         // orders,替换成远程调用拿到的,具体就是查出订单 ===== 当前时间- 订单创建时间>timeout && 订单状态是未支付
-        List<OrderVo> orders = consumeFeignService.getTimeOrders(Long.getLong(timeout) * 60 * 1000, currentTime);
+        //keys 是随机码
+        List<String> keys = consumeFeignService.getTimeOrders(Long.getLong(timeout) * 60 * 1000, currentTime);
         //归还库存
-        if (orders != null && orders.size() > 0) {
-            orders.forEach(order -> {
-                RSemaphore stock = redissonClient.getSemaphore(RedisKeyUtils.STOCK_PREFIX + order.getRandomCode());
+        if (keys != null && keys.size() > 0) {
+            keys.forEach(key -> {
+                RSemaphore stock = redissonClient.getSemaphore(RedisKeyUtils.STOCK_PREFIX + key);
                 //归还产品的一个库存
                 stock.release(1);
             });

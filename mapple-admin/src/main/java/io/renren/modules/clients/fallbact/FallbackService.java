@@ -1,7 +1,6 @@
 package io.renren.modules.clients.fallbact;
 
 import io.renren.modules.clients.ConsumeFeignService;
-import io.renren.modules.job.task.vo.OrderVo;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -14,7 +13,7 @@ import java.util.List;
 public class FallbackService implements ConsumeFeignService {
 
     @Override
-    public List<OrderVo> getTimeOrders(long timeout, long currentTime) {
+    public List<String> getTimeOrders(long timeout, long currentTime) {
         return null;
     }
 }
