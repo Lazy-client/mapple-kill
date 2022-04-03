@@ -27,7 +27,10 @@ public class GiveBackStock implements ITask {
     public void run(String params) {
         // todo 查询mysql中20min内未支付的订单
         logger.info("定时关闭订单,归还库存 定时任务正在执行，参数为：{}", params);
-        // todo 后面就是减库存,将randomCode替换为查出来的randomCode
+
+
+
+        // todo 后面就是归还库存,将randomCode替换为查出来的randomCode
         RSemaphore stock = redissonClient.getSemaphore(RedisKeyUtils.STOCK_PREFIX + "randomCode");
         stock.release(1);
     }
