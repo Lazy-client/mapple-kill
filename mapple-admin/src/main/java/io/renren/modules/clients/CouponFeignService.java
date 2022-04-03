@@ -1,4 +1,4 @@
-package io.renren.modules.sys.service;
+package io.renren.modules.clients;
 
 import io.renren.common.utils.R;
 import org.springframework.cloud.openfeign.FeignClient;
