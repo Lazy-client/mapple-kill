@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.mapple.common.utils.CryptogramUtil;
 import com.mapple.common.utils.jwt.JwtUtils;
 import com.mapple.common.utils.redis.cons.RedisKeyUtils;
+import com.mapple.common.utils.result.CommonResult;
 import com.mapple.common.vo.MkOrder;
 import com.mapple.common.vo.Session;
 import com.mapple.common.vo.Sku;
@@ -197,5 +198,16 @@ public class SeckillServiceImpl implements SecKillService {
             jsonObject.remove("randomCode");
         }
         return jsonObject;
+    }
+
+    @Override
+    public CommonResult sendOrder() {
+        MkOrder order = new MkOrder();
+        order.setUserId("1505814885762260993");
+        order.setSessionId("1504477072970100738");
+        order.setProductId("1507031366130905090");
+        rocketMQTemplate.send(messageTopic, MessageBuilder.withPayload(order).build());
+        log.info("测试发送消息：主题为：{}", messageTopic);
+        return CommonResult.ok();
     }
 }

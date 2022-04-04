@@ -104,4 +104,11 @@ public class SeckillController {
                 .put("data", value)
                 .put("common", ok);
     }
+
+    @ApiOperation(value = "测试发送消息")
+    @GetMapping("sendOrder")
+    public CommonResult sendOrder() {
+        return secKillService.sendOrder();
+    }
+
 }

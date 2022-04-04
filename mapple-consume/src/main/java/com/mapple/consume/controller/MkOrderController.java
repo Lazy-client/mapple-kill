@@ -30,16 +30,16 @@ public class MkOrderController {
     @Resource
     private MkOrderService orderService;
 
-//    /**
-//     * 创建订单接口
-//     */
-//    @ApiOperation(value = "订单进入消息队列", notes = "传入订单实体类")
-//    @PostMapping("createOrder")
-//    public CommonResult createOrder(@RequestBody MkOrder order) {
-//        // 各种参数校验
-//        // 参数校验结束
-//        return orderService.orderEnqueue(order);
-//    }
+    /**
+     * 创建订单接口
+     */
+    @ApiOperation(value = "订单进入消息队列", notes = "传入订单实体类")
+    @PostMapping("createOrder")
+    public CommonResult createOrder(@RequestBody MkOrder order) {
+        // 各种参数校验
+        // 参数校验结束
+        return orderService.orderEnqueue(order);
+    }
 
     /*
      * 订单接口，供管理员使用
