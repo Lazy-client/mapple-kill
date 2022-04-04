@@ -18,7 +18,7 @@ import java.util.HashMap;
 public class PageAspect {
     @Pointcut("execution(* list(..))")
     public void pagePointCut() {
-        // TODO document why this method is empty
+        //  document why this method is empty
     }
 
     @Around("pagePointCut()")

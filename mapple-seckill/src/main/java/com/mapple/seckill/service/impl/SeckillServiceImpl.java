@@ -69,13 +69,13 @@ public class SeckillServiceImpl implements SecKillService {
                         logger.info("用户{}未参与过秒杀活动", userId);
                         //分布式锁减库存
                         RSemaphore semaphore = redissonClient.getSemaphore(RedisKeyUtils.STOCK_PREFIX + key);
-                        // todo 生产环境调为10ms内未减掉库存,那么库存就空了
+                        //  生产环境调为10ms内未减掉库存,那么库存就空了
                         boolean acquire = semaphore.tryAcquire(1, 10, TimeUnit.MILLISECONDS);
                         if (acquire) {//库存与扣成功
                             logger.info("用户{}----秒杀成功", userId);
                             RMapCache<Object, Object> userMap = redissonClient.getMapCache(RedisKeyUtils.SECKILL_USER_PREFIX);
                             userMap.put(userId + "-" + key, "1", 6, TimeUnit.HOURS);
-                            //TODO 生成订单发消息 设置订单属性
+                            //生成订单发消息 设置订单属性
                             MkOrder order = new MkOrder();
                             order.setUserId(userId);
                             order.setSessionId(sku.getId());
