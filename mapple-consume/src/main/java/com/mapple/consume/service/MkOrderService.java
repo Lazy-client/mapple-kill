@@ -5,6 +5,7 @@ import com.mapple.common.utils.result.CommonResult;
 import com.mapple.consume.entity.MkOrder;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -24,4 +25,6 @@ public interface MkOrderService extends IService<MkOrder> {
     CommonResult payOrder(MkOrder order);
 
     CommonResult publicAccountBalance();
+
+    List<String> getTimeoutRandomCodeList(long timeout, long currentTime);
 }

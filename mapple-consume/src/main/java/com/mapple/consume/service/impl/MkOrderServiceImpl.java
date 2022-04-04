@@ -25,6 +25,8 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -193,6 +195,20 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
         String balance = valueOperations.get(RedisKeyUtils.PUBLIC_ACCOUNT);
         return CommonResult.ok().put("balance", balance);
     }
+
+    @Override
+    public List<String> getTimeoutRandomCodeList(long timeout, long currentTime) {
+        List<String> randomCodeList = new ArrayList<>();
+        this.list().forEach(item -> {
+            if ((currentTime - item.getGmtCreate().getTime() > timeout)) {
+                randomCodeList.add(item.getRandomCode());
+                // 删除该条记录
+                this.removeById(item.getId());
+            }
+        });
+        return randomCodeList;
+    }
+
 
     // SendOneWay
     //    @Override
