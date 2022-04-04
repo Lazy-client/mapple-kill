@@ -1,8 +1,8 @@
 /**
  * Copyright (c) 2016-2019 人人开源 All rights reserved.
- * <p>
+ *
  * https://www.renren.io
- * <p>
+ *
  * 版权所有，侵权必究！
  */
 
@@ -58,7 +58,6 @@ public class AppLoginController {
 
     @Autowired
     public RedisTemplate<String, String> stringRedisTemplate;
-
     /**
      * 登录
      */
@@ -79,21 +78,21 @@ public class AppLoginController {
         ArrayList<UserEntity> userEntities = new ArrayList<>();
         userEntities.add(userEntity);
         R r = personRuleController.filterManyUserByRules(userEntities);
-        if (Objects.equals(r.get("result"), "pass")) {
+        if (Objects.equals(r.get("result"), "pass")){
             String userIdPass = userEntity.getUserId();
             //布隆过滤器将通过初筛的人加入到白名单快速过滤
             userBloomFilter.add(userIdPass);
-            LoggerUtil.getLogger().info("userId===={} pass", userIdPass);
-        } else {
+            LoggerUtil.getLogger().info("userId===={} pass",userIdPass);
+        }else {
             //记录未通过的用户log
-            droolsRulesConfigService.asyncExecuteLog(userEntity, 0);
+            droolsRulesConfigService.asyncExecuteLog(userEntity,0);
         }
 
 
         Map<String, Object> map = new HashMap<>();
         map.put("token", token);
         map.put("expire", jwtUtils.getExpire());
-        map.put("user", userEntity);
+        map.put("user",userEntity);
 
         return R.ok(map);
     }
