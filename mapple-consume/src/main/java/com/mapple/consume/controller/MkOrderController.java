@@ -9,6 +9,7 @@ import com.mapple.consume.service.MkOrderService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.*;
+
 import javax.annotation.Resource;
 import java.util.List;
 import java.util.Map;
@@ -105,9 +106,9 @@ public class MkOrderController {
 
 
     @GetMapping("/getTimeOrders")
-    public List<String> getTimeOrders(@RequestParam long timeout,@RequestParam long currentTime){
-        //todo
-        return null;
+    public List<String> getTimeOrders(@RequestParam long timeout, @RequestParam long currentTime) {
+        //TODO 删掉记录
+        return orderService.getTimeoutRandomCodeList(timeout, currentTime);
     }
 }
 
