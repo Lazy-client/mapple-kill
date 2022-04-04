@@ -9,6 +9,7 @@
 package io.renren.modules.app.controller;
 
 
+import io.renren.common.exception.RRException;
 import io.renren.common.utils.LoggerUtil;
 import io.renren.common.utils.R;
 import io.renren.modules.app.entity.UserEntity;
@@ -21,7 +22,9 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.redisson.api.RBloomFilter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -60,6 +63,15 @@ public class AppLoginController {
 
     @Autowired
     public RedisTemplate<String, String> stringRedisTemplate;
+
+    //redis hash操作绑定ip
+    BoundHashOperations<String, Object, Object> operationsForIp;
+
+    @Autowired
+    public AppLoginController(RedisTemplate<String, String> stringRedisTemplate) {
+        this.stringRedisTemplate = stringRedisTemplate;
+        operationsForIp = stringRedisTemplate.boundHashOps("IP_PREFIX");
+    }
     /**
      * 登录
      */
@@ -77,6 +89,22 @@ public class AppLoginController {
         UserEntity userEntity = userService.login(form);
         //生成token
         String token = jwtUtils.generateToken(userEntity.getUserId());
+
+        //ip绑定
+        if (Boolean.TRUE.equals(operationsForIp.hasKey(clientIP))){
+            if (Objects.equals(operationsForIp.get(clientIP), clientIP)){
+                throw new RRException("该ip已经登录，请勿重复登录");
+            }
+        }else {
+            //放入redis，设置过期时间
+            operationsForIp.put(clientIP,userEntity.getUserId());
+            stringRedisTemplate.expire(clientIP,1,java.util.concurrent.TimeUnit.MINUTES);
+        }
+        if (StringUtils.isEmpty(operationsForIp.get(clientIP))){
+            operationsForIp.put(clientIP, clientIP);
+        }
+        operationsForIp.put(clientIP,userEntity.getUserId());
+
         //初筛流程
         ArrayList<UserEntity> userEntities = new ArrayList<>();
         userEntities.add(userEntity);
