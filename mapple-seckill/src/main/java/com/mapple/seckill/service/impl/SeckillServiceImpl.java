@@ -150,8 +150,11 @@ public class SeckillServiceImpl implements SecKillService {
         String userId = getUserId(token);
         logger.info("userId===={}", userId);
         boolean passed = true;
-        if (userBloomFilter.isExists())
+        if (userBloomFilter.isExists()) {
+            logger.info("开启初筛");
             passed = userBloomFilter.contains(userId);
+            logger.info("passed===={}", passed);
+        }
         Map<String, String> sessions = hashOperations.entries(RedisKeyUtils.SESSIONS_PREFIX);
         Set<String> sessionIds = sessions.keySet();
         List<Session> sessionList = new ArrayList<>();

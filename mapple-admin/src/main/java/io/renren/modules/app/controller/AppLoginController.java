@@ -119,6 +119,7 @@ public class AppLoginController {
         String ruleIsOpen = future.get();
         if ("true".equals(ruleIsOpen)) {
             //初筛流程
+            LoggerUtil.getLogger().info("初筛流程开始");
             ArrayList<UserEntity> userEntities = new ArrayList<>();
             userEntities.add(userEntity);
             R r = personRuleController.filterManyUserByRules(userEntities);

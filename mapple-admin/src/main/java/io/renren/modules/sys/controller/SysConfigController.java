@@ -83,6 +83,7 @@ public class SysConfigController extends AbstractController {
         ValidatorUtils.validateEntity(config);
 
         //关闭初筛时，关闭布隆过滤器
+        logger.info("config.getV = {}", config.getParamValue());
         if (config.getId() == 2L && !config.getParamValue().equals("true")) {
 			userBloomFilter.delete();
         }else if (config.getId() == 2L && config.getParamValue().equals("true")) {
