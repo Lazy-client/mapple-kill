@@ -83,6 +83,7 @@ public class SeckillServiceImpl implements SecKillService {
                             order.setSessionName(sku.getSessionName());
                             order.setProductId(sku.getProductId());
                             order.setProductName(sku.getProductName());
+                            order.setStatus(0);
                             order.setOrderSn(IdWorker.get32UUID());
                             // 写死，默认只能抢购1份
                             order.setProductCount(1);
