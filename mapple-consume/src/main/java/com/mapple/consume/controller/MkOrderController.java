@@ -105,6 +105,7 @@ public class MkOrderController {
     }
 
 
+    @ApiOperation(value = "定时删除订单接口")
     @GetMapping("/getTimeOrders")
     public List<String> getTimeOrders(@RequestParam long timeout, @RequestParam long currentTime) {
         //TODO 删掉记录
