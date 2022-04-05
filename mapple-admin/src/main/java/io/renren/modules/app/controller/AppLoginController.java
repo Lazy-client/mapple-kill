@@ -1,8 +1,8 @@
 /**
  * Copyright (c) 2016-2019 人人开源 All rights reserved.
- * <p>
+ *
  * https://www.renren.io
- * <p>
+ *
  * 版权所有，侵权必究！
  */
 
@@ -65,6 +65,14 @@ public class AppLoginController {
     @Autowired
     public RedisTemplate<String, String> stringRedisTemplate;
 
+//    //redis hash操作绑定ip
+//    BoundHashOperations<String, Object, Object> operationsForIp;
+//
+//    @Autowired
+//    public AppLoginController(RedisTemplate<String, String> stringRedisTemplate) {
+//        this.stringRedisTemplate = stringRedisTemplate;
+//        operationsForIp = stringRedisTemplate.boundHashOps("IP_PREFIX")
+//    }
     //redis hash操作绑定ip
     BoundHashOperations<String, Object, Object> operationsForIp;
 
@@ -102,15 +110,13 @@ public class AppLoginController {
         //生成token
         String token = jwtUtils.generateToken(userEntity.getUserId());
 
-        //获取客户端ip
-        if (Boolean.TRUE.equals(operationsForIp.hasKey(clientIP))) {
-            if (!Objects.equals(operationsForIp.get(clientIP), clientIP)) {
-                throw new RRException("请勿同ip多账号登录");
+        if (Boolean.TRUE.equals(stringRedisTemplate.hasKey(clientIP))){
+            if (!Objects.equals(stringRedisTemplate.opsForValue().get(clientIP),userEntity.getUserId())){
+                throw new RRException("请勿多账号频繁登录，1分钟后重试");
             }
-        } else {
-            //放入redis，设置过期时间
-            operationsForIp.put(clientIP, userEntity.getUserId());
-            stringRedisTemplate.expire(clientIP, 1, java.util.concurrent.TimeUnit.MINUTES);
+        }else {
+            //放入redis，设置过期时间1分钟
+            stringRedisTemplate.opsForValue().set(clientIP,userEntity.getUserId(),60,java.util.concurrent.TimeUnit.SECONDS);
         }
 
 
