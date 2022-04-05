@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.io.IOException;
@@ -49,6 +50,7 @@ public class DroolsRulesConfigServiceImpl extends ServiceImpl<DroolsRulesConfigD
 
 
     @Override
+    @Transactional
     public String updateRules(DroolsRulesConfig droolsRulesConfig) {
         //修改规则
         if (droolsRulesConfig.getJobValue().equals("true")) {
@@ -64,14 +66,15 @@ public class DroolsRulesConfigServiceImpl extends ServiceImpl<DroolsRulesConfigD
         //更新droolsRulesConfig规则数据表
         updateById(droolsRulesConfig);
         //把规则字符串放入droolsrules表中
-        return putRulesInDB();
+        return putRulesInDB(droolsRulesConfig.getRuleName());
     }
 
     /**
      * 规则生成以及持久化
      * @return
+     * @param ruleName
      */
-    public String putRulesInDB() {
+    public String putRulesInDB(String ruleName) {
         DroolsRulesConfig droolsRulesConfig = droolsRulesConfigDao.selectOne(new QueryWrapper<DroolsRulesConfig>().eq("rule_name", "fix"));
         //notHasJob==false , isOverdue==false , balance>=20000, isDishonest==false
         //暴力拼接when条件语句
@@ -108,6 +111,7 @@ public class DroolsRulesConfigServiceImpl extends ServiceImpl<DroolsRulesConfigD
         }
         DroolsRules droolsRules = new DroolsRules();
         droolsRules.setRules(drlContent);
+        droolsRules.setRuleName(ruleName);
         droolsRulesDao.insert(droolsRules);
         //map中缓存一份
         RulesContainer.put("rule", drlContent);
@@ -146,6 +150,11 @@ public class DroolsRulesConfigServiceImpl extends ServiceImpl<DroolsRulesConfigD
         }
         return null;
     }
+
+    /**
+     * 查询规则名称，按时间先后排列
+     * @return
+     */
 
     @Async("customizedApplicationTaskExecutor")
     public void asyncExecuteLog(UserEntity userEntity,int status){
