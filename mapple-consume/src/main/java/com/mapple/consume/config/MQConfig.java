@@ -67,6 +67,7 @@ public class MQConfig {
      * @return  返回DefaultMQPushConsumer，交给Spring去管理
      */
 
+
     @Bean(name = "CustomPushConsumer")
     public DefaultMQPushConsumer customPushConsumer() throws MQClientException {
         log.info(consumerGroup + "*******" + nameServer + "*******" + messageTopic);
