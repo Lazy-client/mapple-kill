@@ -3,7 +3,6 @@ feign:
     enabled: true
   httpclient:
     connection-timeout: 1000
-
 management:
   endpoints:
     web:

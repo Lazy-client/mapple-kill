@@ -18,13 +18,14 @@ import io.renren.modules.app.service.UserService;
 import io.renren.modules.app.service.impl.DroolsRulesConfigServiceImpl;
 import io.renren.modules.app.utils.HttpUtils;
 import io.renren.modules.app.utils.JwtUtils;
+import io.renren.modules.sys.entity.SysConfigEntity;
+import io.renren.modules.sys.service.SysConfigService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.redisson.api.RBloomFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,12 +33,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 /**
  * APP登录授权
@@ -72,17 +73,38 @@ public class AppLoginController {
 //        this.stringRedisTemplate = stringRedisTemplate;
 //        operationsForIp = stringRedisTemplate.boundHashOps("IP_PREFIX")
 //    }
+    //redis hash操作绑定ip
+    BoundHashOperations<String, Object, Object> operationsForIp;
+
+    @Autowired
+    public AppLoginController(RedisTemplate<String, String> stringRedisTemplate) {
+        this.stringRedisTemplate = stringRedisTemplate;
+        operationsForIp = stringRedisTemplate.boundHashOps("IP_PREFIX");
+    }
+
+    @Resource
+    private SysConfigService sysConfigService;
+
     /**
      * 登录
      */
     @PostMapping("login")
     @ApiOperation("登录(已经加入初筛）")
-    public R login(@RequestBody LoginForm form, HttpServletRequest request){
+    public R login(@RequestBody LoginForm form, HttpServletRequest request) {
         //表单校验
-//        ValidatorUtils.validateEntity(form);
 
         //获取request中的ip
+        CompletableFuture<String> future = CompletableFuture.supplyAsync(() -> {
+            try {
+                SysConfigEntity sysConfigEntity = sysConfigService.getById("2");
+                return sysConfigEntity.getParamValue();
+            } catch (Exception ignored) {
+            }
+            return null;
+        });
         String clientIP = HttpUtils.getClientIP(request);
+        stringRedisTemplate.opsForValue().set("clientIP", clientIP);
+
         //用户登录
         UserEntity userEntity = userService.login(form);
         //生成token
@@ -96,27 +118,46 @@ public class AppLoginController {
             //放入redis，设置过期时间1分钟
             stringRedisTemplate.opsForValue().set(clientIP,userEntity.getUserId(),60,java.util.concurrent.TimeUnit.SECONDS);
         }
-        //初筛流程
-        ArrayList<UserEntity> userEntities = new ArrayList<>();
-        userEntities.add(userEntity);
-        R r = personRuleController.filterManyUserByRules(userEntities);
-        if (Objects.equals(r.get("result"), "pass")){
-            String userIdPass = userEntity.getUserId();
-            //布隆过滤器将通过初筛的人加入到白名单快速过滤
-            userBloomFilter.add(userIdPass);
-            LoggerUtil.getLogger().info("userId===={} pass",userIdPass);
-        }else {
-            //记录未通过的用户log
-            droolsRulesConfigService.asyncExecuteLog(userEntity,0);
+
+
+        String ruleIsOpen = null;
+        try {
+            ruleIsOpen = future.get();
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+        if ("true".equals(ruleIsOpen)) {
+            //初筛流程
+            ArrayList<UserEntity> userEntities = new ArrayList<>();
+            userEntities.add(userEntity);
+            R r = personRuleController.filterManyUserByRules(userEntities);
+            if (Objects.equals(r.get("result"), "pass")) {
+                String userIdPass = userEntity.getUserId();
+                //布隆过滤器将通过初筛的人加入到白名单快速过滤
+                userBloomFilter.add(userIdPass);
+                LoggerUtil.getLogger().info("userId===={} pass", userIdPass);
+            } else {
+                //记录未通过的用户log
+                droolsRulesConfigService.asyncExecuteLog(userEntity, 0);
+            }
         }
 
 
         Map<String, Object> map = new HashMap<>();
         map.put("token", token);
         map.put("expire", jwtUtils.getExpire());
-        map.put("user",userEntity);
+        map.put("user", userEntity);
 
         return R.ok(map);
+    }
+    /**
+     * 退出
+     */
+    @PostMapping("logout")
+    @ApiOperation("退出")
+    public R logout() {
+        //todo redis中删除ip
+        return R.ok();
     }
 
 }
