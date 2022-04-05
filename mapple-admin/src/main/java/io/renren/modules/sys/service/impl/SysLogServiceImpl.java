@@ -31,7 +31,7 @@ public class SysLogServiceImpl extends ServiceImpl<SysLogDao, SysLogEntity> impl
 
         IPage<SysLogEntity> page = this.page(
             new Query<SysLogEntity>().getPage(params),
-            new QueryWrapper<SysLogEntity>().like(StringUtils.isNotBlank(key),"username", key)
+            new QueryWrapper<SysLogEntity>().like(StringUtils.isNotBlank(key),"username", key).orderByDesc("create_date")
         );
 
         return new PageUtils(page);

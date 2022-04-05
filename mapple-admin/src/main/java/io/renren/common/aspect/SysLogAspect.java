@@ -37,7 +37,7 @@ public class SysLogAspect {
 
     @Pointcut("@annotation(io.renren.common.annotation.SysLog)")
     public void logPointCut() {
-        // TODO document why this method is empty
+        // document why this method is empty
         log.info("切面");
     }
 
