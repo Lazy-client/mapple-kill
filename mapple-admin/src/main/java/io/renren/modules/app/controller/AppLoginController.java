@@ -124,6 +124,7 @@ public class AppLoginController {
             userEntities.add(userEntity);
             R r = personRuleController.filterManyUserByRules(userEntities);
             if (Objects.equals(r.get("result"), "pass")) {
+                LoggerUtil.getLogger().info("初筛流程通过");
                 String userIdPass = userEntity.getUserId();
                 //布隆过滤器将通过初筛的人加入到白名单快速过滤
                 userBloomFilter.add(userIdPass);
