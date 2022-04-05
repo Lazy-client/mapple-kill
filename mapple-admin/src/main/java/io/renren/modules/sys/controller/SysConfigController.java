@@ -88,6 +88,7 @@ public class SysConfigController extends AbstractController {
 			userBloomFilter.delete();
         }else if (config.getId() == 2L && config.getParamValue().equals("true")) {
 			userBloomFilter.tryInit(10000000L, 0.01);
+            userBloomFilter.add("null");
 		}
         sysConfigService.update(config);
 
