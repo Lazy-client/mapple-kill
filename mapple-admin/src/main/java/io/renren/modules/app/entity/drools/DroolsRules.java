@@ -21,6 +21,7 @@ public class DroolsRules {
     @TableId(type = ASSIGN_ID)
     private String id;
     private String rules;
+    private String ruleName;
     @TableField(fill = FieldFill.INSERT)
     private Date gmtCreate;
 }

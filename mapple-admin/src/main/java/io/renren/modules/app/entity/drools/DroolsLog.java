@@ -25,6 +25,7 @@ public class DroolsLog {
     private String ruleId;
     @ApiModelProperty(value = "通过状态，true通过，false不通过")
     private Boolean passStatus;
+    private String ruleName;
     @TableField(fill = FieldFill.INSERT)
     private Date gmtCreate;
 

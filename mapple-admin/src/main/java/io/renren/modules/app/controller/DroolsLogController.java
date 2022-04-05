@@ -33,11 +33,9 @@ public class DroolsLogController {
 
     @GetMapping("/list")
     @ApiOperation("获取日志信息")
-    public R ruleLogsByPage(@ApiParam(name = "页数",
-            value = "page必传，多条件查询要添加用户名比如user1、规则id",
-            required = true)@RequestParam Integer nowPage
+    public R ruleLogsByPage(@RequestParam Integer nowPage
             ,@RequestParam(required = false) String username
-            ,@RequestParam(required = false) String ruleId){
+            ,@RequestParam(required = false) String ruleName){
         Page<DroolsLog> page= new Page<>(nowPage,100);
         LambdaQueryWrapper<DroolsLog> queryWrapper = new LambdaQueryWrapper<>();
 
@@ -46,8 +44,8 @@ public class DroolsLogController {
         if (!StringUtils.isEmpty(username)){
             queryWrapper.eq(DroolsLog::getUsername,username);
         }
-        if (!StringUtils.isEmpty(ruleId)){
-            queryWrapper.eq(DroolsLog::getRuleId,ruleId);
+        if (!StringUtils.isEmpty(ruleName)){
+            queryWrapper.eq(DroolsLog::getRuleName,ruleName);
         }
         Page<DroolsLog> articlePage = droolsLogDao.selectPage(page, queryWrapper);
 
