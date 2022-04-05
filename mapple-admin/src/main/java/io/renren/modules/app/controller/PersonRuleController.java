@@ -68,7 +68,7 @@ public class PersonRuleController {
     @ApiOperation("（可用）修改筛选规则")
     @PostMapping("update")
     public R updateRules(@Valid @RequestBody @ApiParam(name = "DroolsRulesConfig",
-            value = "请传入id=1，年龄上下界，是否需要工作，是否欠款预期，是否失信（三个是否需要传入true或false的字符串），存款金额下界，",
+            value = "请传入id=1，年龄上下界，是否需要工作，是否欠款预期，是否失信（三个是否需要传入true或false的字符串,跟那个查看规则对应，传false的话后台会），存款金额下界，",
             required = true)DroolsRulesConfig droolsRulesConfig) {
         droolsRulesConfigService.updateRules(droolsRulesConfig);
         return R.ok();
@@ -76,9 +76,7 @@ public class PersonRuleController {
 
     @ApiOperation("（可用）查询筛选规则")
     @GetMapping("selectRule")
-    public R selectRules(@RequestParam @ApiParam(
-            value = "请传入id=1,返回的三个Boolean如果为空表示：此规则字段当前没开启，有无工作都可，false表示必须为有工作才能通过筛选",
-            required = true)Integer ruleId) {
+    public R selectRules(@RequestParam Integer ruleId) {
         DroolsRulesConfig config = droolsRulesConfigService.getById(ruleId);
         return R.ok().put("rule",config);
     }
