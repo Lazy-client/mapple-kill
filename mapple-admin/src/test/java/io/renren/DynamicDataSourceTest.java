@@ -8,19 +8,16 @@
 
 package io.renren;
 
-import com.alibaba.fastjson.JSONObject;
 import io.renren.modules.app.entity.UserEntity;
-import io.renren.modules.app.form.LoginForm;
 import io.renren.modules.app.service.UserService;
+import io.renren.modules.sys.entity.SysConfigEntity;
+import io.renren.modules.sys.service.SysConfigService;
 import io.renren.service.DynamicDataSourceTestService;
-import org.apache.http.Consts;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
@@ -34,8 +31,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.alibaba.druid.sql.ast.SQLPartitionValue.Operator.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 /**
  * 多数据源测试
@@ -57,6 +54,26 @@ public class DynamicDataSourceTest {
         dynamicDataSourceTestService.updateUser(id);
         dynamicDataSourceTestService.updateUserBySlave1(id);
         dynamicDataSourceTestService.updateUserBySlave2(id);
+    }
+
+    //注入 sysConfigService
+    @Autowired
+    private SysConfigService sysConfigService;
+    @Test
+    public void test2() throws ExecutionException, InterruptedException {
+        CompletableFuture<String> future = CompletableFuture.supplyAsync(() -> {
+            try {
+                SysConfigEntity sysConfigEntity = sysConfigService.getById("2");
+                System.out.println(sysConfigEntity);
+                System.out.println(sysConfigEntity.getId()+"======");
+                return sysConfigEntity.getParamValue();
+            } catch (Exception ignored) {
+                System.out.println("获取失败");
+            }
+            return null;
+        });
+
+        System.out.println(future.get());
     }
 
     @Test
