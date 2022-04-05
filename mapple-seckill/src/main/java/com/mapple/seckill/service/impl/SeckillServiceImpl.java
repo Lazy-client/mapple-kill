@@ -91,6 +91,8 @@ public class SeckillServiceImpl implements SecKillService {
                             order.setPayAmount(sku.getSeckillPrice());
                             // 1天内不支付，自动取消
                             order.setAutoConfirmDay(1);
+                            // 未支付状态
+                            order.setStatus(0);
                             rocketMQTemplate.send(messageTopic, MessageBuilder.withPayload(order).build());
                             return "ok";
                         }

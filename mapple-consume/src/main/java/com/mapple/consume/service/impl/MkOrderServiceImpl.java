@@ -90,6 +90,7 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
         }
         return CommonResult.ok();
     }
+
     @Override
     public PageUtils queryPage(Map<String, Object> params, String userId) {
 
@@ -101,7 +102,7 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
                 new QueryWrapper<MkOrder>()
                         .eq(StringUtils.isNotBlank(userId), "user_id", userId)
                         // 0-未支付状态, 1-已支付
-                        .eq(statusFlag,  "status", params.get("status"))
+                        .eq(statusFlag, "status", params.get("status"))
         );
 
         return new PageUtils(page);
@@ -199,13 +200,18 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
     @Override
     public List<String> getTimeoutRandomCodeList(long timeout, long currentTime) {
         List<String> randomCodeList = new ArrayList<>();
-        this.list().forEach(item -> {
-            if ((currentTime - item.getGmtCreate().getTime() > timeout)) {
-                randomCodeList.add(item.getRandomCode());
-                // 删除该条记录
-                this.removeById(item.getId());
-            }
-        });
+        List<String> deleteIdList = new ArrayList<>();
+        this.list(new QueryWrapper<MkOrder>()
+                .eq("status", 0))
+                .forEach(item -> {
+                    if ((currentTime - item.getGmtCreate().getTime()) > timeout) {
+                        randomCodeList.add(item.getRandomCode());
+                        // 删除该条记录
+                        deleteIdList.add(item.getId());
+                    }
+                });
+        // 批量删除
+        this.removeByIds(deleteIdList);
         return randomCodeList;
     }
 
