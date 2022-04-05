@@ -149,21 +149,25 @@ public class SeckillServiceImpl implements SecKillService {
         logger.info("token=====>{}", token);
         String userId = getUserId(token);
         logger.info("userId===={}", userId);
-        boolean passed = userBloomFilter.contains(userId);
+        boolean passed = true;
+        if (userBloomFilter.isExists())
+            passed = userBloomFilter.contains(userId);
         Map<String, String> sessions = hashOperations.entries(RedisKeyUtils.SESSIONS_PREFIX);
         Set<String> sessionIds = sessions.keySet();
         List<Session> sessionList = new ArrayList<>();
         List<Session> sessionListNotStart = new ArrayList<>();
 
+
         logger.info("go to sessionSearch===number{}", sessionIds.size());
+        boolean finalPassed = passed;
         sessionIds.forEach(
                 sessionId -> {
                     String times = sessions.get(sessionId);
                     String[] sToEnd = times.split("-");
                     Session session = new Session();
                     // 未通过初筛,不设置sessionId,后续数据用户也看不到了
-                    if (passed) {
-                        logger.info("user is pass:{}", passed);
+                    if (finalPassed) {
+                        logger.info("user is pass:{}", finalPassed);
                         session.setSessionId(sessionId);
                     }
                     //设置 session-name
@@ -173,7 +177,7 @@ public class SeckillServiceImpl implements SecKillService {
                     //当前秒杀的场次
                     if (currentTime >= session.getStartTime() && currentTime < session.getEndTime()) {
                         //如果初筛未通过 只能看到sessionName 和时间,id也不能返回
-                        if (passed) {
+                        if (finalPassed) {
                             String skus = hashOperations.get(RedisKeyUtils.SKUS_PREFIX, sessionId);
                             session.setSkus(JSON.parseArray(skus));
                         }

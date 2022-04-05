@@ -7,6 +7,7 @@ package io.renren.common.utils;
  */
 @SuppressWarnings("unused")
 public class RedisKeyUtils {
+    public static String PUBLIC_ACCOUNT="seckill:account:";
     //# string  产品量
     public static String STOCK_PREFIX = "seckill:upload:stock:";
     //#hash 单个产品的详情 K:sessionId-skuId

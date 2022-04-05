@@ -1,8 +1,8 @@
 /**
  * Copyright (c) 2016-2019 人人开源 All rights reserved.
- *
+ * <p>
  * https://www.renren.io
- *
+ * <p>
  * 版权所有，侵权必究！
  */
 
@@ -65,7 +65,7 @@ public class AppLoginController {
     @Autowired
     public RedisTemplate<String, String> stringRedisTemplate;
 
-//    //redis hash操作绑定ip
+    //    //redis hash操作绑定ip
 //    BoundHashOperations<String, Object, Object> operationsForIp;
 //
 //    @Autowired
@@ -90,18 +90,13 @@ public class AppLoginController {
      */
     @PostMapping("login")
     @ApiOperation("登录(已经加入初筛）")
-    public R login(@RequestBody LoginForm form, HttpServletRequest request) {
+    public R login(@RequestBody LoginForm form, HttpServletRequest request) throws ExecutionException, InterruptedException {
         //表单校验
 
         //获取request中的ip
-        CompletableFuture<String> future = CompletableFuture.supplyAsync(() -> {
-            try {
-                SysConfigEntity sysConfigEntity = sysConfigService.getById("2");
-                return sysConfigEntity.getParamValue();
-            } catch (Exception ignored) {
-            }
-            return null;
-        });
+        CompletableFuture<String> future = getConfigById("2");
+        CompletableFuture<String> ipConfig = getConfigById("3");
+        //
         String clientIP = HttpUtils.getClientIP(request);
         stringRedisTemplate.opsForValue().set("clientIP", clientIP);
 
@@ -110,22 +105,18 @@ public class AppLoginController {
         //生成token
         String token = jwtUtils.generateToken(userEntity.getUserId());
 
-        if (Boolean.TRUE.equals(stringRedisTemplate.hasKey(clientIP))){
-            if (!Objects.equals(stringRedisTemplate.opsForValue().get(clientIP),userEntity.getUserId())){
-                throw new RRException("请勿多账号频繁登录，1分钟后重试");
+        String ipIsOpen = ipConfig.get();
+        if (Objects.equals(ipIsOpen, "true")) {//开启ip登录限制
+            if (Boolean.TRUE.equals(stringRedisTemplate.hasKey(clientIP))) {
+                if (!Objects.equals(stringRedisTemplate.opsForValue().get(clientIP), userEntity.getUserId())) {
+                    throw new RRException("请勿多账号频繁登录，1分钟后重试");
+                }
+            } else {
+                //放入redis，设置过期时间1分钟
+                stringRedisTemplate.opsForValue().set(clientIP, userEntity.getUserId(), 60, java.util.concurrent.TimeUnit.SECONDS);
             }
-        }else {
-            //放入redis，设置过期时间1分钟
-            stringRedisTemplate.opsForValue().set(clientIP,userEntity.getUserId(),60,java.util.concurrent.TimeUnit.SECONDS);
         }
-
-
-        String ruleIsOpen = null;
-        try {
-            ruleIsOpen = future.get();
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
+        String ruleIsOpen = future.get();
         if ("true".equals(ruleIsOpen)) {
             //初筛流程
             ArrayList<UserEntity> userEntities = new ArrayList<>();
@@ -150,6 +141,18 @@ public class AppLoginController {
 
         return R.ok(map);
     }
+
+    private CompletableFuture<String> getConfigById(String id) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                SysConfigEntity sysConfigEntity = sysConfigService.getById(id);
+                return sysConfigEntity.getParamValue();
+            } catch (Exception ignored) {
+            }
+            return null;
+        });
+    }
+
     /**
      * 退出
      */

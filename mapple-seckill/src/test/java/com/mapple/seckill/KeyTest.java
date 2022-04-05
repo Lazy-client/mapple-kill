@@ -37,8 +37,8 @@ public class KeyTest {
 
     @Test
     public void filterTest() {
-        RBloomFilter<String> user = redissonClient.getBloomFilter("user");
-//        user.tryInit(100000000L, 0.01);
+        RBloomFilter<String> user = redissonClient.getBloomFilter("user1");
+        user.tryInit(100000000L, 0.01);
         MkOrder mkOrder = new MkOrder();
         mkOrder.setId("1");
 
@@ -47,11 +47,35 @@ public class KeyTest {
         LoggerUtil.getLogger().info("是否包含1-----{}", user.contains(s));
 
 
+        mkOrder.setId("1010");
+        String s1 = JSON.toJSONString(mkOrder);
+        LoggerUtil.getLogger().info("是否包含XXX-----{}", user.contains(s1));
+
+        user.delete();
+        System.out.println(user.isExists());
+    }
+
+    @Resource
+    RBloomFilter<String> userBloomFilter;
+
+    @Test
+    public void test1() {
+
+        userBloomFilter.delete();
+        System.out.println(userBloomFilter.isExists());
+        userBloomFilter.tryInit(100000000L, 0.01);
+
+        MkOrder mkOrder = new MkOrder();
+        mkOrder.setId("1");
+
+        String s = JSON.toJSONString(mkOrder);
+        userBloomFilter.add(s);
+        LoggerUtil.getLogger().info("是否包含1-----{}", userBloomFilter.contains(s));
+
 
         mkOrder.setId("1010");
         String s1 = JSON.toJSONString(mkOrder);
-//        user.add(s1);
-        LoggerUtil.getLogger().info("是否包含XXX-----{}", user.contains(s1));
+        LoggerUtil.getLogger().info("是否包含XXX-----{}", userBloomFilter.contains(s1));
 
 
     }
