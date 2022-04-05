@@ -100,11 +100,6 @@ public class AppLoginController {
             operationsForIp.put(clientIP,userEntity.getUserId());
             stringRedisTemplate.expire(clientIP,1,java.util.concurrent.TimeUnit.MINUTES);
         }
-        if (StringUtils.isEmpty(operationsForIp.get(clientIP))){
-            operationsForIp.put(clientIP, clientIP);
-        }
-        operationsForIp.put(clientIP,userEntity.getUserId());
-
         //初筛流程
         ArrayList<UserEntity> userEntities = new ArrayList<>();
         userEntities.add(userEntity);
