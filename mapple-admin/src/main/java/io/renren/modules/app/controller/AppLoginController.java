@@ -144,5 +144,14 @@ public class AppLoginController {
 
         return R.ok(map);
     }
+    /**
+     * 退出
+     */
+    @PostMapping("logout")
+    @ApiOperation("退出")
+    public R logout() {
+        //todo redis中删除ip
+        return R.ok();
+    }
 
 }
