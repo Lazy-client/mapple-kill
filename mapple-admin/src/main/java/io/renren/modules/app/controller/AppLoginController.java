@@ -92,8 +92,8 @@ public class AppLoginController {
 
         //ip绑定
         if (Boolean.TRUE.equals(operationsForIp.hasKey(clientIP))){
-            if (Objects.equals(operationsForIp.get(clientIP), clientIP)){
-                throw new RRException("该ip已经登录，请勿重复登录");
+            if (!Objects.equals(operationsForIp.get(clientIP), clientIP)){
+                throw new RRException("请勿同ip多账号登录");
             }
         }else {
             //放入redis，设置过期时间
