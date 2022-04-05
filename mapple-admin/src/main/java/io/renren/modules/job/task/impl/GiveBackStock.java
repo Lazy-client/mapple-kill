@@ -39,8 +39,9 @@ public class GiveBackStock implements ITask {
         // orders,替换成远程调用拿到的,具体就是查出订单 ===== 当前时间- 订单创建时间>timeout && 订单状态是未支付
         //keys 是随机码
         logger.info("远程调用开始");
-        List<String> keys = consumeFeignService.getTimeOrders(Long.getLong(timeout) * 60 * 1000, currentTime);
+        List<String> keys = consumeFeignService.getTimeOrders(Long.parseLong(timeout) * 60 * 1000, currentTime);
         //归还库存
+        logger.info("keys:{}", keys);
         logger.info("远程调用结束");
         if (keys != null && keys.size() > 0) {
             keys.forEach(key -> {
