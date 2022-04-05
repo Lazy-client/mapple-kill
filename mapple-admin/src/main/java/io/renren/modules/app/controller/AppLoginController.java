@@ -84,15 +84,13 @@ public class AppLoginController {
     @ApiOperation("登录(已经加入初筛）")
     public R login(@RequestBody LoginForm form, HttpServletRequest request) {
         //表单校验
-//        ValidatorUtils.validateEntity(form);
 
         //获取request中的ip
         CompletableFuture<String> future = CompletableFuture.supplyAsync(() -> {
             try {
                 SysConfigEntity sysConfigEntity = sysConfigService.getById("2");
                 return sysConfigEntity.getParamValue();
-            } catch (Exception e) {
-                System.out.println("发生异常");
+            } catch (Exception ignored) {
             }
             return null;
         });
@@ -104,7 +102,7 @@ public class AppLoginController {
         //生成token
         String token = jwtUtils.generateToken(userEntity.getUserId());
 
-        //ip绑定
+        //获取客户端ip
         if (Boolean.TRUE.equals(operationsForIp.hasKey(clientIP))) {
             if (!Objects.equals(operationsForIp.get(clientIP), clientIP)) {
                 throw new RRException("请勿同ip多账号登录");
@@ -114,9 +112,6 @@ public class AppLoginController {
             operationsForIp.put(clientIP, userEntity.getUserId());
             stringRedisTemplate.expire(clientIP, 1, java.util.concurrent.TimeUnit.MINUTES);
         }
-        //初筛流程
-        ArrayList<UserEntity> userEntities = new ArrayList<>();
-        userEntities.add(userEntity);
 
 
         String ruleIsOpen = null;
@@ -126,6 +121,9 @@ public class AppLoginController {
             e.printStackTrace();
         }
         if ("true".equals(ruleIsOpen)) {
+            //初筛流程
+            ArrayList<UserEntity> userEntities = new ArrayList<>();
+            userEntities.add(userEntity);
             R r = personRuleController.filterManyUserByRules(userEntities);
             if (Objects.equals(r.get("result"), "pass")) {
                 String userIdPass = userEntity.getUserId();
