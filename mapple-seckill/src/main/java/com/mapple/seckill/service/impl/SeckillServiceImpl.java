@@ -119,6 +119,11 @@ public class SeckillServiceImpl implements SecKillService {
         }
         //关联的产品
         String products = hashOperations.get(RedisKeyUtils.SKUS_PREFIX, sessionId);
+        if (StringUtils.isEmpty(products)) {
+            //查询所有的sku
+            return null;
+        }
+
         String[] times = json.split("-");
         List<Sku> skus = JSON.parseArray(products, Sku.class);
         //秒杀期间的场次
