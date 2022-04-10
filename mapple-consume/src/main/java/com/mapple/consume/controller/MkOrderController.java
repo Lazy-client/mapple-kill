@@ -99,19 +99,6 @@ public class MkOrderController {
         return CommonResult.ok().put("order", orderService.getById(orderId));
     }
 
-//    /**
-////     * 支付接口
-////     */
-////    @ApiOperation(value = "订单支付接口", notes = "传入orderId，设置支付状态为已支付")
-////    @PostMapping("/payOrder/{orderId}")
-////    // @RequiresPermissions("sys:order:update")
-////    public CommonResult update(@PathVariable String orderId) {
-////        MkOrder order = orderService.getById(orderId);
-////        if (order.getStatus() == 1)
-////            return CommonResult.error("订单已支付，请勿重复操作！");
-////
-////        return orderService.payOrder(order);
-////    }
     /**
      * 支付接口
      */
@@ -119,9 +106,22 @@ public class MkOrderController {
     @PostMapping("/payOrder/{orderId}")
     // @RequiresPermissions("sys:order:update")
     public CommonResult update(@PathVariable String orderId) {
-
-        return orderService.payOrderEnqueue(orderId);
+        MkOrder order = orderService.getById(orderId);
+        if (order.getStatus() == 1)
+            return CommonResult.error("订单已支付，请勿重复操作！");
+        return orderService.payOrder(order);
     }
+
+//    /**
+//     * 支付接口
+//     */
+//    @ApiOperation(value = "订单支付接口", notes = "传入orderId，设置支付状态为已支付")
+//    @PostMapping("/payOrder/{orderId}")
+//    // @RequiresPermissions("sys:order:update")
+//    public CommonResult update(@PathVariable String orderId) {
+//
+//        return orderService.payOrderEnqueue(orderId);
+//    }
 
     /**
      * 删除订单

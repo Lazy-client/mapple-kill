@@ -136,6 +136,17 @@ public class ProductSessionController {
     }
 
     /**
+     * 归还库存
+     */
+    @ApiOperation(value = "归还库存", notes = "归还productCount数量的库存")
+    @PostMapping("/refundStock/{productId}/{sessionId}")
+    // @RequiresPermissions("coupon:productSession:deductStock")
+    public int refundStock(@PathVariable String productId,
+                           @PathVariable String sessionId) {
+        return productSessionService.refundStock(productId, sessionId);
+    }
+
+    /**
      * 删除
      */
     @PostMapping("/delete")

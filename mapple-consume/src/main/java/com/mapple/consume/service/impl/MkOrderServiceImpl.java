@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.mapple.common.exception.RRException;
 import com.mapple.common.utils.PageUtils;
 import com.mapple.common.utils.Query;
+import com.mapple.common.utils.RocketMQConstant;
 import com.mapple.common.utils.redis.cons.RedisKeyUtils;
 import com.mapple.common.utils.result.CommonResult;
 import com.mapple.consume.entity.MkOrder;
@@ -55,26 +56,15 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
     @Resource
     private ValueOperations<String, String> valueOperations;
 
-    @Value("${rocketmq.name-server}")
-    private String nameServer;
+//    @Value("${mq.order.topic}")
+//    private String topic;
+//
+//    @Value("${mq.order.delayTopic}")
+//    private String messageDelayTopic;
+//
+//    @Value("${mq.order.tag}")
+//    private String tag;
 
-    @Value("${rocketmq.producer.group}")
-    private String producerGroup;
-
-    @Value("${mq.order.topic}")
-    private String topic;
-
-    @Value("${mq.order.delayTopic}")
-    private String messageDelayTopic;
-
-    @Value("${mq.order.tag}")
-    private String tag;
-
-    @Value("${mq.order.producer.group}")
-    private String transactionProducerGroup;
-
-    @Value("${mq.order.producer.topic}")
-    private String transactionTopic;
 
     /**
      * 传入一个订单之后，消息生产者将order封装成信息，进入消息队列，进行流量削峰
@@ -85,10 +75,10 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
     // Transaction
     @Override
     public CommonResult orderEnqueue(MkOrder order) {
-        log.info("获取到topic: {}, 获取到tag: {}", topic, tag);
+        log.info("获取到topic: {}, 获取到tag: {}", RocketMQConstant.Topic.topic, RocketMQConstant.Tag.tag);
         try {
 //            orderSendTransaction2(order);
-            orderSendOneWay(topic, order);
+            orderSendOneWay(RocketMQConstant.Topic.topic, order);
         } catch (Exception e) {
             e.printStackTrace();
             return CommonResult.error("消息发送失败");
@@ -118,16 +108,6 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
     @GlobalTransactional(timeoutMills = 30000, name = "Consume-PayOrder")    // Seata分布式事务
     public CommonResult payOrder(MkOrder order) {
         log.info("开始全局事务......");
-        // 减库存
-        String productId = order.getProductId();
-        String sessionId = order.getSessionId();
-        Integer productCount = order.getProductCount();
-        // 调用Coupon模块的减库存接口
-        int result = couponFeignService.deductStock(productId, sessionId);
-        if (result < 1) {
-            log.info("result==={}", result);
-            throw new RRException("扣减库存失败");
-        }
         // 减本账户余额
         String userId = order.getUserId();
         BigDecimal payAmount = order.getPayAmount();
@@ -142,7 +122,7 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
             log.info("PayAmount转换的值: {}", payAmount.longValue());
             Long increment = valueOperations.increment(RedisKeyUtils.PUBLIC_ACCOUNT, payAmount.longValue());
             if (increment == null || increment <= 0)
-                throw new RRException("扣减公共账户余额失败");
+                throw new RRException("新增Redis公共账户余额失败");
             else {
                 // 设置订单状态为已支付
                 order.setStatus(1);
@@ -229,7 +209,7 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
     @Override
     public CommonResult sendDelay(String orderSn) {
         log.info("发送的sn标识为： {}", orderSn);
-        rocketMQTemplate.syncSend(messageDelayTopic, MessageBuilder.withPayload(orderSn).build(), 10000);
+        rocketMQTemplate.syncSend(RocketMQConstant.Topic.delayTopic, MessageBuilder.withPayload(orderSn).build(), 10000);
 //        rocketMQTemplate.syncSend(messageDelayTopic, MessageBuilder.withPayload(orderSn).build(), 10000, 0);
         return CommonResult.ok();
     }
@@ -237,9 +217,11 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
     @Override
     public CommonResult payOrderEnqueue(String orderId) {
         MkOrder order = this.getById(orderId);
+        if (order == null)
+            return CommonResult.error("订单不存在!");
         if (order.getStatus() == 1)
             return CommonResult.error("订单已支付，请勿重复操作！");
-        rocketMQTemplate.asyncSend(messageDelayTopic, MessageBuilder.withPayload(orderId).build(), new SendCallback() {
+        rocketMQTemplate.asyncSend(RocketMQConstant.Topic.delayTopic, MessageBuilder.withPayload(orderId).build(), new SendCallback() {
             @Override
             public void onSuccess(SendResult sendResult) {
                 log.info("支付成功，订单id为:{}", orderId);

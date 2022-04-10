@@ -3,4 +3,10 @@
 <mapper namespace="com.mapple.consume.mapper.MkOrderMapper">
 
 
+    <select id="getBySnBatch" resultType="com.mapple.consume.entity.MkOrder">
+        select id, status, session_id, product_id from mk_order where order_sn in
+        <foreach item="orderSn" collection="collection" open="(" separator="," close=")">
+            #{orderSn}
+        </foreach>
+    </select>
 </mapper>

@@ -1,5 +1,6 @@
 package com.mapple.consume.listener;
 
+import com.mapple.common.utils.RocketMQConstant;
 import com.mapple.consume.service.MkOrderService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.common.message.MessageExt;
@@ -11,7 +12,7 @@ import javax.annotation.Resource;
 
 @RocketMQMessageListener(
         topic = "MkOrder-Topic",
-        consumerGroup = "${rocketmq.consumer.group}")   // 负载均衡
+        consumerGroup = RocketMQConstant.ConsumerGroup.consumerGroup)   // 负载均衡
 @Component
 @Slf4j
 public class MkOrderConsumer implements RocketMQListener<MessageExt> {

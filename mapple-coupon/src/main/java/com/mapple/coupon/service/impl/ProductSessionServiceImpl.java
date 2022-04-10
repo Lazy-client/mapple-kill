@@ -20,6 +20,8 @@ import com.mapple.coupon.entity.vo.productSessionVo_Skus;
 import com.mapple.coupon.entity.vo.productSessionVo_new;
 import com.mapple.coupon.entity.vo.productVo_new;
 import com.mapple.coupon.service.ProductSessionService;
+import io.seata.spring.annotation.GlobalTransactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -39,6 +41,7 @@ import java.util.UUID;
 
 
 @Service("productSessionService")
+@Slf4j
 public class ProductSessionServiceImpl extends ServiceImpl<ProductSessionDao, ProductSessionEntity> implements ProductSessionService {
 
     @Autowired
@@ -238,8 +241,15 @@ public class ProductSessionServiceImpl extends ServiceImpl<ProductSessionDao, Pr
 
 
     @Override
+    @Transactional
     public int deductStock(String productId, String sessionId) {
+        log.info("调用扣减库存, productId: {}, sessionId: {}", productId, sessionId);
         return baseMapper.deductStock(productId, sessionId);
+    }
+
+    @Override
+    public int refundStock(String productId, String sessionId) {
+        return baseMapper.refundStock(productId, sessionId);
     }
 
 

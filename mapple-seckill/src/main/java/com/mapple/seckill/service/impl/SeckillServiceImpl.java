@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.mapple.common.utils.CryptogramUtil;
+import com.mapple.common.utils.RocketMQConstant;
 import com.mapple.common.utils.jwt.JwtUtils;
 import com.mapple.common.utils.redis.cons.RedisKeyUtils;
 import com.mapple.common.utils.result.CommonResult;
@@ -48,11 +49,11 @@ public class SeckillServiceImpl implements SecKillService {
     @Resource
     private RocketMQTemplate rocketMQTemplate;
 
-    @Value("${mq.order.topic}")
-    private String messageTopic;
-
-    @Value("${mq.order.delayTopic}")
-    private String messageDelayTopic;
+//    @Value("${mq.order.topic}")
+//    private String messageTopic;
+//
+//    @Value("${mq.order.delayTopic}")
+//    private String messageDelayTopic;
 
     @Override
     public String kill(String key, String id, String token) throws InterruptedException {
@@ -98,12 +99,12 @@ public class SeckillServiceImpl implements SecKillService {
                             // 未支付状态
                             order.setStatus(0);
                             // 创建订单消息
-                            rocketMQTemplate.send(messageTopic, MessageBuilder.withPayload(order).build());
+                            rocketMQTemplate.syncSend(RocketMQConstant.Topic.topic, MessageBuilder.withPayload(order).build(), 10000, 2);
                             // 延时队列消息，20分钟后去监听是否支付
                             // 延时等级，1到18
                             // 1s 5s 10s 30s 1m 2m 3m 4m 5m 6m 7m 8m 9m 10m 20m 30m 1h 2h
                             // 超时时间10s, 延时时间20min
-                            rocketMQTemplate.syncSend(messageDelayTopic, MessageBuilder.withPayload(order.getOrderSn()).build(), 10000, 15);
+//                            rocketMQTemplate.syncSend(RocketMQConstant.Topic.delayTopic, MessageBuilder.withPayload(order.getOrderSn()).build(), 10000, 15);
                             return "ok";
                         }
                     }
@@ -230,8 +231,8 @@ public class SeckillServiceImpl implements SecKillService {
         order.setUserId("1505814885762260993");
         order.setSessionId("1504477072970100738");
         order.setProductId("1507031366130905090");
-        rocketMQTemplate.send(messageTopic, MessageBuilder.withPayload(order).build());
-        log.info("测试发送消息：主题为：{}", messageTopic);
+        rocketMQTemplate.send(RocketMQConstant.Topic.topic, MessageBuilder.withPayload(order).build());
+        log.info("测试发送消息：主题为：{}", RocketMQConstant.Topic.topic);
         return CommonResult.ok();
     }
 }
