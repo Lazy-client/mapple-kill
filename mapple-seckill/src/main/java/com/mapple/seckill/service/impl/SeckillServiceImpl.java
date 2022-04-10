@@ -51,6 +51,9 @@ public class SeckillServiceImpl implements SecKillService {
     @Value("${mq.order.topic}")
     private String messageTopic;
 
+    @Value("${mq.order.delayTopic}")
+    private String messageDelayTopic;
+
     @Override
     public String kill(String key, String id, String token) throws InterruptedException {
         String userId = getUserId(token);
@@ -94,7 +97,13 @@ public class SeckillServiceImpl implements SecKillService {
                             order.setAutoConfirmDay(1);
                             // 未支付状态
                             order.setStatus(0);
+                            // 创建订单消息
                             rocketMQTemplate.send(messageTopic, MessageBuilder.withPayload(order).build());
+                            // 延时队列消息，20分钟后去监听是否支付
+                            // 延时等级，1到18
+                            // 1s 5s 10s 30s 1m 2m 3m 4m 5m 6m 7m 8m 9m 10m 20m 30m 1h 2h
+                            // 超时时间10s, 延时时间20min
+                            rocketMQTemplate.syncSend(messageDelayTopic, MessageBuilder.withPayload(order.getOrderSn()).build(), 10000, 15);
                             return "ok";
                         }
                     }

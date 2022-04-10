@@ -17,6 +17,8 @@ import com.mapple.consume.service.MkOrderService;
 import io.seata.spring.annotation.GlobalTransactional;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
+import org.apache.rocketmq.client.producer.SendCallback;
+import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.ValueOperations;
@@ -61,6 +63,9 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
 
     @Value("${mq.order.topic}")
     private String topic;
+
+    @Value("${mq.order.delayTopic}")
+    private String messageDelayTopic;
 
     @Value("${mq.order.tag}")
     private String tag;
@@ -213,6 +218,39 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
         // 批量删除
         this.removeByIds(deleteIdList);
         return randomCodeList;
+    }
+
+    @Override
+    public List<MkOrder> getBySnBatch(List<String> orderSnList) {
+        return baseMapper.getBySnBatch(orderSnList);
+    }
+
+
+    @Override
+    public CommonResult sendDelay(String orderSn) {
+        log.info("发送的sn标识为： {}", orderSn);
+        rocketMQTemplate.syncSend(messageDelayTopic, MessageBuilder.withPayload(orderSn).build(), 10000);
+//        rocketMQTemplate.syncSend(messageDelayTopic, MessageBuilder.withPayload(orderSn).build(), 10000, 0);
+        return CommonResult.ok();
+    }
+
+    @Override
+    public CommonResult payOrderEnqueue(String orderId) {
+        MkOrder order = this.getById(orderId);
+        if (order.getStatus() == 1)
+            return CommonResult.error("订单已支付，请勿重复操作！");
+        rocketMQTemplate.asyncSend(messageDelayTopic, MessageBuilder.withPayload(orderId).build(), new SendCallback() {
+            @Override
+            public void onSuccess(SendResult sendResult) {
+                log.info("支付成功，订单id为:{}", orderId);
+            }
+
+            @Override
+            public void onException(Throwable throwable) {
+                log.info("支付失败，订单id为:{}, 错误消息为: {}", orderId, throwable.getMessage());
+            }
+        }, 10000);
+        return CommonResult.ok("支付请求成功，如支付后订单状态仍未更新，请充值个人账户");
     }
 
 

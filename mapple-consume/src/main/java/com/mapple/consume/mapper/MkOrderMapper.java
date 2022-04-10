@@ -17,4 +17,5 @@ import java.util.List;
  */
 public interface MkOrderMapper extends BaseMapper<MkOrder> {
 
+    List<MkOrder> getBySnBatch(List<String> orderSnList);
 }
