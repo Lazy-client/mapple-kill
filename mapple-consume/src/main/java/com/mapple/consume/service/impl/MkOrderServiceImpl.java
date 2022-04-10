@@ -137,8 +137,8 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
                 boolean flag = this.updateById(order);
                 if (!flag)
                     throw new RRException("更新订单状态失败");
-                // 支付成功,加入订单id到orderBloomFilter
-                orderBloomFilter.add(order.getId());
+                // 支付成功,加入订单SN到orderBloomFilter
+                orderBloomFilter.add(order.getOrderSn());
                 return CommonResult.ok("执行成功");
             }
         }

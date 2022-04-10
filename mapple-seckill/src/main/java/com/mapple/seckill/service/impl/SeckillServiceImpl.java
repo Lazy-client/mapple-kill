@@ -104,7 +104,7 @@ public class SeckillServiceImpl implements SecKillService {
                             // 延时等级，1到18
                             // 1s 5s 10s 30s 1m 2m 3m 4m 5m 6m 7m 8m 9m 10m 20m 30m 1h 2h
                             // 超时时间10s, 延时时间20min
-//                            rocketMQTemplate.syncSend(RocketMQConstant.Topic.delayTopic, MessageBuilder.withPayload(order.getOrderSn()).build(), 10000, 15);
+                            rocketMQTemplate.syncSend(RocketMQConstant.Topic.delayTopic, MessageBuilder.withPayload(order).build(), 10000, 15);
                             return "ok";
                         }
                     }
