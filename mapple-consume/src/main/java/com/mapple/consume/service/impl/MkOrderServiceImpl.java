@@ -100,9 +100,18 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
 
 
     @Override
-    @GlobalTransactional(timeoutMills = 30000, name = "Consume-PayOrder")    // Seata分布式事务
+    @GlobalTransactional(timeoutMills = 50000, name = "Consume-PayOrder")    // Seata分布式事务
     public CommonResult payOrder(MkOrder order) {
         log.info("开始全局事务......");
+        // 减库存
+        String productId = order.getProductId();
+        String sessionId = order.getSessionId();
+        // 调用Coupon模块的减库存接口
+        int result = couponFeignService.deductStock(productId, sessionId);
+        if (result < 0) {
+            log.info("result==={}", result);
+            throw new RRException("扣减库存失败");
+        }
         // 减本账户余额
         String userId = order.getUserId();
         BigDecimal payAmount = order.getPayAmount();

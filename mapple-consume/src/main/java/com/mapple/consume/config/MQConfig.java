@@ -67,7 +67,8 @@ public class MQConfig {
             });
             log.info("MkOrderList size: {}, content: {}", orderList.size(), orderList);
             // 处理批量消息
-            orderService.orderSaveBatch(orderList);
+            // orderService.orderSaveBatch(orderList);
+            orderService.saveBatch(orderList);
             return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
         });
         consumer.start();
