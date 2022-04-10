@@ -35,4 +35,6 @@ public interface MkOrderService extends IService<MkOrder> {
     CommonResult payOrderEnqueue(String orderId);
 
     void orderSaveBatch(List<MkOrder> orderList);
+
+    int removeBatchBySnList(List<String> orderSnList);
 }

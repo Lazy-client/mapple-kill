@@ -259,6 +259,11 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
         });
     }
 
+    @Override
+    public int removeBatchBySnList(List<String> orderSnList) {
+        return baseMapper.removeBatchBySnList(orderSnList);
+    }
+
 
     // SendOneWay
     //    @Override

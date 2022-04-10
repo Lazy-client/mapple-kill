@@ -2,9 +2,6 @@ package com.mapple.consume.mapper;
 
 import com.mapple.consume.entity.MkOrder;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
-
 import java.util.List;
 
 /**
@@ -18,4 +15,6 @@ import java.util.List;
 public interface MkOrderMapper extends BaseMapper<MkOrder> {
 
     List<MkOrder> getBySnBatch(List<String> orderSnList);
+
+    int removeBatchBySnList(List<String> orderSnList);
 }

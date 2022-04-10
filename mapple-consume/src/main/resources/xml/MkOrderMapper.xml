@@ -9,4 +9,11 @@
             #{orderSn}
         </foreach>
     </select>
+
+    <delete id="removeBatchBySnList">
+        delete from mk_order where order_sn in
+        <foreach item="orderSn" collection="collection" open="(" separator="," close=")">
+            #{orderSn}
+        </foreach>
+    </delete>
 </mapper>

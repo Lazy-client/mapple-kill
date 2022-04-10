@@ -48,7 +48,6 @@ public class MQConfig {
 
     /**
      * 实现批量处理，消费对应主题和Tag的消息，然后调用批量处理方法
-     *
      * @return 返回DefaultMQPushConsumer，交给Spring去管理
      */
     @Bean(name = "CustomPushConsumer")
@@ -108,9 +107,7 @@ public class MQConfig {
             });
             log.info("MkDelayList size: {}, content: {}", orderSnList.size(), orderSnList);
             // 批量删除
-            orderService.remove(
-                    new QueryWrapper<MkOrder>()
-                            .in("order_sn", orderSnList));
+            orderService.removeBatchBySnList(orderSnList);
             return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
         });
         consumer.start();
