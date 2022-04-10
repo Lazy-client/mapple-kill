@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.mapple.common.exception.RRException;
 import com.mapple.common.utils.PageUtils;
 import com.mapple.common.utils.Query;
+import com.mapple.common.utils.RocketMQConstant;
 import com.mapple.common.utils.redis.cons.RedisKeyUtils;
 import com.mapple.common.utils.result.CommonResult;
 import com.mapple.consume.entity.MkOrder;
@@ -17,6 +18,8 @@ import com.mapple.consume.service.MkOrderService;
 import io.seata.spring.annotation.GlobalTransactional;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
+import org.apache.rocketmq.client.producer.SendCallback;
+import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.redisson.api.RBloomFilter;
 import org.springframework.beans.factory.annotation.Value;
@@ -57,23 +60,6 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
     @Resource
     private ValueOperations<String, String> valueOperations;
 
-    @Value("${rocketmq.name-server}")
-    private String nameServer;
-
-    @Value("${rocketmq.producer.group}")
-    private String producerGroup;
-
-    @Value("${mq.order.topic}")
-    private String topic;
-
-    @Value("${mq.order.tag}")
-    private String tag;
-
-    @Value("${mq.order.producer.group}")
-    private String transactionProducerGroup;
-
-    @Value("${mq.order.producer.topic}")
-    private String transactionTopic;
 
     /**
      * 传入一个订单之后，消息生产者将order封装成信息，进入消息队列，进行流量削峰
@@ -84,10 +70,14 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
     // Transaction
     @Override
     public CommonResult orderEnqueue(MkOrder order) {
-        log.info("获取到topic: {}, 获取到tag: {}", topic, tag);
+        log.info("获取到topic: {}, 获取到tag: {}", RocketMQConstant.Topic.topic, RocketMQConstant.Tag.tag);
         try {
 //            orderSendTransaction2(order);
-            orderSendOneWay(topic, order);
+//            orderSendOneWay(RocketMQConstant.Topic.topic, order);
+            rocketMQTemplate.syncSend(RocketMQConstant.Topic.topic,
+                    MessageBuilder.withPayload(order).build(),
+                    10000,
+                    2);
         } catch (Exception e) {
             e.printStackTrace();
             return CommonResult.error("消息发送失败");
@@ -114,16 +104,15 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
 
 
     @Override
-    @GlobalTransactional(timeoutMills = 30000, name = "Consume-PayOrder")    // Seata分布式事务
+    @GlobalTransactional(timeoutMills = 50000, name = "Consume-PayOrder")    // Seata分布式事务
     public CommonResult payOrder(MkOrder order) {
         log.info("开始全局事务......");
         // 减库存
         String productId = order.getProductId();
         String sessionId = order.getSessionId();
-        Integer productCount = order.getProductCount();
         // 调用Coupon模块的减库存接口
         int result = couponFeignService.deductStock(productId, sessionId);
-        if (result < 1) {
+        if (result < 0) {
             log.info("result==={}", result);
             throw new RRException("扣减库存失败");
         }
@@ -141,7 +130,7 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
             log.info("PayAmount转换的值: {}", payAmount.longValue());
             Long increment = valueOperations.increment(RedisKeyUtils.PUBLIC_ACCOUNT, payAmount.longValue());
             if (increment == null || increment <= 0)
-                throw new RRException("扣减公共账户余额失败");
+                throw new RRException("新增Redis公共账户余额失败");
             else {
                 // 设置订单状态为已支付
                 order.setStatus(1);
@@ -219,6 +208,55 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
         // 批量删除
         this.removeByIds(deleteIdList);
         return randomCodeList;
+    }
+
+    @Override
+    public List<MkOrder> getBySnBatch(List<String> orderSnList) {
+        return baseMapper.getBySnBatch(orderSnList);
+    }
+
+
+    @Override
+    public CommonResult sendDelay(String orderSn) {
+        log.info("发送的sn标识为： {}", orderSn);
+        rocketMQTemplate.syncSend(RocketMQConstant.Topic.delayTopic, MessageBuilder.withPayload(orderSn).build(), 10000);
+//        rocketMQTemplate.syncSend(messageDelayTopic, MessageBuilder.withPayload(orderSn).build(), 10000, 0);
+        return CommonResult.ok();
+    }
+
+    @Override
+    public CommonResult payOrderEnqueue(String orderId) {
+        MkOrder order = this.getById(orderId);
+        if (order == null)
+            return CommonResult.error("订单不存在!");
+        if (order.getStatus() == 1)
+            return CommonResult.error("订单已支付，请勿重复操作！");
+        rocketMQTemplate.asyncSend(RocketMQConstant.Topic.delayTopic, MessageBuilder.withPayload(orderId).build(), new SendCallback() {
+            @Override
+            public void onSuccess(SendResult sendResult) {
+                log.info("支付成功，订单id为:{}", orderId);
+            }
+
+            @Override
+            public void onException(Throwable throwable) {
+                log.info("支付失败，订单id为:{}, 错误消息为: {}", orderId, throwable.getMessage());
+            }
+        }, 10000);
+        return CommonResult.ok("支付请求成功，如支付后订单状态仍未更新，请充值个人账户");
+    }
+
+
+    @Override
+    @GlobalTransactional
+    public void orderSaveBatch(List<MkOrder> orderList) {
+        this.saveBatch(orderList);
+        // 进行真实库存扣减
+        orderList.forEach(item -> {
+            // 调用Coupon模块的减库存接口
+            int res = couponFeignService.deductStock(item.getProductId(), item.getSessionId());
+            if (res < 0)
+                log.info("扣减库存失败，productId: {}, sessionId: {}", item.getProductId(), item.getSessionId());
+        });
     }
 
 

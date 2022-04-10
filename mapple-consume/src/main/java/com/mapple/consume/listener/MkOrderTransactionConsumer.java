@@ -1,6 +1,7 @@
 package com.mapple.consume.listener;
 
 import com.alibaba.fastjson.JSON;
+import com.mapple.common.utils.RocketMQConstant;
 import com.mapple.consume.entity.MkOrder;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.common.message.MessageExt;
@@ -11,8 +12,8 @@ import org.springframework.stereotype.Component;
 import java.nio.charset.StandardCharsets;
 
 @RocketMQMessageListener(
-        topic = "${mq.order.producer.topic}",
-        consumerGroup = "${mq.order.consumer.group}")   // 负载均衡
+        topic = RocketMQConstant.Topic.transactionTopic,
+        consumerGroup = RocketMQConstant.ConsumerGroup.consumerGroup)   // 负载均衡
 @Component
 @Slf4j
 public class MkOrderTransactionConsumer implements RocketMQListener<MessageExt> {

@@ -14,4 +14,9 @@ public class FallbackService implements CouponFeignService {
     public int deductStock(String productId, String sessionId) {
         return -1;
     }
+
+    @Override
+    public int refundStock(String productId, String sessionId) {
+        return -1;
+    }
 }

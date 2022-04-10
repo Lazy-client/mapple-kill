@@ -40,6 +40,33 @@ public class MkOrderController {
         return orderService.orderEnqueue(order);
     }
 
+    /**
+     * 发送延时消息
+     * @return
+     */
+    @ApiOperation(value = "延时消息进入队列", notes = "传入订单的SN标识")
+    @PostMapping("sendDelay/{orderSn}")
+    public CommonResult sendDelay(@PathVariable String orderSn) {
+        // 各种参数校验
+        // 参数校验结束
+        return orderService.sendDelay(orderSn);
+    }
+
+    /**
+     * 测试批量获取
+     * @param orderSnList
+     * @return
+     */
+    @ApiOperation(value = "测试批量获取订单消息", notes = "传入订单Sn列表")
+    @PostMapping("testGetSnBatch")
+    public CommonResult testGetSnBatch(@RequestBody List<String> orderSnList) {
+        // 各种参数校验
+        // 参数校验结束
+        List<MkOrder> bySnBatch = orderService.getBySnBatch(orderSnList);
+        return CommonResult.ok().put("result", bySnBatch);
+    }
+
+
     /*
      * 订单接口，供管理员使用
      */
@@ -80,9 +107,19 @@ public class MkOrderController {
         MkOrder order = orderService.getById(orderId);
         if (order.getStatus() == 1)
             return CommonResult.error("订单已支付，请勿重复操作！");
-
         return orderService.payOrder(order);
     }
+
+//    /**
+//     * 支付接口
+//     */
+//    @ApiOperation(value = "订单支付接口", notes = "传入orderId，设置支付状态为已支付")
+//    @PostMapping("/payOrder/{orderId}")
+//    // @RequiresPermissions("sys:order:update")
+//    public CommonResult update(@PathVariable String orderId) {
+//
+//        return orderService.payOrderEnqueue(orderId);
+//    }
 
     /**
      * 删除订单

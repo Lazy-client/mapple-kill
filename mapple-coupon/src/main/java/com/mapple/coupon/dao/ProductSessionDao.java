@@ -19,4 +19,9 @@ public interface ProductSessionDao extends BaseMapper<ProductSessionEntity> {
             "set total_count = total_count - 1 " +
             "where product_id = #{productId} and session_id = #{sessionId}")
     int deductStock(@Param("productId") String productId, @Param("sessionId") String sessionId);
+
+    @Update("update mk_product_session " +
+            "set total_count = total_count + 1 " +
+            "where product_id = #{productId} and session_id = #{sessionId}")
+    int refundStock(@Param("productId") String productId, @Param("sessionId") String sessionId);
 }

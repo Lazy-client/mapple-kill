@@ -27,4 +27,12 @@ public interface MkOrderService extends IService<MkOrder> {
     CommonResult publicAccountBalance();
 
     List<String> getTimeoutRandomCodeList(long timeout, long currentTime);
+
+    List<MkOrder> getBySnBatch(List<String> orderSnList);
+
+    CommonResult sendDelay(String orderSn);
+
+    CommonResult payOrderEnqueue(String orderId);
+
+    void orderSaveBatch(List<MkOrder> orderList);
 }

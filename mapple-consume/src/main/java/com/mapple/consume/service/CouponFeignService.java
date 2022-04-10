@@ -19,7 +19,12 @@ public interface CouponFeignService {
      * Controller路径 /coupon/productsession
      * 具体接口路径 /deductStock/{productId}/{sessionId}/{productCount}
      */
+
     @PostMapping("/coupon/coupon/productsession/deductStock/{productId}/{sessionId}")
     int deductStock(@PathVariable String productId,
+                    @PathVariable String sessionId);
+
+    @PostMapping("/coupon/coupon/productsession/refundStock/{productId}/{sessionId}")
+    int refundStock(@PathVariable String productId,
                     @PathVariable String sessionId);
 }
