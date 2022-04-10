@@ -56,15 +56,6 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
     @Resource
     private ValueOperations<String, String> valueOperations;
 
-//    @Value("${mq.order.topic}")
-//    private String topic;
-//
-//    @Value("${mq.order.delayTopic}")
-//    private String messageDelayTopic;
-//
-//    @Value("${mq.order.tag}")
-//    private String tag;
-
 
     /**
      * 传入一个订单之后，消息生产者将order封装成信息，进入消息队列，进行流量削峰
@@ -78,7 +69,11 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
         log.info("获取到topic: {}, 获取到tag: {}", RocketMQConstant.Topic.topic, RocketMQConstant.Tag.tag);
         try {
 //            orderSendTransaction2(order);
-            orderSendOneWay(RocketMQConstant.Topic.topic, order);
+//            orderSendOneWay(RocketMQConstant.Topic.topic, order);
+            rocketMQTemplate.syncSend(RocketMQConstant.Topic.topic,
+                    MessageBuilder.withPayload(order).build(),
+                    10000,
+                    2);
         } catch (Exception e) {
             e.printStackTrace();
             return CommonResult.error("消息发送失败");
@@ -233,6 +228,20 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
             }
         }, 10000);
         return CommonResult.ok("支付请求成功，如支付后订单状态仍未更新，请充值个人账户");
+    }
+
+
+    @Override
+    @GlobalTransactional
+    public void orderSaveBatch(List<MkOrder> orderList) {
+        this.saveBatch(orderList);
+        // 进行真实库存扣减
+        orderList.forEach(item -> {
+            // 调用Coupon模块的减库存接口
+            int res = couponFeignService.deductStock(item.getProductId(), item.getSessionId());
+            if (res < 0)
+                log.info("扣减库存失败，productId: {}, sessionId: {}", item.getProductId(), item.getSessionId());
+        });
     }
 
 

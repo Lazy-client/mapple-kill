@@ -33,4 +33,6 @@ public interface MkOrderService extends IService<MkOrder> {
     CommonResult sendDelay(String orderSn);
 
     CommonResult payOrderEnqueue(String orderId);
+
+    void orderSaveBatch(List<MkOrder> orderList);
 }

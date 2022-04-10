@@ -67,14 +67,7 @@ public class MQConfig {
             });
             log.info("MkOrderList size: {}, content: {}", orderList.size(), orderList);
             // 处理批量消息
-            orderService.saveBatch(orderList);
-            // 进行真实库存扣减
-            orderList.forEach(item -> {
-                // 调用Coupon模块的减库存接口
-                int res = couponFeignService.deductStock(item.getProductId(), item.getSessionId());
-                if (res < 0)
-                    log.info("扣减库存失败，productId: {}, sessionId: {}", item.getProductId(), item.getSessionId());
-            });
+            orderService.orderSaveBatch(orderList);
             return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
         });
         consumer.start();
