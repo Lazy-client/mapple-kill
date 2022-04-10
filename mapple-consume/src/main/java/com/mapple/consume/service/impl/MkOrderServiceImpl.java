@@ -18,6 +18,7 @@ import io.seata.spring.annotation.GlobalTransactional;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
+import org.redisson.api.RBloomFilter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.messaging.support.MessageBuilder;
@@ -40,6 +41,9 @@ import java.util.Map;
 @Service
 @Slf4j
 public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> implements MkOrderService {
+
+    @Resource
+    private RBloomFilter<String> orderBloomFilter;
 
     @Resource
     private RocketMQTemplate rocketMQTemplate;
@@ -144,6 +148,8 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
                 boolean flag = this.updateById(order);
                 if (!flag)
                     throw new RRException("更新订单状态失败");
+                // 支付成功,加入订单id到orderBloomFilter
+                orderBloomFilter.add(order.getId());
                 return CommonResult.ok("执行成功");
             }
         }
