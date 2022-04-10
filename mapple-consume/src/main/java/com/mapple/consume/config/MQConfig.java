@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
+import org.redisson.api.RBloomFilter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import com.alibaba.fastjson.JSONObject;
@@ -41,6 +42,8 @@ public class MQConfig {
     @Resource
     private CouponFeignService couponFeignService;
 
+    @Resource
+    private RBloomFilter<String> orderBloomFilter;
     /**
      * 实现批量处理，消费对应主题和Tag的消息，然后调用批量处理方法
      * @return 返回DefaultMQPushConsumer，交给Spring去管理
@@ -75,8 +78,11 @@ public class MQConfig {
         return consumer;
     }
 
+    //todo 从过滤器中获取状态
     @Bean(name = "DelayPushConsumer")
     public DefaultMQPushConsumer delayPushConsumer() throws MQClientException {
+
+//        orderBloomFilter.contains()
         log.info(RocketMQConstant.ConsumerGroup.delayConsumerGroup + "*******" + nameServer + "*******" + RocketMQConstant.Topic.delayTopic);
         DefaultMQPushConsumer consumer = new DefaultMQPushConsumer(RocketMQConstant.ConsumerGroup.delayConsumerGroup);
         consumer.setNamesrvAddr(nameServer);
