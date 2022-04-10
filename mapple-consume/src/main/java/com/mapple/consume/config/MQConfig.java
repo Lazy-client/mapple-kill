@@ -1,25 +1,30 @@
 package com.mapple.consume.config;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.alibaba.fastjson.JSONObject;
 import com.mapple.common.utils.RocketMQConstant;
+import com.mapple.common.utils.redis.cons.RedisKeyUtils;
 import com.mapple.consume.entity.MkOrder;
 import com.mapple.consume.service.CouponFeignService;
 import com.mapple.consume.service.MkOrderService;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
-import org.apache.rocketmq.spring.core.RocketMQTemplate;
-import org.redisson.api.RBloomFilter;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Configuration;
-import com.alibaba.fastjson.JSONObject;
 import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyStatus;
 import org.apache.rocketmq.client.consumer.listener.MessageListenerConcurrently;
 import org.apache.rocketmq.client.exception.MQClientException;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
+import org.redisson.api.RBloomFilter;
+import org.redisson.api.RSemaphore;
+import org.redisson.api.RedissonClient;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.Resource;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author : Gelcon
@@ -48,6 +53,7 @@ public class MQConfig {
 
     /**
      * 实现批量处理，消费对应主题和Tag的消息，然后调用批量处理方法
+     *
      * @return 返回DefaultMQPushConsumer，交给Spring去管理
      */
     @Bean(name = "CustomPushConsumer")
@@ -80,6 +86,9 @@ public class MQConfig {
     }
 
 
+    @Resource
+    private RedissonClient redissonClient;
+
     @Bean(name = "DelayPushConsumer")
     public DefaultMQPushConsumer delayPushConsumer() throws MQClientException {
         log.info(RocketMQConstant.ConsumerGroup.delayConsumerGroup + "*******" + nameServer + "*******" + RocketMQConstant.Topic.delayTopic);
@@ -102,6 +111,9 @@ public class MQConfig {
                 // 从过滤器中获取状态
                 if (!orderBloomFilter.contains(orderSn)) {
                     orderSnList.add(orderSn);
+                    RSemaphore stock = redissonClient.getSemaphore(RedisKeyUtils.STOCK_PREFIX + order.getRandomCode());
+                    //归还产品的一个库存
+                    stock.release(1);
                 }
                 queueMsgMap.compute(msg.getQueueId(), (key, val) -> val == null ? 1 : ++val);
             });
