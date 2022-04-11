@@ -9,6 +9,7 @@
 package io.renren.modules.sys.form;
 
 import lombok.Data;
+import org.hibernate.validator.constraints.Length;
 
 /**
  * 密码表单
@@ -24,6 +25,7 @@ public class PasswordForm {
     /**
      * 新密码
      */
+    @Length(min = 6)
     private String newPassword;
 
 }

@@ -62,7 +62,6 @@ public class DroolsRulesConfigServiceImpl extends ServiceImpl<DroolsRulesConfigD
         if (droolsRulesConfig.getDishonestValue().equals("true")) {
             droolsRulesConfig.setDishonestValue(null);
         }
-        droolsRulesConfig.setRuleName("fix");
         //更新droolsRulesConfig规则数据表
         updateById(droolsRulesConfig);
         //把规则字符串放入droolsrules表中

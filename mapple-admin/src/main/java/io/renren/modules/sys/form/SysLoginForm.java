@@ -9,6 +9,7 @@
 package io.renren.modules.sys.form;
 
 import lombok.Data;
+import org.hibernate.validator.constraints.Length;
 
 /**
  * 登录表单
@@ -18,6 +19,7 @@ import lombok.Data;
 @Data
 public class SysLoginForm {
     private String username;
+    @Length(min = 6)
     private String password;
     private String captcha;
     private String uuid;
