@@ -57,11 +57,11 @@ public class MQConfig {
         consumer.setNamesrvAddr(nameServer);
         consumer.subscribe(RocketMQConstant.Topic.topic, "*");
         // 设置每次消息拉取的时间间隔，单位毫秒
-        consumer.setPullInterval(500);
+        consumer.setPullInterval(100);
         // 设置每个队列每次拉取的最大消息数
-        consumer.setPullBatchSize(24);
+        consumer.setPullBatchSize(144);
         // 设置消费者单次批量消费的消息数目上限
-        consumer.setConsumeMessageBatchMaxSize(12);
+        consumer.setConsumeMessageBatchMaxSize(72);
         consumer.registerMessageListener((MessageListenerConcurrently) (msgs, context)
                 -> {
             List<MkOrder> orderList = new ArrayList<>(msgs.size());
@@ -87,11 +87,11 @@ public class MQConfig {
         consumer.setNamesrvAddr(nameServer);
         consumer.subscribe(RocketMQConstant.Topic.delayTopic, "*");
         // 设置每次消息拉取的时间间隔，单位毫秒
-        consumer.setPullInterval(1000);
+        consumer.setPullInterval(100);
         // 设置每个队列每次拉取的最大消息数
-        consumer.setPullBatchSize(24);
+        consumer.setPullBatchSize(144);
         // 设置消费者单次批量消费的消息数目上限
-        consumer.setConsumeMessageBatchMaxSize(12);
+        consumer.setConsumeMessageBatchMaxSize(72);
         consumer.registerMessageListener((MessageListenerConcurrently) (msgs, context)
                 -> {
             List<String> orderSnList = new ArrayList<>(msgs.size());

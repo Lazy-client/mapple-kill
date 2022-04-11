@@ -42,7 +42,6 @@ public class MkOrderController {
 
     /**
      * 发送延时消息
-     * @return
      */
     @ApiOperation(value = "延时消息进入队列", notes = "传入订单的SN标识")
     @PostMapping("sendDelay/{orderSn}")
