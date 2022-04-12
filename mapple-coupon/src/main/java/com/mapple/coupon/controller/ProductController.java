@@ -68,6 +68,7 @@ public class ProductController {
      * 修改
      */
     @PostMapping("/update")
+    @ApiOperation("曹尼玛")
     //@RequiresPermissions("coupon:product:update")
     public CommonResult update(@Valid @ApiParam(name = "productSessionVo_Skus",
             value = "请传入sessionId和productId,然后加上要修改的字段，注意一次修改一个产品信息，修改产品字段或者修改场次和产品关联的两个字段：秒杀价和库存，都可以在这个接口传入",
