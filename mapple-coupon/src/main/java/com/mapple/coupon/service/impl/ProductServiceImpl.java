@@ -79,6 +79,16 @@ public class ProductServiceImpl extends ServiceImpl<ProductDao, ProductEntity> i
                 sessionId_list.add(sku_key.split("-")[0]);
             }
         }
+        //判断这些session场次是否在进行中
+        BoundHashOperations<String, String, String> operations_forSessions = redisTemplate.boundHashOps(RedisKeyUtils.SESSIONS_PREFIX);
+        Date nowTime = new Date();
+        for (String sessionId : sessionId_list) {
+            String sessionValue = operations_forSessions.get(sessionId);
+            String startTime = sessionValue.split("-")[0];
+            if (Long.parseLong(startTime)<nowTime.getTime()){
+                throw new RRException("当前产品正在秒杀中，无法修改信息");
+            }
+        }
 
 
         //如果数据库更新成功，则更新redis数据
