@@ -8,6 +8,7 @@ import com.mapple.consume.entity.MkOrder;
 import com.mapple.consume.service.MkOrderService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -25,6 +26,7 @@ import java.util.Map;
 @Api(tags = {"订单接口"})
 @RestController
 @RequestMapping("/mk-order")
+@Slf4j
 public class MkOrderController {
     @Resource
     private MkOrderService orderService;
@@ -69,7 +71,13 @@ public class MkOrderController {
     /*
      * 订单接口，供管理员使用
      */
-
+    @ApiOperation(value = "管理员订单查询", notes = "status参数传入0，即为未支付订单，传入1即为已支付订单")
+    @GetMapping("/listForAdmin")
+    //    @RequiresPermissions("sys:order:list")
+    public CommonResult listForAdmin(@RequestParam Map<String, Object> params) {
+        PageUtils page = orderService.queryPageForAdmin(params);
+        return CommonResult.ok().put("page", page);
+    }
 
     /**
      * 订单列表,供用户使用
@@ -79,9 +87,9 @@ public class MkOrderController {
     @GetMapping("/list")
     //    @RequiresPermissions("sys:order:list")
     public CommonResult list(@RequestParam Map<String, Object> params, @RequestHeader String token) {
-        LoggerUtil.getLogger().info("token==={}", token);
+        log.info("token==={}", token);
         String userId = JwtUtils.getUserIdByToken(token);
-        LoggerUtil.getLogger().info("userId===={}", userId);
+        log.info("userId===={}", userId);
         PageUtils page = orderService.queryPage(params, userId);
 
         return CommonResult.ok().put("page", page);

@@ -24,6 +24,7 @@ import io.renren.modules.app.entity.UserEntity;
 import io.renren.modules.app.form.LoginForm;
 import io.renren.modules.app.form.RegisterForm;
 import io.renren.modules.app.service.UserService;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -36,9 +37,11 @@ public class UserServiceImpl extends ServiceImpl<UserDao, UserEntity> implements
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
+        String username = (String) params.get("username");
         IPage<UserEntity> page = this.page(
                 new Query<UserEntity>().getPage(params),
-                new QueryWrapper<>()
+                new QueryWrapper<UserEntity>()
+                    .like(StringUtils.isNotBlank(username), "username", username)
         );
 
         return new PageUtils(page);

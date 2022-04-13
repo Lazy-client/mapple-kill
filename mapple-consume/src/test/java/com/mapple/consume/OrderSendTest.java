@@ -10,6 +10,7 @@ import org.springframework.messaging.support.MessageBuilder;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.util.UUID;
 
 /**
  * @author : Gelcon
@@ -25,9 +26,7 @@ public class OrderSendTest {
     @Test
     public void sendOrder() {
         MkOrder order = new MkOrder();
-        order.setUserId("1505814885762260993");
-        order.setSessionId("1504477072970100738");
-        order.setProductId("1507031366130905090");
+        order.setOrderSn(UUID.randomUUID().toString());
         rocketMQTemplate.send("MkOrder-Topic", MessageBuilder.withPayload(order).build());
     }
 

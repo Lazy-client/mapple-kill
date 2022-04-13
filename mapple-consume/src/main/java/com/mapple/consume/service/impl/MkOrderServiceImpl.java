@@ -2,6 +2,7 @@ package com.mapple.consume.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.baomidou.mybatisplus.extension.api.R;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.mapple.common.exception.RRException;
@@ -20,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.apache.rocketmq.client.producer.SendCallback;
 import org.apache.rocketmq.client.producer.SendResult;
+import org.apache.rocketmq.client.producer.SendStatus;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.redisson.api.RBloomFilter;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,6 +34,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * <p>
@@ -70,27 +73,37 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
     // Transaction
     @Override
     public CommonResult orderEnqueue(MkOrder order) {
-        log.info("获取到topic: {}, 获取到tag: {}", RocketMQConstant.Topic.topic, RocketMQConstant.Tag.tag);
+        log.info("调用订单进入消息队列方法");
         try {
+            for (int i = 0; i < 1000; i++) {
+                MkOrder orderNew = new MkOrder();
+                String uuid = IdWorker.get32UUID();
+                log.info("UUID: {}", uuid);
+                orderNew.setOrderSn(uuid);
+                orderNew.setPayAmount(BigDecimal.valueOf(100));
+                orderNew.setTotalAmount(BigDecimal.valueOf(100));
+                orderNew.setStatus(0);
+                rocketMQTemplate.syncSend(RocketMQConstant.Topic.topic,
+                            MessageBuilder.withPayload(orderNew).build());
+            }
 //            orderSendTransaction2(order);
 //            orderSendOneWay(RocketMQConstant.Topic.topic, order);
-            rocketMQTemplate.syncSend(RocketMQConstant.Topic.topic,
-                    MessageBuilder.withPayload(order).build(),
-                    10000,
-                    2);
+//            SendResult sendResult = rocketMQTemplate.syncSend(RocketMQConstant.Topic.topic,
+//                    MessageBuilder.withPayload(order).build(),
+//                    10000);
+//            if (sendResult.getSendStatus() == SendStatus.SEND_OK)
+//                return CommonResult.ok("发送成功");
         } catch (Exception e) {
             e.printStackTrace();
             return CommonResult.error("消息发送失败");
         }
-        return CommonResult.ok();
+        return CommonResult.ok("发送成功");
     }
 
     @Override
     public PageUtils queryPage(Map<String, Object> params, String userId) {
 
-
         boolean statusFlag = params.get("status") != null;
-
         IPage<MkOrder> page = this.page(
                 new Query<MkOrder>().getPage(params),
                 new QueryWrapper<MkOrder>()
@@ -99,6 +112,18 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
                         .eq(statusFlag, "status", params.get("status"))
         );
 
+        return new PageUtils(page);
+    }
+
+    @Override
+    public PageUtils queryPageForAdmin(Map<String, Object> params) {
+        boolean statusFlag = params.get("status") != null;
+        IPage<MkOrder> page = this.page(
+                new Query<MkOrder>().getPage(params),
+                new QueryWrapper<MkOrder>()
+                        // 0-未支付状态, 1-已支付
+                        .eq(statusFlag, "status", params.get("status"))
+        );
         return new PageUtils(page);
     }
 
@@ -263,6 +288,8 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
     public int removeBatchBySnList(List<String> orderSnList) {
         return baseMapper.removeBatchBySnList(orderSnList);
     }
+
+
 
 
     // SendOneWay
