@@ -61,14 +61,14 @@ mapple-kill
 
 ### 后端技术
 
-|        技术        |       说明       |                      官网                       |
-| :----------------: | :--------------: | :---------------------------------------------: |
+|         技术         |       说明       |                      官网                       |
+|:------------------:| :--------------: | :---------------------------------------------: |
 |     SpringBoot     |   容器+MVC框架   |     https://spring.io/projects/spring-boot      |
 |    SpringCloud     |    微服务架构    |     https://spring.io/projects/spring-cloud     |
 | SpringCloudAlibaba |    一系列组件    | https://spring.io/projects/spring-cloud-alibaba |
 |    MyBatis-Plus    |     ORM框架      |             https://mp.baomidou.com             |
 |  renren-generator  | 项目的代码生成器 |   https://gitee.com/renrenio/renren-generator   |
-|      RabbitMQ      |     消息队列     |            https://www.rabbitmq.com             |
+|      RocketMQ      |     消息队列     |            https://rocketmq.apache.org/             |
 |      Redisson      |     分布式锁     |      https://github.com/redisson/redisson       |
 |       Docker       |   应用容器引擎   |             https://www.docker.com              |
 |        OSS         |    对象云存储    |  https://github.com/aliyun/aliyun-oss-java-sdk  |
@@ -105,13 +105,13 @@ mapple-kill
 
 ### 开发环境
 
-|   工具   | 版本号 |                             下载                             |
-| :------: | :----: | :----------------------------------------------------------: |
-|   JDK    |  1.8   | https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html |
-|  Mysql   |  5.7   |                    https://www.mysql.com                     |
-|  Redis   | Redis  |                  https://redis.io/download                   |
-| RabbitMQ | 3.8.5  |            http://www.rabbitmq.com/download.html             |
-|  Nginx   | 1.1.6  |              http://nginx.org/en/download.html               |
+|    工具     |  版本号  |                             下载                             |
+|:---------:|:-----:| :----------------------------------------------------------: |
+|    JDK    |  1.8  | https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html |
+|   Mysql   |  5.7  |                    https://www.mysql.com                     |
+|   Redis   | Redis |                  https://redis.io/download                   |
+| RocketMQ  | 4.X.X |            https://rocketmq.apache.org/             |
+| OpenResty | 1.1.6 |              https://openresty.com.cn/cn/               |
 
 
 
@@ -120,37 +120,106 @@ mapple-kill
 - 修改Linux中Nginx的配置文件
 
 ```shell
-1、在nginx.conf中添加负载均衡的配置   
-upstream mapple{
-	# 网关的地址
-	server 192.168.56.1:88;
-}    
-2、在gulimall.conf中添加如下配置
-server {
-	# 监听以下域名地址的80端口
-    listen       80;
-    server_name  mapple.com;
 
-    #charset koi8-r;
-    #access_log  /var/log/nginx/log/host.access.log  main;
+#user  nobody;
+worker_processes  1;
 
-    #配置静态资源分离
-    location /static/ {
-        root   /usr/share/nginx/html;
+#error_log  logs/error.log;
+#error_log  logs/error.log  notice;
+#error_log  logs/error.log  info;
+
+#pid        logs/nginx.pid;
+
+
+events {
+    worker_connections  1024;
+}
+
+
+http {
+    limit_req_zone $binary_remote_addr zone=req_one:20m rate=15r/s;
+    include       mime.types;
+    default_type  application/octet-stream;
+
+    #log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+    #                  '$status $body_bytes_sent "$http_referer" '
+    #                  '"$http_user_agent" "$http_x_forwarded_for"';
+
+    #access_log  logs/access.log  main;
+
+    sendfile        on;
+    #tcp_nopush     on;
+
+    #keepalive_timeout  0;
+    keepalive_timeout  65;
+
+	upstream mapple-gateway {
+                server localhost:90 weight=1;
+                server localhost:88 weight=1;
+                server localhost:89 weight=1;
+        }
+    # HTTPS server
+    #
+    server {
+        listen       8888 ssl;
+        server_name  lazy.sicheng.store;
+
+        ssl_certificate      cert/7598388_lazy.sicheng.store.pem;
+        ssl_certificate_key  cert/7598388_lazy.sicheng.store.key;
+        #ssl_session_cache    shared:SSL:1m;
+        ssl_session_timeout  5m;
+        ssl_protocols TLSv1.1 TLSv1.2 TLSv1.3;
+        ssl_ciphers  ECDHE-RSA-AES128-GCM-SHA256:ECDHE:ECDH:AES:HIGH:!NULL:!aNULL:!MD5:!ADH:!RC4; #HIGH:!aNULL:!MD5;
+        ssl_prefer_server_ciphers  on;
+        #
+        #ssl_ciphers  HIGH:!aNULL:!MD5;
+    #    ssl_prefer_server_ciphers  on;
+
+	location /mapple {
+           alias  /sxapp/mapple/maple-kill-vue/dist;
+           index  index.html;
+        }
+	
+	location /mapple-kill {
+           alias /sxapp/mapple/kill-mobile/dist;
+           index  index.html;
+        }
+
+
+
+
+ 	#location / {
+        #    proxy_pass      http://localhost:8080/;
+        #    proxy_redirect  off;
+        #    proxy_set_header Host $host;
+        #    proxy_set_header X-Real-IP $remote_addr;
+        #    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        # }
+
+	location /api/ {
+		#limit_req zone=req_one burst=10 nodelay;
+                
+		proxy_set_header Host $host;
+		proxy_set_header X-Real-IP $remote_addr;
+		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+		set $business "mapple-kill";
+		access_by_lua_file /usr/local/openresty/nginx/conf/access.lua;
+		proxy_pass http://mapple-gateway;
+		#content_by_lua_file /usr/local/openresty/nginx/conf/access.lua;
+	
+	}
+
+
+        #    root   html;
+        #    index  index.html index.htm;
+        #}
+
+	error_page   500 502 503 504  /50x.html;
+        location = /50x.html {
+            root   html;
+        } 
     }
-
-    #支付异步回调的一个配置
-    location /payed/ {
-        proxy_set_header Host order.gulimall.com;        #不让请求头丢失
-        proxy_pass http://mapple;
-    }
-
-    location / {
-        #root   /usr/share/nginx/html;
-        #index  index.html index.htm;
-        proxy_set_header Host $host;        #不让请求头丢失
-        proxy_pass http://mapple;
-    }
+}
 ```
 
 
