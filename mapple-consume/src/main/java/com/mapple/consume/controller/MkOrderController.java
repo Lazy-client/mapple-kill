@@ -74,9 +74,8 @@ public class MkOrderController {
     @ApiOperation(value = "管理员订单查询", notes = "status参数传入0，即为未支付订单，传入1即为已支付订单")
     @GetMapping("/listForAdmin")
     //    @RequiresPermissions("sys:order:list")
-    public CommonResult listForAdmin(@RequestParam Map<String, Object> params) {
-        PageUtils page = orderService.queryPageForAdmin(params);
-        return CommonResult.ok().put("page", page);
+    public PageUtils listForAdmin(@RequestParam Map<String, Object> params) {
+        return orderService.queryPageForAdmin(params);
     }
 
     /**

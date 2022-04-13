@@ -4,6 +4,7 @@ import io.renren.common.utils.PageUtils;
 import io.renren.common.utils.R;
 import io.renren.modules.app.entity.UserEntity;
 import io.renren.modules.app.service.UserService;
+import io.renren.modules.clients.ConsumeFeignService;
 import io.swagger.annotations.ApiOperation;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +23,9 @@ import java.util.Map;
 public class AppUserController {
     @Resource
     private UserService userService;
+
+    @Resource
+    private ConsumeFeignService consumeFeignService;
     /**
      * 列表
      */
@@ -75,5 +79,16 @@ public class AppUserController {
     public R delete(@RequestBody String[] userIds){
         userService.removeByIds(Arrays.asList(userIds));
         return R.ok();
+    }
+
+    /*
+     * 订单接口，供管理员使用
+     */
+    @ApiOperation(value = "管理员订单查询", notes = "status参数传入0，即为未支付订单，传入1即为已支付订单")
+    @GetMapping("/listOrderForAdmin")
+    // @RequiresPermissions("sys:order:list")
+    public R listOrderForAdmin(@RequestParam Map<String, Object> params) {
+        PageUtils page = consumeFeignService.listForAdmin(params);
+        return R.ok().put("page", page);
     }
 }
