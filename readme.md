@@ -115,7 +115,12 @@ mapple-kill
 
 
 
-### 部署待续
+### 部署手册
+
+**参见wiki**
+
+https://gitee.com/Lazy_client/mapple-kill/wikis/lazy%E7%9A%84issues
+https://gitee.com/Lazy_client/mapple-kill/wikis/Home
 
 - 修改Linux中Nginx的配置文件
 
