@@ -48,13 +48,13 @@
 mapple-kill
 ├── mapple-common -- 工具类及通用代码
 ├── mapple-admin -- 后台管理
-├── renren-generator -- 项目的代码生成器
 ├── mapple-coupon -- 产品，活动服务
 ├── mapple-gateway -- 统一配置网关
-├── mapple-order -- 订单服务
-├── mapple-search -- 检索服务
+├── mapple-consume -- 订单服务,支付服务
 ├── mapple-seckill -- 秒杀服务
 └── mapple-xxx -- (待续)
+
+├── renren-generator -- 项目的代码生成器
 ```
 
 ## 技术选型
@@ -118,7 +118,6 @@ mapple-kill
 ### 部署手册
 
 **参见wiki**
-
 https://gitee.com/Lazy_client/mapple-kill/wikis/lazy%E7%9A%84issues
 https://gitee.com/Lazy_client/mapple-kill/wikis/Home
 
