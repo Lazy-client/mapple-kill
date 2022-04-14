@@ -118,11 +118,13 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
     @Override
     public PageUtils queryPageForAdmin(Map<String, Object> params) {
         boolean statusFlag = params.get("status") != null;
+        boolean orderSnFlag = params.get("orderSn") != null;
         IPage<MkOrder> page = this.page(
                 new Query<MkOrder>().getPage(params),
                 new QueryWrapper<MkOrder>()
                         // 0-未支付状态, 1-已支付
                         .eq(statusFlag, "status", params.get("status"))
+                        .eq(orderSnFlag, "order_sn", params.get("orderSn"))
         );
         return new PageUtils(page);
     }
