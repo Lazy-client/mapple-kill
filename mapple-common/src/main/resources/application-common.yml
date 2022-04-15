@@ -11,11 +11,3 @@ management:
 ok:
   kill: common
 
-#指定admin中自定义线程池的参数
-async-thread-pool:
-  corePoolSize: 20
-  #池中最大线程数量
-  maximumPoolSize: 1000
-  keepAliveTime: 30
-  #等待队列
-  queueCapacity: 1000

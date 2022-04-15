@@ -14,7 +14,6 @@ no-loop true
 when
  $user:UserEntity(@{whenStr})
 then
- System.out.println( $user + " is a work user who can buy product!" );
  UserRuleAction.doParse($user, drools.getRule());
   end
  end template
