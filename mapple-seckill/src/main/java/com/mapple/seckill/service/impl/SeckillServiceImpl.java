@@ -20,7 +20,6 @@ import org.redisson.api.RSemaphore;
 import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
@@ -78,7 +77,7 @@ public class SeckillServiceImpl implements SecKillService {
                         if (acquire) {//库存与扣成功
                             logger.info("用户{}----秒杀成功", userId);
                             RMapCache<Object, Object> userMap = redissonClient.getMapCache(RedisKeyUtils.SECKILL_USER_PREFIX);
-                            userMap.put(userId + "-" + key, "1", 6, TimeUnit.HOURS);
+                            userMap.put(userId + "-" + key, "1", sku.getEndTime().getTime() - sku.getStartTime().getTime(), TimeUnit.MILLISECONDS);
                             //生成订单发消息 设置订单属性
                             MkOrder order = new MkOrder();
                             order.setUserId(userId);
@@ -185,7 +184,7 @@ public class SeckillServiceImpl implements SecKillService {
                     Session session = new Session();
                     // 未通过初筛,不设置sessionId,后续数据用户也看不到了
                     if (finalPassed) {
-                        logger.info("user is pass:{}", finalPassed);
+                        logger.info("user is pass:{}", true);
                         session.setSessionId(sessionId);
                     }
                     //设置 session-name
