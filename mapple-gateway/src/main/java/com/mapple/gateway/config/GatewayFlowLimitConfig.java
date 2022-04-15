@@ -6,6 +6,7 @@ import com.alibaba.csp.sentinel.adapter.gateway.sc.SentinelGatewayFilter;
 import com.alibaba.csp.sentinel.adapter.gateway.sc.callback.BlockRequestHandler;
 import com.alibaba.csp.sentinel.adapter.gateway.sc.callback.GatewayCallbackManager;
 import com.alibaba.csp.sentinel.adapter.gateway.sc.exception.SentinelGatewayBlockExceptionHandler;
+import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
@@ -32,10 +33,15 @@ import java.util.stream.Collectors;
  * @version 1.0
  * @date 2022/3/27 14:08
  */
+@Setter
 @Configuration
 @ConfigurationProperties(prefix = "spring.cloud.gateway")
 public class GatewayFlowLimitConfig {
 
+    private int flowMax1;
+    private int burstMax1;
+    private int flowMax2;
+    private int burstMax2;
     private List<RouteDefinition> routes = new ArrayList<>();
     protected Logger logger = LoggerFactory.getLogger(getClass());
     private final List<ViewResolver> viewResolvers;
@@ -70,13 +76,13 @@ public class GatewayFlowLimitConfig {
                 .map(route -> {
                             if (ServiceName.MAPPLE_SECKILL.getService().equals(route.getId()))
                                 return new GatewayFlowRule(route.getId())//资源名称,对应路由id
-                                        .setCount(800) // 限流阈值
-                                        .setBurst(250) //瞬时爆发的流量
+                                        .setCount(flowMax1) // 限流阈值
+                                        .setBurst(burstMax1) //瞬时爆发的流量
                                         .setIntervalSec(1);// 统计时间窗口，单位是秒，默认是 1 秒
 
                             return new GatewayFlowRule(route.getId())
-                                    .setCount(150)
-                                    .setBurst(100)
+                                    .setCount(flowMax2)
+                                    .setBurst(burstMax2)
                                     .setIntervalSec(1);
                         }
                 ).collect(Collectors.toSet());
