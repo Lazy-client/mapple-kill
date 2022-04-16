@@ -24,7 +24,7 @@ public class SessionEntity implements Serializable {
 	/**
 	 * 主键id
 	 */
-	@TableId
+	@TableId(type = IdType.ASSIGN_ID)
 	private String id;
 	/**
 	 * 场次名称

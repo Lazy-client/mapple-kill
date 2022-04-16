@@ -1,19 +1,15 @@
 package com.mapple.coupon.entity;
 
-import com.baomidou.mybatisplus.annotation.FieldFill;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
 
 import java.io.Serializable;
 import java.util.Date;
 
-import io.swagger.annotations.ApiModelProperty;
-import lombok.Data;
-
 /**
  * 库存信息表
- * 
+ *
  * @author sicheng
  * @email sicheng_zhou@qq.com
  * @date 2022-03-13 15:23:08
@@ -26,7 +22,7 @@ public class StockEntity implements Serializable {
 	/**
 	 * 库存id
 	 */
-	@TableId
+	@TableId(type = IdType.ASSIGN_ID)
 	private String id;
 	/**
 	 * 产品id
