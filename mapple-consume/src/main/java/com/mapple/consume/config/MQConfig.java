@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.mapple.common.utils.RocketMQConstant;
 import com.mapple.common.utils.redis.cons.RedisKeyUtils;
 import com.mapple.consume.entity.MkOrder;
-import com.mapple.consume.service.CouponFeignService;
 import com.mapple.consume.service.MkOrderService;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -45,8 +44,8 @@ public class MQConfig {
     @Resource
     private RocketMQTemplate rocketMQTemplate;
 
-    @Resource
-    private CouponFeignService couponFeignService;
+//    @Resource
+//    private CouponFeignService couponFeignService;
 
     @Resource
     private RBloomFilter<String> orderBloomFilter;

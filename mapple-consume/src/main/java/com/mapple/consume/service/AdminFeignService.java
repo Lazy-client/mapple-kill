@@ -22,11 +22,11 @@ public interface AdminFeignService {
     R deductBalance(@PathVariable String userId,
                     @PathVariable BigDecimal payAmount);
 
-    @PostMapping("/renren-fast/coupon/productsession/deductStock/{productId}/{sessionId}")
+    @PostMapping("/renren-fast/coupon/coupon/productsession/deductStock/{productId}/{sessionId}")
     int deductStock(@PathVariable String productId,
                     @PathVariable String sessionId);
 
-    @PostMapping("/renren-fast/coupon/productsession/refundStock/{productId}/{sessionId}")
+    @PostMapping("/renren-fast/coupon/coupon/productsession/refundStock/{productId}/{sessionId}")
     int refundStock(@PathVariable String productId,
                     @PathVariable String sessionId);
 }
