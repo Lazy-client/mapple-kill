@@ -14,7 +14,6 @@ import com.mapple.common.utils.result.CommonResult;
 import com.mapple.consume.entity.MkOrder;
 import com.mapple.consume.mapper.MkOrderMapper;
 import com.mapple.consume.service.AdminFeignService;
-import com.mapple.consume.service.CouponFeignService;
 import com.mapple.consume.service.MkOrderService;
 import io.seata.spring.annotation.GlobalTransactional;
 import lombok.extern.slf4j.Slf4j;
@@ -54,8 +53,8 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
     @Resource
     private RocketMQTemplate rocketMQTemplate;
 
-    @Resource
-    private CouponFeignService couponFeignService;
+//    @Resource
+//    private CouponFeignService couponFeignService;
 
     @Resource
     private AdminFeignService adminFeignService;
@@ -138,7 +137,7 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
         String productId = order.getProductId();
         String sessionId = order.getSessionId();
         // 调用Coupon模块的减库存接口
-        int result = couponFeignService.deductStock(productId, sessionId);
+        int result = adminFeignService.deductStock(productId, sessionId);
         if (result < 0) {
             log.info("result==={}", result);
             throw new RRException("扣减库存失败");
@@ -280,7 +279,7 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
         // 进行真实库存扣减
         orderList.forEach(item -> {
             // 调用Coupon模块的减库存接口
-            int res = couponFeignService.deductStock(item.getProductId(), item.getSessionId());
+            int res = adminFeignService.deductStock(item.getProductId(), item.getSessionId());
             if (res < 0)
                 log.info("扣减库存失败，productId: {}, sessionId: {}", item.getProductId(), item.getSessionId());
         });
