@@ -1,4 +1,4 @@
-package com.mapple.coupon.entity;
+package io.renren.modules.coupon.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
 import io.swagger.annotations.ApiModel;
