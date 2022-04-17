@@ -101,6 +101,10 @@ public class ProductServiceImpl extends ServiceImpl<ProductDao, ProductEntity> i
         }
         //更新操作
         productDao.updateById(product);
+        //如果未上架到redis，从这就返回
+        if (sessionId_list.size()==0){
+            return;
+        }
 
         //再判断秒杀价格或库存有没改变
         if ((!StringUtils.isEmpty(productSessionVo_Skus.getSeckillPrice()) || (!StringUtils.isEmpty(productSessionVo_Skus.getTotalCount())))) {
