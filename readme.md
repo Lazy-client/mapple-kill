@@ -8,7 +8,7 @@
 
 ## 项目介绍
 
-包括前台系统以及后台管理系统，基于 SpringCloud、SpringCloud Alibaba、MyBatis Plus实现。前台商城系统包括：用户登录、注册、银行产品搜索、产品详情、订单、秒杀活动等模块。后台管理系统包括：系统管理、产品系统、库存系统、订单系统、用户系统、等模块。
+包括前台系统以及后台管理系统，基于 SpringCloud、SpringCloud Alibaba、MyBatis Plus实现。前台商城系统包括：用户登录、注册、银行产品搜索、产品详情、订单、秒杀活动等模块。后台管理系统包括：系统管理、产品系统、订单系统、用户系统、等功能模块。
 
 
 
@@ -47,13 +47,11 @@
 ```
 mapple-kill
 ├── mapple-common -- 工具类及通用代码
-├── mapple-admin -- 后台管理
-├── mapple-coupon -- 产品，活动服务
+├── mapple-admin -- 后台管理(权限，产品，活动发布等)
 ├── mapple-gateway -- 统一配置网关
 ├── mapple-consume -- 订单服务,支付服务
 ├── mapple-seckill -- 秒杀服务
 └── mapple-xxx -- (待续)
-
 ├── renren-generator -- 项目的代码生成器
 ```
 
