@@ -26,6 +26,6 @@ public class SysAccountController extends AbstractController {
     @ApiOperation("获取公共账户信息")
     public R info() {
         String account = valueOperations.get(RedisKeyUtils.PUBLIC_ACCOUNT);
-        return R.ok().put("data", account == null ? 0 :Integer.parseInt(account));
+        return R.ok().put("data", account == null ? 0 : Long.parseLong(account));
     }
 }
