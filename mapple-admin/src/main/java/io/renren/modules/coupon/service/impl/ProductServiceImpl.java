@@ -71,9 +71,11 @@ public class ProductServiceImpl extends ServiceImpl<ProductDao, ProductEntity> i
         //将存在该产品的场次id都放在这个list里面
         ArrayList<String> sessionId_list = new ArrayList<>();
         Set<String> sku_keys = operationsForSku.keys();
-        for (String sku_key : sku_keys) {
-            if (sku_key.contains(productSessionVo_Skus.getProductId())){
-                sessionId_list.add(sku_key.split("-")[0]);
+        if (sku_keys != null && sku_keys.size() > 0) {
+            for (String sku_key : sku_keys) {
+                if (sku_key.contains(productSessionVo_Skus.getProductId())) {
+                    sessionId_list.add(sku_key.split("-")[0]);
+                }
             }
         }
         //判断这些session场次是否在进行中
@@ -82,7 +84,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductDao, ProductEntity> i
         for (String sessionId : sessionId_list) {
             String sessionValue = operations_forSessions.get(sessionId);
             String startTime = sessionValue.split("-")[0];
-            if (Long.parseLong(startTime)<nowTime.getTime()){
+            if (Long.parseLong(startTime) < nowTime.getTime()) {
                 throw new RRException("当前产品正在秒杀中，无法修改信息");
             }
         }
@@ -102,7 +104,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductDao, ProductEntity> i
         //更新操作
         productDao.updateById(product);
         //如果未上架到redis，从这就返回
-        if (sessionId_list.size()==0){
+        if (sessionId_list.size() == 0) {
             return;
         }
 
@@ -112,9 +114,9 @@ public class ProductServiceImpl extends ServiceImpl<ProductDao, ProductEntity> i
             BeanUtils.copyProperties(productSessionVo_Skus, productSessionEntity);
             //更新关联表信息
             productSessionDao.update(productSessionEntity
-                    ,new QueryWrapper<ProductSessionEntity>()
-                            .eq("session_id",productSessionEntity.getSessionId())
-                            .eq("product_id",productSessionEntity.getProductId()));
+                    , new QueryWrapper<ProductSessionEntity>()
+                            .eq("session_id", productSessionEntity.getSessionId())
+                            .eq("product_id", productSessionEntity.getProductId()));
         }
 
         //更新redis的数据
@@ -122,9 +124,9 @@ public class ProductServiceImpl extends ServiceImpl<ProductDao, ProductEntity> i
 
         //获取rediskey
 //        String sessionId = productSessionVo_Skus.getSessionId();
-        String randomCode=null;
+        String randomCode = null;
         for (String sessionId : sessionId_list) {
-            String redisKey =  sessionId + "-" + productSessionVo_Skus.getProductId();
+            String redisKey = sessionId + "-" + productSessionVo_Skus.getProductId();
             //从redis获取之前的vo数据
             if (operationsForSku.hasKey(redisKey)) {
                 productSessionVo_Skus productSessionVo_skus_fromRedis = JSON.parseObject(operationsForSku.get(redisKey), productSessionVo_Skus.class);
@@ -142,26 +144,26 @@ public class ProductServiceImpl extends ServiceImpl<ProductDao, ProductEntity> i
                 String skus_fromRedis = operationsForSkus.get(sessionId);
                 List<productSessionVo_Skus> skusList = JSONObject.parseArray(skus_fromRedis, productSessionVo_Skus.class);
                 for (int i = 0; i < skusList.size(); i++) {
-                    if (skusList.get(i).getProductId().equals(productSessionVo_Skus.getProductId())){
+                    if (skusList.get(i).getProductId().equals(productSessionVo_Skus.getProductId())) {
                         productSessionVo_Skus vo_skus = skusList.get(i);
-                        BeanUtil.copyProperties(productSessionVo_Skus,vo_skus, new CopyOptions().setIgnoreNullValue(true));
-                        skusList.set(i,vo_skus);
+                        BeanUtil.copyProperties(productSessionVo_Skus, vo_skus, new CopyOptions().setIgnoreNullValue(true));
+                        skusList.set(i, vo_skus);
                         //取出随机码randomcode
                         randomCode = vo_skus.getRandomCode();
                     }
                 }
                 operationsForSkus.delete(sessionId);
-                operationsForSkus.put(sessionId,JSON.toJSONString(skusList));
+                operationsForSkus.put(sessionId, JSON.toJSONString(skusList));
             }
         }
 
         //3.stock修改库存
         //获取库存数量
-        if (productSessionVo_Skus.getTotalCount()>0){
+        if (productSessionVo_Skus.getTotalCount() > 0) {
             Integer stockCount = productSessionVo_Skus.getTotalCount();
-            if (!StringUtils.isEmpty(stockCount)){
+            if (!StringUtils.isEmpty(stockCount)) {
                 ValueOperations<String, String> opsForValue = stringRedisTemplate.opsForValue();
-                opsForValue.set(RedisKeyUtils.STOCK_PREFIX+randomCode,
+                opsForValue.set(RedisKeyUtils.STOCK_PREFIX + randomCode,
                         stockCount.toString());
             }
         }

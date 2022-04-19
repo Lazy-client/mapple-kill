@@ -1,8 +1,10 @@
 package io.renren;
 
 import io.renren.common.utils.R;
+import io.renren.modules.coupon.entity.ProductEntity;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
@@ -14,6 +16,14 @@ public class REnren {
     @Test
     public void test(){
         System.out.println(R.ok().put("1", 2));
+
+        ArrayList<ProductEntity> productEntities = new ArrayList<>();
+        for (ProductEntity productEntity : productEntities) {
+
+
+            System.out.println(productEntity.getProductId());
+        }
+
 
         Object[] skuKeys = new String[2];
         skuKeys[0]="ssss";
