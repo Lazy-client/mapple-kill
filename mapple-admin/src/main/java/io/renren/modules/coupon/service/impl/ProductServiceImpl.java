@@ -112,11 +112,6 @@ public class ProductServiceImpl extends ServiceImpl<ProductDao, ProductEntity> i
         }
         //更新操作
         productDao.updateById(product);
-        //如果未上架到redis，从这就返回
-        if (sessionId_list.size() == 0) {
-            return;
-        }
-
         //再判断秒杀价格或库存有没改变
         if ((!StringUtils.isEmpty(productSessionVo_Skus.getSeckillPrice()) || (!StringUtils.isEmpty(productSessionVo_Skus.getTotalCount())))) {
             ProductSessionEntity productSessionEntity = new ProductSessionEntity();
@@ -126,11 +121,13 @@ public class ProductServiceImpl extends ServiceImpl<ProductDao, ProductEntity> i
                     , new QueryWrapper<ProductSessionEntity>()
                             .eq("session_id", productSessionEntity.getSessionId())
                             .eq("product_id", productSessionEntity.getProductId()));
-            System.out.println(productSessionEntity.getSessionId());
-            System.out.println(productSessionEntity.getProductId());
-
             System.out.println(update);
         }
+        //如果未上架到redis，从这就返回
+        if (sessionId_list.size() == 0) {
+            return;
+        }
+
 
         //更新redis的数据
         //1. redis hash操作修改sku的数据
