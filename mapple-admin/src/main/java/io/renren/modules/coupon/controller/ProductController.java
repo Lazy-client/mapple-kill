@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import javax.validation.Valid;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 
@@ -72,8 +73,10 @@ public class ProductController {
     //@RequiresPermissions("coupon:product:update")
     public R update(@Valid @ApiParam(name = "productSessionVo_Skus",
             value = "请传入sessionId和productId,然后加上要修改的字段，注意一次修改一个产品信息，修改产品字段或者修改场次和产品关联的两个字段：秒杀价和库存，都可以在这个接口传入",
-            required = true)@RequestBody productSessionVo_Skus productSessionVo_Skus){
-        productService.updateProductById(productSessionVo_Skus);
+            required = true)@RequestBody List<productSessionVo_Skus> productSessionVo_Skus_list){
+        for (productSessionVo_Skus productSessionVo_skus : productSessionVo_Skus_list) {
+            productService.updateProductById(productSessionVo_skus);
+        }
         return R.ok();
     }
 
