@@ -66,25 +66,34 @@ public class ProductServiceImpl extends ServiceImpl<ProductDao, ProductEntity> i
     @Override
     @Transactional
     public void updateProductById(productSessionVo_Skus productSessionVo_Skus) {
-        //判断改商品是否在卖
-        BoundHashOperations<String, String, String> operationsForSku = redisTemplate.boundHashOps(RedisKeyUtils.SKU_PREFIX);
-        //将存在该产品的场次id都放在这个list里面
+        BoundHashOperations<String, String, String> operations_forSessions = redisTemplate.boundHashOps(RedisKeyUtils.SESSIONS_PREFIX);
         ArrayList<String> sessionId_list = new ArrayList<>();
-        Set<String> sku_keys = operationsForSku.keys();
-        if (sku_keys != null && sku_keys.size() > 0) {
-            for (String sku_key : sku_keys) {
-                if (sku_key.contains(productSessionVo_Skus.getProductId())) {
-                    sessionId_list.add(sku_key.split("-")[0]);
+        BoundHashOperations<String, String, String> operationsForSku = redisTemplate.boundHashOps(RedisKeyUtils.SKU_PREFIX);
+        //如果没有sessionid，表示是修改的单独的产品
+        if (StringUtils.isEmpty(productSessionVo_Skus.getSessionId())){
+            //判断改商品是否在卖
+            //将存在该产品的场次id都放在这个list里面
+            Set<String> sku_keys = operationsForSku.keys();
+            if (sku_keys != null && sku_keys.size() > 0) {
+                for (String sku_key : sku_keys) {
+                    if (sku_key.contains(productSessionVo_Skus.getProductId())) {
+                        sessionId_list.add(sku_key.split("-")[0]);
+                    }
                 }
             }
-        }
-        //判断这些session场次是否在进行中
-        BoundHashOperations<String, String, String> operations_forSessions = redisTemplate.boundHashOps(RedisKeyUtils.SESSIONS_PREFIX);
-        Date nowTime = new Date();
-        for (String sessionId : sessionId_list) {
-            String sessionValue = operations_forSessions.get(sessionId);
+            //判断这些session场次是否在进行中
+            Date nowTime = new Date();
+            for (String sessionId : sessionId_list) {
+                String sessionValue = operations_forSessions.get(sessionId);
+                String startTime = sessionValue.split("-")[0];
+                if (Long.parseLong(startTime) < nowTime.getTime()) {
+                    throw new RRException("当前产品正在秒杀中，无法修改信息");
+                }
+            }
+        }else {
+            String sessionValue = operations_forSessions.get(productSessionVo_Skus.getSessionId());
             String startTime = sessionValue.split("-")[0];
-            if (Long.parseLong(startTime) < nowTime.getTime()) {
+            if (Long.parseLong(startTime) < new Date().getTime()) {
                 throw new RRException("当前产品正在秒杀中，无法修改信息");
             }
         }
