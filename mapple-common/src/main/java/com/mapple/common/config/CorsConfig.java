@@ -6,7 +6,7 @@
  * 版权所有，侵权必究！
  */
 
-package io.renren.config;
+package com.mapple.common.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
