@@ -1,6 +1,7 @@
 package com.mapple.seckill.controller;
 
 import com.alibaba.fastjson.JSON;
+import com.mapple.common.config.interceptor.annotation.Login;
 import com.mapple.common.utils.redis.cons.RedisConstants;
 import com.mapple.common.utils.redis.cons.RedisKeyUtils;
 import com.mapple.common.utils.result.CommonResult;
@@ -43,6 +44,7 @@ public class SeckillController {
             @ApiImplicitParam(name = "productId", value = "产品Id", required = true, dataTypeClass = String.class),
     })
     @GetMapping("kill/{token}/{key}")
+    @Login
     public CommonResult kill(@PathVariable String key,
                              String sessionId,
                              String productId,
@@ -62,6 +64,7 @@ public class SeckillController {
 
     @ApiOperation(value = "搜索某个场次下的产品详情")
     @GetMapping("search")
+    @Login
     public CommonResult search(@ApiParam(value = "场次Id", required = true) @RequestParam String sessionId) {
 
         List<Sku> search = secKillService.search(sessionId);
@@ -71,6 +74,7 @@ public class SeckillController {
 
     @ApiOperation(value = "搜索某个场次下的某个产品详情")
     @GetMapping("searchById")
+    @Login
     public CommonResult searchById(@ApiParam(value = "场次Id", required = true) @RequestParam String sessionId,
                                    @ApiParam(value = "产品Id", required = true) @RequestParam String productId) {
 
@@ -81,6 +85,7 @@ public class SeckillController {
 
     @ApiOperation(value = "搜索所有场次信息", notes = "进行中，以及未开始")
     @GetMapping("searchSessions")
+    @Login
     public CommonResult searchSessions(@RequestHeader String token) {
         Map<String, List<Session>> data = secKillService.searchSessions(token);
         return CommonResult.ok().put("data", data);
@@ -94,6 +99,7 @@ public class SeckillController {
 
     @ApiOperation(value = "获取redis的key", notes = "这只是个测试接口，不是业务")
     @GetMapping("/redisKey")
+    @Login
     public CommonResult redisKey() {
         RMapCache<Object, Object> userMap = redissonClient.getMapCache(RedisKeyUtils.SECKILL_USER_PREFIX);
         userMap.put("userId" + "-" + "key", "1", 60, TimeUnit.SECONDS);
@@ -107,6 +113,7 @@ public class SeckillController {
 
     @ApiOperation(value = "测试发送消息")
     @GetMapping("sendOrder")
+    @Deprecated
     public CommonResult sendOrder() {
         return secKillService.sendOrder();
     }

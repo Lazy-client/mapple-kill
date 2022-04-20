@@ -1,11 +1,14 @@
 package io.renren;
 
-import io.renren.common.utils.R;
-import io.renren.modules.coupon.entity.ProductEntity;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.renren.common.utils.CryptogramUtil;
+import io.renren.modules.app.utils.JwtConstants;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Date;
+
+import static io.renren.modules.app.utils.JwtConstants.expire;
 
 /**
  * @author zsc
@@ -15,19 +18,19 @@ import java.util.Arrays;
 public class REnren {
     @Test
     public void test(){
-        System.out.println(R.ok().put("1", 2));
 
-        ArrayList<ProductEntity> productEntities = new ArrayList<>();
-        for (ProductEntity productEntity : productEntities) {
-
-
-            System.out.println(productEntity.getProductId());
-        }
-
-
-        Object[] skuKeys = new String[2];
-        skuKeys[0]="ssss";
-        skuKeys[1]="2222";
-        System.out.println(Arrays.toString(skuKeys));
+        Date nowDate = new Date();
+        //过期时间
+        Date expireDate = new Date(nowDate.getTime() + expire * 1000);
+        String jwtToken = Jwts.builder()
+                .setHeaderParam("typ", "JWT")
+                //用户唯一id标识
+                .setSubject("")
+                .setIssuedAt(nowDate)
+                .setExpiration(expireDate)
+                .signWith(SignatureAlgorithm.HS512, JwtConstants.secret)
+                .compact();
+        //***用国密sm4（cbc模式）加密***
+        System.out.println(CryptogramUtil.doEncrypt(jwtToken));
     }
 }

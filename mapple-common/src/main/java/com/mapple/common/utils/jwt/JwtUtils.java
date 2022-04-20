@@ -28,7 +28,7 @@ public class JwtUtils {
     private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
     private static final String secret = JwtConstants.secret;
     private static final long expire = JwtConstants.expire;
-    private static final String header = JwtConstants.header;
+    public static final String header = JwtConstants.header;
 
     /**
      * 用国密生成jwt token
@@ -36,7 +36,7 @@ public class JwtUtils {
      * @param userId
      * @return
      */
-    public static String  generateToken(long userId) {
+    public static String generateToken(long userId) {
         Date nowDate = new Date();
         //过期时间
         Date expireDate = new Date(nowDate.getTime() + expire * 1000);
