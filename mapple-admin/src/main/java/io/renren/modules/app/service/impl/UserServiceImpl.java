@@ -14,6 +14,9 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.api.R;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.RemovalListener;
 import io.renren.common.exception.RRException;
 import io.renren.common.utils.PageUtils;
 import io.renren.common.utils.Query;
@@ -24,17 +27,35 @@ import io.renren.modules.app.entity.UserEntity;
 import io.renren.modules.app.form.LoginForm;
 import io.renren.modules.app.form.RegisterForm;
 import io.renren.modules.app.service.UserService;
+import io.renren.modules.app.utils.CacheConstants;
+import io.renren.modules.app.utils.CacheUtil;
 import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.BoundHashOperations;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 
 @Service("userService")
 public class UserServiceImpl extends ServiceImpl<UserDao, UserEntity> implements UserService {
 
+    @Autowired
+    public RedisTemplate<String, String> stringRedisTemplate;
+
+    //绑定userbalance的hash
+    BoundHashOperations<String, String, String> operationsForBalance;
+
+    @Autowired
+    public UserServiceImpl(RedisTemplate<String, String> stringRedisTemplate) {
+        this.stringRedisTemplate = stringRedisTemplate;
+        operationsForBalance = stringRedisTemplate.boundHashOps("USER_BALANCE");
+    }
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
         String username = (String) params.get("username");
@@ -109,6 +130,9 @@ public class UserServiceImpl extends ServiceImpl<UserDao, UserEntity> implements
 
     @Override
     public R deductBalance(String userId, BigDecimal payAmount) {
+
+//        BigDecimal balance = (BigDecimal) CacheUtil.get(CacheConstants.GET_MENU, userId);
+
         UserEntity user = this.getById(userId);
         // 钱不够
         if (user.getBalance().compareTo(payAmount) < 0)
@@ -118,4 +142,27 @@ public class UserServiceImpl extends ServiceImpl<UserDao, UserEntity> implements
             return R.ok("支付成功");
         return R.failed("支付失败");
     }
+
+    /**
+     * 放余额到caffeine cache
+     * @param userId
+     * @param balance
+     */
+    @Override
+    public void UploadBalanceToCaffeine(String userId, BigDecimal balance) {
+//        System.out.println(cache.get(2, new Function<Integer, Integer>() {
+//            @Override
+//            public Integer apply(Integer key) {
+//                return 888;
+//            }
+//        }));
+        CacheUtil.put(CacheConstants.GET_MENU,userId,balance);
+    }
+
+//    @Override
+//    public void UploadBalanceToRedis(String userId, BigDecimal balance){
+//        if (!Boolean.TRUE.equals(operationsForBalance.hasKey(userId))){
+//            operationsForBalance.put(userId,balance.toString());
+//        }
+//    }
 }
