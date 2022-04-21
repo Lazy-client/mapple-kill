@@ -3,10 +3,7 @@ package com.mapple.consume.service;
 import com.baomidou.mybatisplus.extension.api.R;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.mapple.consume.entity.UserEntity;
-import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 
 import java.math.BigDecimal;
 
@@ -17,7 +14,7 @@ import java.math.BigDecimal;
 //@FeignClient(value = "renren-fast", fallback = FallbackService.class)
 public interface AdminFeignService extends IService<UserEntity> {
 
-//    @GetMapping("/renren-fast/app/user/deductBalance/{userId}/{payAmount}")
+    //    @GetMapping("/renren-fast/app/user/deductBalance/{userId}/{payAmount}")
     R deductBalance(@PathVariable String userId,
                     @PathVariable BigDecimal payAmount);
 
