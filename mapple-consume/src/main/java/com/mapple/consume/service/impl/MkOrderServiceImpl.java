@@ -11,6 +11,7 @@ import com.mapple.common.utils.Query;
 import com.mapple.common.utils.RocketMQConstant;
 import com.mapple.common.utils.redis.cons.RedisKeyUtils;
 import com.mapple.common.utils.result.CommonResult;
+import com.mapple.common.vo.MkOrderPay;
 import com.mapple.consume.entity.MkOrder;
 import com.mapple.consume.mapper.MkOrderMapper;
 import com.mapple.consume.service.AdminFeignService;
@@ -18,9 +19,13 @@ import com.mapple.consume.service.MkOrderService;
 import io.seata.spring.annotation.GlobalTransactional;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
+import org.apache.rocketmq.client.exception.MQBrokerException;
+import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.client.producer.SendCallback;
 import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.client.producer.SendStatus;
+import org.apache.rocketmq.common.message.Message;
+import org.apache.rocketmq.remoting.exception.RemotingException;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.redisson.api.RBloomFilter;
 import org.springframework.beans.factory.annotation.Value;
@@ -83,7 +88,7 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
                 orderNew.setTotalAmount(BigDecimal.valueOf(100));
                 orderNew.setStatus(0);
                 rocketMQTemplate.syncSend(RocketMQConstant.Topic.topic,
-                            MessageBuilder.withPayload(orderNew).build());
+                        MessageBuilder.withPayload(orderNew).build());
             }
 //            orderSendTransaction2(order);
 //            orderSendOneWay(RocketMQConstant.Topic.topic, order);
@@ -127,6 +132,47 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
         );
         return new PageUtils(page);
     }
+
+    /**
+     * TODO
+     * 查询Redis中当前user的账户余额是否足够
+     * 不够，则直接返回支付失败，够，扣减Redis中的余额，直接返回支付成功
+     * 进入消息队列，实际扣除，由消息队列去处理
+     */
+    @Override
+    @GlobalTransactional(timeoutMills = 50000, name = "Consume-PayOrderNew")
+    public CommonResult payOrderNew(MkOrderPay pay) {
+        // 发送消息
+        Message message = new Message();
+        message.setTopic(RocketMQConstant.Topic.payTopic);
+        // 延时等级，1到18
+        // 1s 5s 10s 30s 1m 2m 3m 4m 5m 6m 7m 8m 9m 10m 20m 30m 1h 2h
+        message.setDelayTimeLevel(1);
+        // 进行幂等性处理
+        message.setKeys(pay.getId());
+        // 设置消息体
+        message.setBody(pay.toString().getBytes());
+        try {
+            rocketMQTemplate.getProducer().send(message);
+            log.info("userId为{}的用户支付orderId为{}的订单成功", pay.getUserId(), pay.getId());
+            return CommonResult.ok("支付成功");
+        } catch (MQClientException | RemotingException | MQBrokerException | InterruptedException e) {
+            e.printStackTrace();
+            log.info("userId为{}的用户支付orderId为{}的订单失败", pay.getUserId(), pay.getId());
+        }
+        return CommonResult.ok("支付失败");
+    }
+
+    /**
+     * 支付接口，正在使用
+     */
+    @Override
+    public boolean pay(MkOrderPay pay) {
+        return false;
+    }
+
+
+
 
 
     @Override
@@ -289,8 +335,6 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
     public int removeBatchBySnList(List<String> orderSnList) {
         return baseMapper.removeBatchBySnList(orderSnList);
     }
-
-
 
 
     // SendOneWay
