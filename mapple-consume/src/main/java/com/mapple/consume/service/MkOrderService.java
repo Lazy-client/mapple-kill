@@ -2,9 +2,11 @@ package com.mapple.consume.service;
 
 import com.mapple.common.utils.PageUtils;
 import com.mapple.common.utils.result.CommonResult;
+import com.mapple.common.vo.MkOrderPay;
 import com.mapple.consume.entity.MkOrder;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -39,4 +41,8 @@ public interface MkOrderService extends IService<MkOrder> {
     int removeBatchBySnList(List<String> orderSnList);
 
     PageUtils queryPageForAdmin(Map<String, Object> params);
+
+    CommonResult payOrderNew(MkOrderPay pay);
+
+    boolean pay(MkOrderPay pay);
 }

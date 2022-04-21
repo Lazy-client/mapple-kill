@@ -86,6 +86,8 @@ public class MQConfig {
             boolean flag = orderService.saveBatch(orderList);
             if (!flag)
                 return ConsumeConcurrentlyStatus.RECONSUME_LATER;
+            // TODO 扣减库存
+
             return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
         });
         consumer.start();

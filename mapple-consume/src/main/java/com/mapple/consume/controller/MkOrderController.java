@@ -5,6 +5,7 @@ import com.mapple.common.utils.PageUtils;
 import com.mapple.common.utils.jwt.JwtUtils;
 import com.mapple.common.utils.result.CommonResult;
 import com.mapple.consume.entity.MkOrder;
+import com.mapple.consume.service.AdminFeignService;
 import com.mapple.consume.service.MkOrderService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -30,6 +31,9 @@ import java.util.Map;
 public class MkOrderController {
     @Resource
     private MkOrderService orderService;
+
+    @Resource
+    private AdminFeignService adminFeignService;
 
     /**
      * 创建订单接口
@@ -110,16 +114,15 @@ public class MkOrderController {
 
     /**
      * 支付接口
+     * 支付：扣减库存，扣减个人账户余额，增加公共账户余额
      */
     @ApiOperation(value = "订单支付接口", notes = "传入orderId，设置支付状态为已支付")
     @PostMapping("/payOrder/{orderId}")
     @Login
     // @RequiresPermissions("sys:order:update")
-    public CommonResult update(@PathVariable String orderId) {
-        MkOrder order = orderService.getById(orderId);
-        if (order.getStatus() == 1)
-            return CommonResult.error("订单已支付，请勿重复操作！");
-        return orderService.payOrder(order);
+    public CommonResult payOrder(@PathVariable String orderId) {
+        // 查询订单基本信息，
+        return adminFeignService.deductBalance(orderId);
     }
 
 //    /**
