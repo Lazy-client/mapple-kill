@@ -18,8 +18,8 @@ import java.math.BigDecimal;
  */
 //@FeignClient(value = "renren-fast", fallback = FallbackService.class)
 public interface AdminFeignService extends IService<UserEntity> {
+    CommonResult deductBalance(String orderId);
 
-    CommonResult deductBalance(MkOrderPay pay);
 
 //    @GetMapping("/renren-fast/app/user/deductBalance/{userId}/{payAmount}")
 //    R deductBalance(@PathVariable String userId,
