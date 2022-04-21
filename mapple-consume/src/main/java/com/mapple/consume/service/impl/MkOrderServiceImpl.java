@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
@@ -130,18 +131,19 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
 
 
     @Override
-    @GlobalTransactional(timeoutMills = 50000, name = "Consume-PayOrder")    // Seata分布式事务
+//    @GlobalTransactional(timeoutMills = 50000, name = "Consume-PayOrder")    // Seata分布式事务
+    //不再使用SeaTa分布式事务
+    @Transactional
     public CommonResult payOrder(MkOrder order) {
-        log.info("开始全局事务......");
-        // 减库存
-        String productId = order.getProductId();
-        String sessionId = order.getSessionId();
-        // 调用Coupon模块的减库存接口
-        int result = adminFeignService.deductStock(productId, sessionId);
-        if (result < 0) {
-            log.info("result==={}", result);
-            throw new RRException("扣减库存失败");
-        }
+//        // 减库存
+//        String productId = order.getProductId();
+//        String sessionId = order.getSessionId();
+//        // 调用Coupon模块的减库存接口
+//        int result = adminFeignService.deductStock(productId, sessionId);
+//        if (result < 0) {
+//            log.info("result==={}", result);
+//            throw new RRException("扣减库存失败");
+//        }
         // 减本账户余额
         String userId = order.getUserId();
         BigDecimal payAmount = order.getPayAmount();
@@ -275,14 +277,14 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
     @Override
     @GlobalTransactional
     public void orderSaveBatch(List<MkOrder> orderList) {
-        this.saveBatch(orderList);
+//        this.saveBatch(orderList);
         // 进行真实库存扣减
-        orderList.forEach(item -> {
-            // 调用Coupon模块的减库存接口
-            int res = adminFeignService.deductStock(item.getProductId(), item.getSessionId());
-            if (res < 0)
-                log.info("扣减库存失败，productId: {}, sessionId: {}", item.getProductId(), item.getSessionId());
-        });
+//        orderList.forEach(item -> {
+//            // 调用Coupon模块的减库存接口
+//            int res = adminFeignService.deductStock(item.getProductId(), item.getSessionId());
+//            if (res < 0)
+//                log.info("扣减库存失败，productId: {}, sessionId: {}", item.getProductId(), item.getSessionId());
+//        });
     }
 
     @Override
