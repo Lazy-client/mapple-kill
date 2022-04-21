@@ -2,17 +2,21 @@ package com.mapple.seckill;
 
 import com.alibaba.fastjson.JSON;
 import com.mapple.common.utils.LoggerUtil;
+import com.mapple.common.utils.Lua;
 import com.mapple.common.utils.redis.cons.Key;
 import com.mapple.common.utils.redis.cons.RedisKeyUtils;
 import com.mapple.common.vo.MkOrder;
 import org.junit.jupiter.api.Test;
 import org.redisson.api.RBloomFilter;
 import org.redisson.api.RMapCache;
+import org.redisson.api.RScript;
 import org.redisson.api.RedissonClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.HashOperations;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -76,7 +80,22 @@ public class KeyTest {
         mkOrder.setId("1010");
         String s1 = JSON.toJSONString(mkOrder);
         LoggerUtil.getLogger().info("是否包含XXX-----{}", userBloomFilter.contains(s1));
+    }
 
+    @Test
+    public void testLua() {
+        String banlance = Lua.banlance.getLua();
+        RScript script = redissonClient.getScript();
+        List<Object> keys = new ArrayList<>();
+        keys.add("seckill:banlance:");
+        keys.add("userId");
+        boolean re = script.eval(
+                RScript.Mode.READ_WRITE,
+                banlance,
+                RScript.ReturnType.BOOLEAN,
+                keys,
+                "10000");
 
+        System.out.println();
     }
 }
