@@ -122,7 +122,6 @@ public class MkOrderController {
     @Login
     // @RequiresPermissions("sys:order:update")
     public CommonResult payOrder(@RequestBody MkOrderPay pay) {
-        // 查询订单基本信息，
         return adminFeignService.deductBalance(pay);
     }
 

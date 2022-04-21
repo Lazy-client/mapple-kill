@@ -3,7 +3,6 @@ package com.mapple.consume.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
-import com.baomidou.mybatisplus.extension.api.R;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.mapple.common.exception.RRException;
 import com.mapple.common.utils.PageUtils;
@@ -13,9 +12,12 @@ import com.mapple.common.utils.redis.cons.RedisKeyUtils;
 import com.mapple.common.utils.result.CommonResult;
 import com.mapple.common.vo.MkOrderPay;
 import com.mapple.consume.entity.MkOrder;
+import com.mapple.consume.entity.ProductSessionEntity;
+import com.mapple.consume.entity.UserEntity;
 import com.mapple.consume.mapper.MkOrderMapper;
 import com.mapple.consume.service.AdminFeignService;
 import com.mapple.consume.service.MkOrderService;
+import com.mapple.consume.service.ProductSessionService;
 import io.seata.spring.annotation.GlobalTransactional;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
@@ -23,7 +25,6 @@ import org.apache.rocketmq.client.exception.MQBrokerException;
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.client.producer.SendCallback;
 import org.apache.rocketmq.client.producer.SendResult;
-import org.apache.rocketmq.client.producer.SendStatus;
 import org.apache.rocketmq.common.message.Message;
 import org.apache.rocketmq.remoting.exception.RemotingException;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
@@ -38,7 +39,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 /**
  * <p>
@@ -60,6 +60,9 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
 
     @Resource
     private AdminFeignService adminFeignService;
+
+    @Resource
+    private ProductSessionService productSessionService;
 
     @Resource
     private ValueOperations<String, String> valueOperations;
@@ -107,7 +110,7 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
 
     @Override
     public PageUtils queryPage(Map<String, Object> params, String userId) {
-
+        // TODO 返回给前端的数据，需要经过布隆过滤器处理
         boolean statusFlag = params.get("status") != null;
         IPage<MkOrder> page = this.page(
                 new Query<MkOrder>().getPage(params),
@@ -116,7 +119,6 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
                         // 0-未支付状态, 1-已支付
                         .eq(statusFlag, "status", params.get("status"))
         );
-
         return new PageUtils(page);
     }
 
@@ -168,11 +170,60 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
 
     /**
      * 支付接口，正在使用
+     * ①扣减真正的库存
+     * ②扣减自己的余额
+     * ③增加公共账户余额
+     * ④设置订单状态为1
+     */
+    /**
+
      */
     @Override
     @Transactional
     public boolean pay(MkOrderPay pay) {
-        return false;
+        // 扣库存
+        long version = productSessionService.getOne(
+                new QueryWrapper<ProductSessionEntity>()
+                .select("version")
+                .eq("product_id", pay.getProductId())
+                .eq("session_id", pay.getSessionId()))
+                .getVersion();
+            int deductStockFlag = productSessionService.deductStock(pay.getProductId(), pay.getSessionId(), version);
+            if (deductStockFlag < 1)
+                return false;
+
+        // 扣个人余额
+        boolean shouldException = false;
+        long versionMoney = adminFeignService.getOne(
+                new QueryWrapper<UserEntity>()
+                        .select("version")
+                        .eq("user_id", pay.getUserId()))
+                .getVersion();
+        try {
+            int deductMoneyFlag = adminFeignService.deductMoney(pay.getPayAmount(), pay.getUserId(), versionMoney);
+            shouldException = deductMoneyFlag < 1;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RRException("扣减余额失败");
+        } finally {
+            if (shouldException)
+                throw new RRException("扣减余额失败");
+        }
+        // 加公共账户余额
+        Long increment = valueOperations.increment(RedisKeyUtils.PUBLIC_ACCOUNT, pay.getPayAmount().longValue());
+        if (increment == null || increment <= 0)
+            throw new RRException("新增Redis公共账户余额失败");
+        else {
+            // 设置订单状态为已支付
+            MkOrder order = this.getById(pay.getId());
+            order.setStatus(1);
+            boolean flag = this.updateById(order);
+            if (!flag)
+                throw new RRException("更新订单状态失败");
+            // 支付成功,加入订单SN到orderBloomFilter
+            orderBloomFilter.add(order.getOrderSn());
+            return true;
+        }
     }
 
     @Override

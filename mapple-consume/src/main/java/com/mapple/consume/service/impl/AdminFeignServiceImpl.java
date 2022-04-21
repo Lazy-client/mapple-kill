@@ -1,6 +1,5 @@
 package com.mapple.consume.service.impl;
 
-import com.baomidou.mybatisplus.extension.api.R;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.mapple.common.utils.Lua;
 import com.mapple.common.utils.RocketMQConstant;
@@ -16,7 +15,6 @@ import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.common.message.Message;
 import org.apache.rocketmq.remoting.exception.RemotingException;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
-import org.redisson.api.RBloomFilter;
 import org.redisson.api.RScript;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,9 +34,6 @@ import java.util.List;
 @Service
 @Slf4j
 public class AdminFeignServiceImpl extends ServiceImpl<UserDao, UserEntity> implements AdminFeignService {
-
-    @Resource
-    private RBloomFilter<String> payBloomFilter;
 
     @Resource
     RedissonClient redissonClient;
@@ -72,13 +67,12 @@ public class AdminFeignServiceImpl extends ServiceImpl<UserDao, UserEntity> impl
                 keys,
                 pay.getPayAmount().toString());
         if (re) {
-            payBloomFilter.add(pay.getId());
             // 发支付消息
             Message message = new Message();
             message.setTopic(RocketMQConstant.Topic.payTopic);
             // 延时等级，1到18
             // 1s 5s 10s 30s 1m 2m 3m 4m 5m 6m 7m 8m 9m 10m 20m 30m 1h 2h
-            message.setDelayTimeLevel(1);
+            // message.setDelayTimeLevel(1);
             // 进行幂等性处理
             message.setKeys(pay.getId());
             // 设置消息体
@@ -96,4 +90,8 @@ public class AdminFeignServiceImpl extends ServiceImpl<UserDao, UserEntity> impl
         return CommonResult.error("支付失败");
     }
 
+    @Override
+    public int deductMoney(BigDecimal payAmount, String userId, long version) {
+        return baseMapper.deductMoney(payAmount, userId, version);
+    }
 }
