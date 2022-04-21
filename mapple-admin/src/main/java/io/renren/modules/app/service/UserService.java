@@ -39,4 +39,9 @@ public interface UserService extends IService<UserEntity> {
 	String register(RegisterForm form);
 
     R deductBalance(String userId, BigDecimal payAmount);
+
+//	void UploadBalanceToRedis(String userId, BigDecimal balance);
+
+	void UploadBalanceToCaffeine(String userId, BigDecimal balance);
+
 }
