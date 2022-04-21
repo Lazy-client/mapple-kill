@@ -113,4 +113,9 @@ public class UserEntity implements Serializable {
 	@TableField(fill = FieldFill.INSERT_UPDATE)
 	private Date gmtModified;
 
+	/**
+	 * 乐观锁
+	 */
+	@Version
+	private long version;
 }

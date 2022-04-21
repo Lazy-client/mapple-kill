@@ -4,6 +4,7 @@ import com.mapple.common.config.interceptor.annotation.Login;
 import com.mapple.common.utils.PageUtils;
 import com.mapple.common.utils.jwt.JwtUtils;
 import com.mapple.common.utils.result.CommonResult;
+import com.mapple.common.vo.MkOrderPay;
 import com.mapple.consume.entity.MkOrder;
 import com.mapple.consume.service.AdminFeignService;
 import com.mapple.consume.service.MkOrderService;
@@ -120,9 +121,8 @@ public class MkOrderController {
     @PostMapping("/payOrder/{orderId}")
     @Login
     // @RequiresPermissions("sys:order:update")
-    public CommonResult payOrder(@PathVariable String orderId) {
-        // 查询订单基本信息，
-        return adminFeignService.deductBalance(orderId);
+    public CommonResult payOrder(@RequestBody MkOrderPay pay) {
+        return adminFeignService.deductBalance(pay);
     }
 
 //    /**
