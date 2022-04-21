@@ -3,6 +3,7 @@ package com.mapple.consume.service.impl;
 import com.baomidou.mybatisplus.extension.api.R;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.mapple.common.utils.Lua;
+import com.mapple.common.utils.redis.cons.RedisKeyUtils;
 import com.mapple.consume.entity.UserEntity;
 import com.mapple.consume.mapper.UserDao;
 import com.mapple.consume.service.AdminFeignService;
@@ -37,14 +38,14 @@ public class AdminFeignServiceImpl extends ServiceImpl<UserDao, UserEntity> impl
     @Autowired
     public AdminFeignServiceImpl(RedisTemplate<String, String> stringRedisTemplate) {
         this.stringRedisTemplate = stringRedisTemplate;
-        operationsForBalance = stringRedisTemplate.boundHashOps("USER_BALANCE");
+        operationsForBalance = stringRedisTemplate.boundHashOps(RedisKeyUtils.USER_BALANCE);
     }
     @Override
     public R deductBalance(String userId, BigDecimal payAmount) {
         String banlance = Lua.banlance.getLua();
         RScript script = redissonClient.getScript();
         List<Object> keys = new ArrayList<>();
-        keys.add("seckill:banlance:");
+        keys.add(RedisKeyUtils.USER_BALANCE);
         keys.add(userId);
         boolean re = script.eval(
                 RScript.Mode.READ_WRITE,
