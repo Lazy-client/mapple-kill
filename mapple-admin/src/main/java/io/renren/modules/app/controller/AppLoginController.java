@@ -16,6 +16,8 @@ import io.renren.modules.app.entity.UserEntity;
 import io.renren.modules.app.form.LoginForm;
 import io.renren.modules.app.service.UserService;
 import io.renren.modules.app.service.impl.DroolsRulesConfigServiceImpl;
+import io.renren.modules.app.utils.CacheConstants;
+import io.renren.modules.app.utils.CacheUtil;
 import io.renren.modules.app.utils.HttpUtils;
 import io.renren.modules.app.utils.JwtUtils;
 import io.renren.modules.sys.entity.SysConfigEntity;
@@ -33,6 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -104,6 +107,8 @@ public class AppLoginController {
         UserEntity userEntity = userService.login(form);
         //生成token
         String token = jwtUtils.generateToken(userEntity.getUserId());
+        //放置该用户余额到caffeine缓存
+        userService.UploadBalanceToCaffeine(userEntity.getUserId(), userEntity.getBalance());
 
         String ipIsOpen = ipConfig.get();
         if (Objects.equals(ipIsOpen, "true")) {//开启ip登录限制
@@ -116,6 +121,7 @@ public class AppLoginController {
                 stringRedisTemplate.opsForValue().set(clientIP, userEntity.getUserId(), 60, java.util.concurrent.TimeUnit.SECONDS);
             }
         }
+//        System.out.println("===============>"+CacheUtil.get(CacheConstants.GET_MENU,userEntity.getUserId()));
         String ruleIsOpen = future.get();
         if ("true".equals(ruleIsOpen)) {
             //初筛流程
