@@ -64,6 +64,10 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
     @Resource
     private ValueOperations<String, String> valueOperations;
 
+    @Resource
+    private RBloomFilter<String> payBloomFilter;
+
+
 
     /**
      * 传入一个订单之后，消息生产者将order封装成信息，进入消息队列，进行流量削峰

@@ -28,6 +28,13 @@ public class UserBloomFilterConfig {
     }
 
     @Bean
+    public RBloomFilter<String> payBloomFilter(RedissonClient redissonClient){
+        RBloomFilter<String> orderBloomFilter = redissonClient.getBloomFilter("pay");
+        orderBloomFilter.tryInit(10000000L,0.01);
+        return orderBloomFilter;
+    }
+
+    @Bean
     public RMap<String,String> ruleMap(RedissonClient redissonClient){
         return redissonClient.getMap("rule");
     }
