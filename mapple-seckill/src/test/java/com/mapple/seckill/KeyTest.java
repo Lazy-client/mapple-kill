@@ -15,6 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.HashOperations;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -84,6 +85,8 @@ public class KeyTest {
 
     @Test
     public void testLua() {
+        BigDecimal pay = new BigDecimal("100");
+        String str = pay.toString();
         String banlance = Lua.banlance.getLua();
         RScript script = redissonClient.getScript();
         List<Object> keys = new ArrayList<>();
@@ -94,8 +97,8 @@ public class KeyTest {
                 banlance,
                 RScript.ReturnType.BOOLEAN,
                 keys,
-                "10000");
+                pay.toString());
 
-        System.out.println();
+        System.out.println(re);
     }
 }

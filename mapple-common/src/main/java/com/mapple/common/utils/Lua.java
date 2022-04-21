@@ -17,12 +17,12 @@ public enum Lua {
             "\n" +
             "if banlance -payment < 0 then\n" +
             "    -- 达到限流大小 返回\n" +
-            "    return true;\n" +
+            "    return false;\n" +
             "else\n" +
             "    -- 没有达到阈值 value + 1\n" +
             "    redis.call(\"HINCRBY\",hash, userId, -payment)\n" +
             "    -- 设置过期时间\n" +
-            "    return false\n" +
+            "    return true\n" +
             "end");
 
     private final String lua;

@@ -55,7 +55,7 @@ public class UserServiceImpl extends ServiceImpl<UserDao, UserEntity> implements
     @Autowired
     public UserServiceImpl(RedisTemplate<String, String> stringRedisTemplate) {
         this.stringRedisTemplate = stringRedisTemplate;
-        operationsForBalance = stringRedisTemplate.boundHashOps("USER_BALANCE");
+        operationsForBalance = stringRedisTemplate.boundHashOps("seckill:banlance:");
     }
 
     @Override
@@ -131,7 +131,14 @@ public class UserServiceImpl extends ServiceImpl<UserDao, UserEntity> implements
         }
     }
 
+    /**
+     * 没用了这个方法！！！！！！！！！！！！！！
+     * @param userId
+     * @param payAmount
+     * @return
+     */
     @Override
+    @Deprecated
     public R deductBalance(String userId, BigDecimal payAmount) {
 //        //redis lua脚本减库存，绑定userbalance的hash，写个script
 //        //redission判断hash为USER_BALANCE的key的value是否大于payAmount
