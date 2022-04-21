@@ -33,6 +33,7 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -56,17 +57,19 @@ public class UserServiceImpl extends ServiceImpl<UserDao, UserEntity> implements
         this.stringRedisTemplate = stringRedisTemplate;
         operationsForBalance = stringRedisTemplate.boundHashOps("USER_BALANCE");
     }
+
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
         String username = (String) params.get("username");
         IPage<UserEntity> page = this.page(
                 new Query<UserEntity>().getPage(params),
                 new QueryWrapper<UserEntity>()
-                    .like(StringUtils.isNotBlank(username), "username", username)
+                        .like(StringUtils.isNotBlank(username), "username", username)
         );
 
         return new PageUtils(page);
     }
+
     @Override
     public UserEntity queryByUsername(String username) {
         return baseMapper.selectOne(new QueryWrapper<UserEntity>().eq("username", username));
@@ -130,6 +133,47 @@ public class UserServiceImpl extends ServiceImpl<UserDao, UserEntity> implements
 
     @Override
     public R deductBalance(String userId, BigDecimal payAmount) {
+//        //redis lua脚本减库存，绑定userbalance的hash，写个script
+//        //redission判断hash为USER_BALANCE的key的value是否大于payAmount
+//
+//        //如果更新成功，则返回true，否则返回false
+//        //如果大于，则执行脚本，并返回true，否则返回false
+//        DefaultRedisScript<Boolean> script = new DefaultRedisScript<>();
+//        script.setScriptText("if redis.call('get', KEYS[1]) > ARGV[1] then return redis.call('decrby', KEYS[1], ARGV[1]) else return false end");
+//        script.setResultType(Boolean.class);
+//        Boolean result = stringRedisTemplate.execute(script, operationsForBalance.getKey(), payAmount.toString());
+//        if (result) {
+//            //扣钱成功
+//            return R.ok();
+//        }
+//        "if redis"
+//        String script = "if redis.call('HGET', KEYS[1]) == ARGV[1] then return redis.call('HINCRBY', KEYS[1], -ARGV[2]) else return -1 end";
+//        //设置脚本缓存时间
+//        stringRedisTemplate.setDefaultScriptTimeout(5000);
+//        //获取hash中的余额
+//        String balance = operationsForBalance.get(userId);
+//        //设置hash中的余额
+//        operationsForBalance.put(userId, balance);
+//        //执行脚本
+//        Long result = stringRedisTemplate.execute(
+//                DefaultRedisScript.of(script, Long.class),
+//
+//                        operationsForBalance.getKey(),
+//                                balance,
+//                                                payAmount.toString());
+//        //如果执行失败，则返回失败
+//        if (result == -1) {
+//            return R.error("扣款失败");
+//        }
+//        //如果执行成功，则返回成功
+//        return R.ok();
+//
+//        BigDecimal balance = new BigDecimal(operationsForBalance.get(userId));
+//        if (balance.compareTo(payAmount) < 0) {
+//            throw new RRException("余额不足");
+//        }
+//        operationsForBalance.put(userId, balance.subtract(payAmount).toString());
+//        return R.ok();
 
 //        BigDecimal balance = (BigDecimal) CacheUtil.get(CacheConstants.GET_MENU, userId);
 
@@ -145,19 +189,22 @@ public class UserServiceImpl extends ServiceImpl<UserDao, UserEntity> implements
 
     /**
      * 放余额到caffeine cache
+     *
      * @param userId
      * @param balance
      */
     @Override
     public void UploadBalanceToCaffeine(String userId, BigDecimal balance) {
-//        System.out.println(cache.get(2, new Function<Integer, Integer>() {
-//            @Override
-//            public Integer apply(Integer key) {
-//                return 888;
-//            }
-//        }));
-        CacheUtil.put(CacheConstants.GET_MENU,userId,balance);
-    }
+////        System.out.println(cache.get(2, new Function<Integer, Integer>() {
+////            @Override
+////            public Integer apply(Integer key) {
+////                return 888;
+////            }
+////        }));
+//        CacheUtil.put(CacheConstants.GET_MENU,userId,balance);
+        if (!Boolean.TRUE.equals(operationsForBalance.hasKey(userId))) {
+            operationsForBalance.put(userId, balance.toString());
+        }
 
 //    @Override
 //    public void UploadBalanceToRedis(String userId, BigDecimal balance){
@@ -165,4 +212,5 @@ public class UserServiceImpl extends ServiceImpl<UserDao, UserEntity> implements
 //            operationsForBalance.put(userId,balance.toString());
 //        }
 //    }
+    }
 }

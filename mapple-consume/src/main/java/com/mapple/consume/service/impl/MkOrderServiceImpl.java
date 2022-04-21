@@ -146,7 +146,7 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
         String userId = order.getUserId();
         BigDecimal payAmount = order.getPayAmount();
         // 调用admin模块的接口
-        log.info("进入远程调用，减余额");
+//        log.info("进入远程调用，减余额");
         R r = adminFeignService.deductBalance(userId, payAmount);
         log.info("余额调用结束，结果{}", r.getMsg());
         long code = r.getCode();
