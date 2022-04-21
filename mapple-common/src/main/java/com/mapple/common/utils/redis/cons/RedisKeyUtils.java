@@ -24,7 +24,7 @@ public class RedisKeyUtils {
     //#hash ip
     public static String IP_PREFIX = "seckill:ip:";
     //预减余额
-    public static String USER_BALANCE = "seckill:banlance:";
+    public static String USER_BALANCE = "seckill:balance:";
 
 
 
