@@ -28,7 +28,6 @@ import org.apache.rocketmq.common.message.Message;
 import org.apache.rocketmq.remoting.exception.RemotingException;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.redisson.api.RBloomFilter;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
@@ -120,6 +119,11 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
     }
 
     @Override
+    public CommonResult payOrder(MkOrder order) {
+        return null;
+    }
+
+    @Override
     public PageUtils queryPageForAdmin(Map<String, Object> params) {
         boolean statusFlag = params.get("status") != null;
         boolean orderSnFlag = StringUtils.isNotBlank((String) params.get("orderSn"));
@@ -172,70 +176,25 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
     }
 
 
-
-
-
-    @Override
-    @GlobalTransactional(timeoutMills = 50000, name = "Consume-PayOrder")    // Seata分布式事务
-    public CommonResult payOrder(MkOrder order) {
-        log.info("开始全局事务......");
-        // 减库存
-        String productId = order.getProductId();
-        String sessionId = order.getSessionId();
-        // 调用Coupon模块的减库存接口
-        int result = adminFeignService.deductStock(productId, sessionId);
-        if (result < 0) {
-            log.info("result==={}", result);
-            throw new RRException("扣减库存失败");
-        }
-        // 减本账户余额
-        String userId = order.getUserId();
-        BigDecimal payAmount = order.getPayAmount();
-        // 调用admin模块的接口
-//        log.info("进入远程调用，减余额");
-        R r = adminFeignService.deductBalance(userId, payAmount);
-        log.info("余额调用结束，结果{}", r.getMsg());
-        long code = r.getCode();
-        String msg = r.getMsg();
-        // 给Redis公共账户加钱
-        if (code == 0) {
-            log.info("PayAmount转换的值: {}", payAmount.longValue());
-            Long increment = valueOperations.increment(RedisKeyUtils.PUBLIC_ACCOUNT, payAmount.longValue());
-            if (increment == null || increment <= 0)
-                throw new RRException("新增Redis公共账户余额失败");
-            else {
-                // 设置订单状态为已支付
-                order.setStatus(1);
-                boolean flag = this.updateById(order);
-                if (!flag)
-                    throw new RRException("更新订单状态失败");
-                // 支付成功,加入订单SN到orderBloomFilter
-                orderBloomFilter.add(order.getOrderSn());
-                return CommonResult.ok("执行成功");
-            }
-        }
-        throw new RRException(msg);
-    }
-
+//    @Deprecated
 //    @Override
-//    @GlobalTransactional(timeoutMills = 30000, name = "Consume-PayOrder")    // Seata分布式事务
+//    @GlobalTransactional(timeoutMills = 50000, name = "Consume-PayOrder")    // Seata分布式事务
 //    public CommonResult payOrder(MkOrder order) {
 //        log.info("开始全局事务......");
 //        // 减库存
 //        String productId = order.getProductId();
 //        String sessionId = order.getSessionId();
-//        Integer productCount = order.getProductCount();
 //        // 调用Coupon模块的减库存接口
-//        int result = couponFeignService.deductStock(productId, sessionId);
-//        if (result < 1) {
-//            log.info("result==={}", result);
-//            throw new RRException("扣减库存失败");
-//        }
+////        int result = adminFeignService.deductStock(productId, sessionId);
+////        if (result < 0) {
+////            log.info("result==={}", result);
+////            throw new RRException("扣减库存失败");
+////        }
 //        // 减本账户余额
 //        String userId = order.getUserId();
 //        BigDecimal payAmount = order.getPayAmount();
 //        // 调用admin模块的接口
-//        log.info("进入远程调用，减余额");
+////        log.info("进入远程调用，减余额");
 //        R r = adminFeignService.deductBalance(userId, payAmount);
 //        log.info("余额调用结束，结果{}", r.getMsg());
 //        long code = r.getCode();
@@ -245,13 +204,15 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
 //            log.info("PayAmount转换的值: {}", payAmount.longValue());
 //            Long increment = valueOperations.increment(RedisKeyUtils.PUBLIC_ACCOUNT, payAmount.longValue());
 //            if (increment == null || increment <= 0)
-//                throw new RRException("扣减公共账户余额失败");
+//                throw new RRException("新增Redis公共账户余额失败");
 //            else {
 //                // 设置订单状态为已支付
 //                order.setStatus(1);
 //                boolean flag = this.updateById(order);
 //                if (!flag)
 //                    throw new RRException("更新订单状态失败");
+//                // 支付成功,加入订单SN到orderBloomFilter
+//                orderBloomFilter.add(order.getOrderSn());
 //                return CommonResult.ok("执行成功");
 //            }
 //        }
@@ -321,14 +282,14 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
     @Override
     @GlobalTransactional
     public void orderSaveBatch(List<MkOrder> orderList) {
-        this.saveBatch(orderList);
-        // 进行真实库存扣减
-        orderList.forEach(item -> {
-            // 调用Coupon模块的减库存接口
-            int res = adminFeignService.deductStock(item.getProductId(), item.getSessionId());
-            if (res < 0)
-                log.info("扣减库存失败，productId: {}, sessionId: {}", item.getProductId(), item.getSessionId());
-        });
+//        this.saveBatch(orderList);
+//        // 进行真实库存扣减
+//        orderList.forEach(item -> {
+//            // 调用Coupon模块的减库存接口
+//            int res = adminFeignService.deductStock(item.getProductId(), item.getSessionId());
+//            if (res < 0)
+//                log.info("扣减库存失败，productId: {}, sessionId: {}", item.getProductId(), item.getSessionId());
+//        });
     }
 
     @Override

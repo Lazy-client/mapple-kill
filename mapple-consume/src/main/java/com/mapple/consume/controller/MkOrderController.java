@@ -6,6 +6,7 @@ import com.mapple.common.utils.jwt.JwtUtils;
 import com.mapple.common.utils.result.CommonResult;
 import com.mapple.common.vo.MkOrderPay;
 import com.mapple.consume.entity.MkOrder;
+import com.mapple.consume.service.AdminFeignService;
 import com.mapple.consume.service.MkOrderService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -32,6 +33,9 @@ import java.util.Map;
 public class MkOrderController {
     @Resource
     private MkOrderService orderService;
+
+    @Resource
+    private AdminFeignService adminFeignService;
 
     /**
      * 创建订单接口
@@ -119,7 +123,8 @@ public class MkOrderController {
     @Login
     // @RequiresPermissions("sys:order:update")
     public CommonResult payOrder(@RequestBody MkOrderPay pay) {
-        return orderService.payOrderNew(pay);
+        // return orderService.payOrderNew(pay);
+        return adminFeignService.deductBalance(pay);
     }
 
 //    /**
