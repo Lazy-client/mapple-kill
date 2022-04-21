@@ -123,7 +123,6 @@ public class MkOrderController {
     @Login
     // @RequiresPermissions("sys:order:update")
     public CommonResult payOrder(@RequestBody MkOrderPay pay) {
-        // return orderService.payOrderNew(pay);
         return adminFeignService.deductBalance(pay);
     }
 

@@ -58,9 +58,6 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
     @Resource
     private RocketMQTemplate rocketMQTemplate;
 
-//    @Resource
-//    private CouponFeignService couponFeignService;
-
     @Resource
     private AdminFeignService adminFeignService;
 
@@ -119,10 +116,7 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
         return new PageUtils(page);
     }
 
-    @Override
-    public CommonResult payOrder(MkOrder order) {
-        return null;
-    }
+
 
     @Override
     public PageUtils queryPageForAdmin(Map<String, Object> params) {
@@ -172,52 +166,15 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
      * 支付接口，正在使用
      */
     @Override
+    @Transactional
     public boolean pay(MkOrderPay pay) {
         return false;
     }
-//    @GlobalTransactional(timeoutMills = 50000, name = "Consume-PayOrder")    // Seata分布式事务
-    //不再使用SeaTa分布式事务
-    // @Transactional
+
+    @Override
     public CommonResult payOrder(MkOrder order) {
-//        // 减库存
-//        String productId = order.getProductId();
-//        String sessionId = order.getSessionId();
-//        // 调用Coupon模块的减库存接口
-//        int result = adminFeignService.deductStock(productId, sessionId);
-//        if (result < 0) {
-//            log.info("result==={}", result);
-//            throw new RRException("扣减库存失败");
-//        }
-        // 减本账户余额
-        String userId = order.getUserId();
-        BigDecimal payAmount = order.getPayAmount();
-        // 调用admin模块的接口
-//        log.info("进入远程调用，减余额");
-        R r = adminFeignService.deductBalance(userId, payAmount);
-        log.info("余额调用结束，结果{}", r.getMsg());
-        long code = r.getCode();
-        String msg = r.getMsg();
-        // 给Redis公共账户加钱
-        if (code == 0) {
-            log.info("PayAmount转换的值: {}", payAmount.longValue());
-            Long increment = valueOperations.increment(RedisKeyUtils.PUBLIC_ACCOUNT, payAmount.longValue());
-            if (increment == null || increment <= 0)
-                throw new RRException("新增Redis公共账户余额失败");
-            else {
-                // 设置订单状态为已支付
-                order.setStatus(1);
-                boolean flag = this.updateById(order);
-                if (!flag)
-                    throw new RRException("更新订单状态失败");
-                // 支付成功,加入订单SN到orderBloomFilter
-                orderBloomFilter.add(order.getOrderSn());
-                return CommonResult.ok("执行成功");
-            }
-        }
-        throw new RRException(msg);
+        return null;
     }
-
-
 //    @Deprecated
 //    @Override
 //    @GlobalTransactional(timeoutMills = 50000, name = "Consume-PayOrder")    // Seata分布式事务
@@ -337,13 +294,8 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
 
     @Override
     public int removeBatchBySnList(List<String> orderSnList) {
-        return 0;
+        return baseMapper.removeBatchBySnList(orderSnList);
     }
-
-//    @Override
-//    public int removeBatchBySnList(List<String> orderSnList) {
-//        return baseMapper.removeBatchBySnList(orderSnList);
-//    }
 
 
     // SendOneWay

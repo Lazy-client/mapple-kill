@@ -5,9 +5,11 @@ import com.mapple.common.utils.RocketMQConstant;
 import com.mapple.common.vo.MkOrderPay;
 import com.mapple.consume.service.MkOrderService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.apache.rocketmq.common.message.MessageExt;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
+import org.apache.rocketmq.spring.core.RocketMQPushConsumerLifecycleListener;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -18,7 +20,7 @@ import java.nio.charset.StandardCharsets;
         consumerGroup = RocketMQConstant.ConsumerGroup.payConsumerGroup)
 @Component
 @Slf4j
-public class MkOrderPayConsumer implements RocketMQListener<MessageExt> {
+public class MkOrderPayConsumer implements RocketMQListener<MessageExt>, RocketMQPushConsumerLifecycleListener {
 
 
     @Resource
@@ -36,8 +38,13 @@ public class MkOrderPayConsumer implements RocketMQListener<MessageExt> {
         log.info("接受消息成功");
         MkOrderPay pay = JSON.parseObject(body, MkOrderPay.class);
         // TODO 调用接口完成4个步骤
-        // if (orderService.pay(pay))
+    }
 
-
+    @Override
+    public void prepareStart(DefaultMQPushConsumer defaultMQPushConsumer) {
+        // 每次拉取的间隔，单位为毫秒
+        defaultMQPushConsumer.setPullInterval(500);
+        // 设置每次从队列中拉取的消息数为16
+        defaultMQPushConsumer.setPullBatchSize(128);
     }
 }
