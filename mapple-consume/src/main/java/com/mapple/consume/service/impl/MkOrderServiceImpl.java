@@ -119,6 +119,15 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
                         // 0-未支付状态, 1-已支付
                         .eq(statusFlag, "status", params.get("status"))
         );
+        if (params.get("status") =="0") {
+            page.getRecords().forEach(order -> {
+                //布隆过滤器判断是否已经支付
+                if (payBloomFilter.contains(order.getOrderSn())) {
+                    //去掉已经支付的订单
+                    page.getRecords().remove(order);
+                }
+            });
+        }
         return new PageUtils(page);
     }
 

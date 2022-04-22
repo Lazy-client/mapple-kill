@@ -15,6 +15,7 @@ import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.common.message.Message;
 import org.apache.rocketmq.remoting.exception.RemotingException;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
+import org.redisson.api.RBloomFilter;
 import org.redisson.api.RScript;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,8 @@ import java.util.List;
 @Slf4j
 public class AdminFeignServiceImpl extends ServiceImpl<UserDao, UserEntity> implements AdminFeignService {
 
+    @Resource
+    private RBloomFilter<String> payBloomFilter;
     @Resource
     RedissonClient redissonClient;
 
@@ -67,6 +70,8 @@ public class AdminFeignServiceImpl extends ServiceImpl<UserDao, UserEntity> impl
                 keys,
                 pay.getPayAmount().toString());
         if (re) {
+            //放入布隆过滤器
+            payBloomFilter.add(pay.getId());
             // 发支付消息
             Message message = new Message();
             message.setTopic(RocketMQConstant.Topic.payTopic);
