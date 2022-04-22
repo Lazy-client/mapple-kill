@@ -67,9 +67,6 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
     @Resource
     private ValueOperations<String, String> valueOperations;
 
-    @Resource
-    private RBloomFilter<String> payBloomFilter;
-
 
 
     /**
@@ -122,7 +119,7 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
         if (params.get("status") =="0") {
             page.getRecords().forEach(order -> {
                 //布隆过滤器判断是否已经支付
-                if (payBloomFilter.contains(order.getOrderSn())) {
+                if (orderBloomFilter.contains(order.getOrderSn())) {
                     //去掉已经支付的订单
                     page.getRecords().remove(order);
                 }
@@ -197,12 +194,11 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
                 .eq("product_id", pay.getProductId())
                 .eq("session_id", pay.getSessionId()))
                 .getVersion();
-            int deductStockFlag = productSessionService.deductStock(pay.getProductId(), pay.getSessionId(), version);
-            if (deductStockFlag < 1)
-                return false;
+        int deductStockFlag = productSessionService.deductStock(pay.getProductId(), pay.getSessionId(), version);
+        if (deductStockFlag < 1)
+            return false;
 
         // 扣个人余额
-        boolean shouldException = false;
         long versionMoney = adminFeignService.getOne(
                 new QueryWrapper<UserEntity>()
                         .select("version")
@@ -210,13 +206,11 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
                 .getVersion();
         try {
             int deductMoneyFlag = adminFeignService.deductMoney(pay.getPayAmount(), pay.getUserId(), versionMoney);
-            shouldException = deductMoneyFlag < 1;
+            if (deductMoneyFlag < 1)
+                throw new RRException("扣减余额失败");
         } catch (Exception e) {
             e.printStackTrace();
             throw new RRException("扣减余额失败");
-        } finally {
-            if (shouldException)
-                throw new RRException("扣减余额失败");
         }
         // 加公共账户余额
         Long increment = valueOperations.increment(RedisKeyUtils.PUBLIC_ACCOUNT, pay.getPayAmount().longValue());
@@ -224,13 +218,9 @@ public class MkOrderServiceImpl extends ServiceImpl<MkOrderMapper, MkOrder> impl
             throw new RRException("新增Redis公共账户余额失败");
         else {
             // 设置订单状态为已支付
-            MkOrder order = this.getById(pay.getId());
-            order.setStatus(1);
-            boolean flag = this.updateById(order);
-            if (!flag)
+            int flag = baseMapper.setStatusTO1(pay.getId());
+            if (flag < 1)
                 throw new RRException("更新订单状态失败");
-            // 支付成功,加入订单SN到orderBloomFilter
-            orderBloomFilter.add(order.getOrderSn());
             return true;
         }
     }

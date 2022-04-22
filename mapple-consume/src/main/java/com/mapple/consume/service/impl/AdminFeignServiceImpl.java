@@ -36,8 +36,11 @@ import java.util.List;
 @Slf4j
 public class AdminFeignServiceImpl extends ServiceImpl<UserDao, UserEntity> implements AdminFeignService {
 
+    //    @Resource
+    //    private RBloomFilter<String> payBloomFilter;
     @Resource
-    private RBloomFilter<String> payBloomFilter;
+    private RBloomFilter<String> orderBloomFilter;
+
     @Resource
     RedissonClient redissonClient;
 
@@ -70,8 +73,8 @@ public class AdminFeignServiceImpl extends ServiceImpl<UserDao, UserEntity> impl
                 keys,
                 pay.getPayAmount().toString());
         if (re) {
-            //放入布隆过滤器
-            payBloomFilter.add(pay.getId());
+            //放入订单布隆过滤器，加的是订单SN标识
+            orderBloomFilter.add(pay.getOrderSn());
             // 发支付消息
             Message message = new Message();
             message.setTopic(RocketMQConstant.Topic.payTopic);
@@ -79,7 +82,7 @@ public class AdminFeignServiceImpl extends ServiceImpl<UserDao, UserEntity> impl
             // 1s 5s 10s 30s 1m 2m 3m 4m 5m 6m 7m 8m 9m 10m 20m 30m 1h 2h
             // message.setDelayTimeLevel(1);
             // 进行幂等性处理
-            message.setKeys(pay.getId());
+            message.setKeys(pay.getOrderSn());
             // 设置消息体
             message.setBody(pay.toString().getBytes());
             try {

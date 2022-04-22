@@ -29,4 +29,6 @@ public class MkOrderPay implements Serializable {
     private String userId;
 
     private BigDecimal payAmount;
+
+    private String orderSn;
 }

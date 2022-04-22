@@ -16,4 +16,8 @@
             #{orderSn}
         </foreach>
     </delete>
+
+    <update id="setStatusTO1">
+        update mk_order set status = 1 where id = #{id}
+    </update>
 </mapper>

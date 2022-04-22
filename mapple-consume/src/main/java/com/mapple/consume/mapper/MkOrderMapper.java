@@ -17,4 +17,6 @@ public interface MkOrderMapper extends BaseMapper<MkOrder> {
     List<MkOrder> getBySnBatch(List<String> orderSnList);
 
     int removeBatchBySnList(List<String> orderSnList);
+
+    int setStatusTO1(String id);
 }

@@ -3,6 +3,7 @@ package com.mapple.consume.config;
 import com.alibaba.fastjson.JSONObject;
 import com.mapple.common.utils.RocketMQConstant;
 import com.mapple.common.utils.redis.cons.RedisKeyUtils;
+import com.mapple.common.vo.MkOrderPay;
 import com.mapple.consume.entity.MkOrder;
 import com.mapple.consume.service.MkOrderService;
 import lombok.Data;
@@ -130,6 +131,54 @@ public class MQConfig {
             // 批量删除
             orderService.removeBatchBySnList(orderSnList);
             return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
+        });
+        consumer.start();
+        return consumer;
+    }
+
+    @Resource
+    private RBloomFilter<String> payBloomFilter;
+
+    @Bean(name = "PayPushConsumer")
+    public DefaultMQPushConsumer payPushConsumer() throws MQClientException {
+        log.info(RocketMQConstant.ConsumerGroup.payConsumerGroup + "*******" + nameServer + "*******" + RocketMQConstant.Topic.payTopic);
+        DefaultMQPushConsumer consumer = new DefaultMQPushConsumer(RocketMQConstant.ConsumerGroup.payConsumerGroup);
+        consumer.setNamesrvAddr(nameServer);
+        consumer.subscribe(RocketMQConstant.Topic.payTopic, "*");
+        // 设置每次消息拉取的时间间隔，单位毫秒
+        consumer.setPullInterval(500);
+        // 设置每个队列每次拉取的最大消息数
+        consumer.setPullBatchSize(256);
+        // 设置消费者单次批量消费的消息数目上限
+        consumer.setConsumeMessageBatchMaxSize(1);
+        consumer.registerMessageListener((MessageListenerConcurrently) (msgs, context)
+                -> {
+            List<MkOrderPay> payList = new ArrayList<>(msgs.size());
+            Map<Integer, Integer> queueMsgMap = new HashMap<>(8);
+            msgs.forEach(msg -> {
+                MkOrderPay pay = JSONObject.parseObject(msg.getBody(), MkOrderPay.class);
+                // 从过滤器中获取状态
+                if (orderBloomFilter.contains(pay.getOrderSn())) {
+                    payList.add(pay);
+                }
+                queueMsgMap.compute(msg.getQueueId(), (key, val) -> val == null ? 1 : ++val);
+            });
+            log.info("MkPayList size: {}, content: {}", payList.size(), payList);
+            // 批量删除
+            boolean flag = false;
+            for (MkOrderPay pay : payList) {
+                try {
+                    boolean payFlag = orderService.pay(pay);
+                    if (!payFlag)
+                        flag = true;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    flag = true;
+                }
+            }
+            return flag
+                    ? ConsumeConcurrentlyStatus.RECONSUME_LATER
+                    : ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
         });
         consumer.start();
         return consumer;

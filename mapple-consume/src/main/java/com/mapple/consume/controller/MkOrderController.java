@@ -118,8 +118,8 @@ public class MkOrderController {
      * 支付：扣减库存，扣减个人账户余额，增加公共账户余额
      */
     @ApiOperation(value = "订单支付接口", notes = "传入orderId，设置支付状态为已支付")
-    @PostMapping("/payOrder/{orderId}")
-    @Login
+    @PostMapping("/payOrder")
+//    @Login
     // @RequiresPermissions("sys:order:update")
     public CommonResult payOrder(@RequestBody MkOrderPay pay) {
         return adminFeignService.deductBalance(pay);
